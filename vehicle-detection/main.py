@@ -19,7 +19,7 @@ print(mydb)
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\cars2.mp4")
+cap = cv2.VideoCapture(r"C:\Users\ballx\Downloads\road_training.mp4")
 model = YOLO('yolov8n.pt')
 
 classnames = []
@@ -59,22 +59,22 @@ while True:
             if objectdetect in ['car', 'bus', 'truck'] and conf > 60:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf])
+                print(f'detect object: {new_detections}')
                 detections = np.vstack((detections, new_detections))
                 # print(f'detect object: {box}')
 
     track_result = tracker.update(detections)
     cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 255, 255), 7)
 
-    track_result_with_type = []
-
     for results in track_result:
         x1, y1, x2, y2, id = results
+        print(f'track object: {results}')
         x1, y1, x2, y2, id = int(x1), int(y1), int(x2), int(y2), int(id)
 
         # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
-        if id not in detected_objects:
-            print("new object detected")
-            detected_objects.append(id)  # เพิ่มไอดีใหม่ลงในรายการ
+        if id not in [obj[0] for obj in detected_objects]:
+            print(f'new object detected: {id}, {objectdetect}')
+            detected_objects.append([id, objectdetect])  # เพิ่มไอดีใหม่ลงในรายการ
         
         w, h = x2 - x1, y2 - y1
         cx, cy = x1 + w // 2, y1 + h // 2
@@ -102,5 +102,6 @@ while True:
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
 
+print(detected_objects)
 cap.release()
 cv2.destroyAllWindows()
