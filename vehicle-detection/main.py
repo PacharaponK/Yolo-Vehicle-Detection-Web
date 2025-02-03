@@ -30,6 +30,7 @@ with open('classes.txt', 'r') as f:
 tracker = Sort(max_age=10, min_hits=2, iou_threshold=0.35)
 line = [320, 350, 620, 350]
 counter = []
+detected_objects = []
 previous_positions = {}
 
 while True:
@@ -59,6 +60,7 @@ while True:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf])
                 detections = np.vstack((detections, new_detections))
+                # print(f'detect object: {box}')
 
     track_result = tracker.update(detections)
     cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 255, 255), 7)
@@ -66,6 +68,11 @@ while True:
     for results in track_result:
         x1, y1, x2, y2, id = results
         x1, y1, x2, y2, id = int(x1), int(y1), int(x2), int(y2), int(id)
+
+        # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
+        if id not in detected_objects:
+            print("new object detected")
+            detected_objects.append(id)  # เพิ่มไอดีใหม่ลงในรายการ
 
         w, h = x2 - x1, y2 - y1
         cx, cy = x1 + w // 2, y1 + h // 2
