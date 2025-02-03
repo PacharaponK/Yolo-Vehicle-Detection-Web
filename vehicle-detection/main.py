@@ -65,6 +65,8 @@ while True:
     track_result = tracker.update(detections)
     cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 255, 255), 7)
 
+    track_result_with_type = []
+
     for results in track_result:
         x1, y1, x2, y2, id = results
         x1, y1, x2, y2, id = int(x1), int(y1), int(x2), int(y2), int(id)
@@ -73,7 +75,7 @@ while True:
         if id not in detected_objects:
             print("new object detected")
             detected_objects.append(id)  # เพิ่มไอดีใหม่ลงในรายการ
-
+        
         w, h = x2 - x1, y2 - y1
         cx, cy = x1 + w // 2, y1 + h // 2
 
@@ -93,6 +95,7 @@ while True:
             cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 0, 255), 15)
             if id not in counter:  # ใช้ not in แทน .count(id) == 0 (เร็วกว่า)
                 counter.append(id)
+
 
     cvzone.putTextRect(frame, f'count = {len(counter)}', [290, 34], thickness=4, scale=2.3, border=2)
 
