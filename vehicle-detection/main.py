@@ -5,6 +5,16 @@ import numpy as np
 from ultralytics import YOLO
 import cvzone
 import mysql.connector
+import datetime
+
+now = datetime.datetime.now()
+
+# Separate date and time
+current_date = now.date()
+current_time = now.time()
+
+print("Date:", current_date)
+print("Time:", current_time)
 
 mydb = mysql.connector.connect(
     host="35.240.191.105",
@@ -19,7 +29,7 @@ print(mydb)
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-cap = cv2.VideoCapture(r"C:\Users\ballx\Downloads\road_training.mp4")
+cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\cars2.mp4")
 model = YOLO('yolov8n.pt')
 
 classnames = []
@@ -43,7 +53,7 @@ while True:
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
-    detections = np.empty((0, 5))
+    detections = np.empty((0, 6))
     result = model(frame, stream=True)
     
     for info in result:
@@ -56,10 +66,10 @@ while True:
             classindex = int(classindex)
             objectdetect = classnames[classindex]
 
-            if objectdetect in ['car', 'bus', 'truck'] and conf > 60:
+            if objectdetect in ['car', 'truck'] and conf > 60:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
-                new_detections = np.array([x1, y1, x2, y2, conf])
-                print(f'detect object: {new_detections}')
+                new_detections = np.array([x1, y1, x2, y2, conf, classindex])
+                # print(f'detect object: {new_detections}')
                 detections = np.vstack((detections, new_detections))
                 # print(f'detect object: {box}')
 
@@ -67,14 +77,14 @@ while True:
     cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 255, 255), 7)
 
     for results in track_result:
-        x1, y1, x2, y2, id = results
-        print(f'track object: {results}')
-        x1, y1, x2, y2, id = int(x1), int(y1), int(x2), int(y2), int(id)
+        x1, y1, x2, y2, id, classindex = results
+        # print(f'track object: {results}')
+        x1, y1, x2, y2, id, classindex = int(x1), int(y1), int(x2), int(y2), int(id), int(classindex)
 
         # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
-        if id not in [obj[0] for obj in detected_objects]:
-            print(f'new object detected: {id}, {objectdetect}')
-            detected_objects.append([id, objectdetect])  # เพิ่มไอดีใหม่ลงในรายการ
+        if id not in detected_objects:
+            print("new object detected: ", results[4], classnames[classindex])
+            detected_objects.append(id)  # เพิ่มไอดีใหม่ลงในรายการ
         
         w, h = x2 - x1, y2 - y1
         cx, cy = x1 + w // 2, y1 + h // 2
