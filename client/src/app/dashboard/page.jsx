@@ -3,6 +3,41 @@ import Link from "next/link";
 import React from "react";
 
 const Dashboard = () => {
+  const transactions = [
+    { id: 1, date: "Apr 23, 2021", description: "Car", amount: "60 km/h" },
+    {
+      id: 2,
+      date: "Apr 23, 2021",
+      description: "car",
+      amount: "60 km/h",
+    },
+    {
+      id: 3,
+      date: "Apr 23, 2021",
+      description: "car",
+      amount: "60 km/h",
+    },{
+      id: 4,
+      date: "Apr 23, 2021",
+      description: "car",
+      amount: "60 km/h",
+    },{
+      id: 5,
+      date: "Apr 23, 2021",
+      description: "car",
+      amount: "60 km/h",
+    },{
+      id: 6,
+      date: "Apr 23, 2021",
+      description: "car",
+      amount: "60 km/h",
+    },{
+      id: 7,
+      date: "Apr 23, 2021",
+      description: "car",
+      amount: "60 km/h",
+    },
+  ];
   return (
     <div>
       <div>
@@ -109,24 +144,7 @@ const Dashboard = () => {
                     ></path>
                   </svg>
                 </button>
-                <div className="hidden lg:flex items-center">
-                  <span className="text-base font-normal text-gray-500 mr-5">
-                    Open source ❤️
-                  </span>
-                  <div className="-mb-1">
-                    <Link
-                      className="github-button"
-                      href="#"
-                      data-color-scheme="no-preference: dark; light: light; dark: light;"
-                      data-icon="octicon-star"
-                      data-size="large"
-                      data-show-count="true"
-                      aria-label="Star themesberg/windster-tailwind-css-dashboard on GitHub"
-                    >
-                      Star
-                    </Link>
-                  </div>
-                </div>
+                <div className="hidden lg:flex items-center"></div>
                 <Link
                   href="#"
                   className="hidden sm:inline-flex ml-5 text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center mr-3"
@@ -146,7 +164,7 @@ const Dashboard = () => {
                       d="M378.7 32H133.3L256 182.7L378.7 32zM512 192l-107.4-141.3L289.6 192H512zM107.4 50.67L0 192h222.4L107.4 50.67zM244.3 474.9C247.3 478.2 251.6 480 256 480s8.653-1.828 11.67-5.062L510.6 224H1.365L244.3 474.9z"
                     ></path>
                   </svg>
-                  Upgrade to Pro
+                  Login
                 </Link>
               </div>
             </div>
@@ -205,49 +223,7 @@ const Dashboard = () => {
                         <span className="ml-3">Dashboard</span>
                       </Link>
                     </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 flex items-center p-2 group "
-                      >
-                        <svg
-                          className="w-6 h-6 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
-                        </svg>
-                        <span className="ml-3 flex-1 whitespace-nowrap">
-                          Kanban
-                        </span>
-                        <span className="bg-gray-200 text-gray-800 ml-3 text-sm font-medium inline-flex items-center justify-center px-2 rounded-full">
-                          Pro
-                        </span>
-                      </Link>
-                    </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 flex items-center p-2 group "
-                      >
-                        <svg
-                          className="w-6 h-6 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path d="M8.707 7.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l2-2a1 1 0 00-1.414-1.414L11 7.586V3a1 1 0 10-2 0v4.586l-.293-.293z"></path>
-                          <path d="M3 5a2 2 0 012-2h1a1 1 0 010 2H5v7h2l1 2h4l1-2h2V5h-1a1 1 0 110-2h1a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V5z"></path>
-                        </svg>
-                        <span className="ml-3 flex-1 whitespace-nowrap">
-                          Inbox
-                        </span>
-                        <span className="bg-gray-200 text-gray-800 ml-3 text-sm font-medium inline-flex items-center justify-center px-2 rounded-full">
-                          Pro
-                        </span>
-                      </Link>
-                    </li>
+
                     <li>
                       <Link
                         href="#"
@@ -270,28 +246,7 @@ const Dashboard = () => {
                         </span>
                       </Link>
                     </li>
-                    <li>
-                      <Link
-                        href="#"
-                        className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 flex items-center p-2 group "
-                      >
-                        <svg
-                          className="w-6 h-6 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 2a4 4 0 00-4 4v1H5a1 1 0 00-.994.89l-1 9A1 1 0 004 18h12a1 1 0 00.994-1.11l-1-9A1 1 0 0015 7h-1V6a4 4 0 00-4-4zm2 5V6a2 2 0 10-4 0v1h4zm-6 3a1 1 0 112 0 1 1 0 01-2 0zm7-1a1 1 0 100 2 1 1 0 000-2z"
-                            clipRule="evenodd"
-                          ></path>
-                        </svg>
-                        <span className="ml-3 flex-1 whitespace-nowrap">
-                          Products
-                        </span>
-                      </Link>
-                    </li>
+
                     <li>
                       <Link
                         href="#"
@@ -343,27 +298,6 @@ const Dashboard = () => {
                       className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 group transition duration-75 flex items-center p-2"
                     >
                       <svg
-                        className="w-5 h-5 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75"
-                        aria-hidden="true"
-                        focusable="false"
-                        data-prefix="fas"
-                        data-icon="gem"
-                        role="img"
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 512 512"
-                      >
-                        <path
-                          fill="currentColor"
-                          d="M378.7 32H133.3L256 182.7L378.7 32zM512 192l-107.4-141.3L289.6 192H512zM107.4 50.67L0 192h222.4L107.4 50.67zM244.3 474.9C247.3 478.2 251.6 480 256 480s8.653-1.828 11.67-5.062L510.6 224H1.365L244.3 474.9z"
-                        ></path>
-                      </svg>
-                      <span className="ml-4">Upgrade to Pro</span>
-                    </Link>
-                    <Link
-                      href="#"
-                      className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 group transition duration-75 flex items-center p-2"
-                    >
-                      <svg
                         className="w-6 h-6 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75"
                         fill="currentColor"
                         viewBox="0 0 20 20"
@@ -378,20 +312,7 @@ const Dashboard = () => {
                       </svg>
                       <span className="ml-3">Documentation</span>
                     </Link>
-                    <Link
-                      href="#"
-                      className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 group transition duration-75 flex items-center p-2"
-                    >
-                      <svg
-                        className="w-6 h-6 text-gray-500 flex-shrink-0 group-hover:text-gray-900 transition duration-75"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"></path>
-                      </svg>
-                      <span className="ml-3">Components</span>
-                    </Link>
+
                     <Link
                       href="#"
                       className="text-base text-gray-900 font-normal rounded-lg hover:bg-gray-100 group transition duration-75 flex items-center p-2"
@@ -430,10 +351,10 @@ const Dashboard = () => {
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex-shrink-0">
                         <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
-                          $45,385
+                          150
                         </span>
                         <h3 className="text-base font-normal text-gray-500">
-                          Sales this week
+                          Total vehicles detected today
                         </h3>
                       </div>
                       <div className="flex items-center justify-end flex-1 text-green-500 text-base font-bold">
@@ -452,16 +373,16 @@ const Dashboard = () => {
                         </svg>
                       </div>
                     </div>
-                    <div id="main-chart"></div>
+                    <div id="diagram">Hello</div>
                   </div>
                   <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 ">
                     <div className="mb-4 flex items-center justify-between">
                       <div>
                         <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          Latest Transactions
+                          Last detected vehicle
                         </h3>
                         <span className="text-base font-normal text-gray-500">
-                          This is Link list of latest transactions
+                          This is Link list of last detected vehicles
                         </span>
                       </div>
                       <div className="flex-shrink-0">
@@ -484,7 +405,7 @@ const Dashboard = () => {
                                     scope="col"
                                     className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                   >
-                                    Transaction
+                                    ID
                                   </th>
                                   <th
                                     scope="col"
@@ -496,109 +417,41 @@ const Dashboard = () => {
                                     scope="col"
                                     className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                                   >
-                                    Amount
+                                    Type of vehicle
+                                  </th>
+
+                                  <th
+                                    scope="col"
+                                    className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                  >
+                                    Velocity
                                   </th>
                                 </tr>
                               </thead>
                               <tbody className="bg-white">
-                                <tr>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                    Payment from{" "}
-                                    <span className="font-semibold">
-                                      Bonnie Green
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 23 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    $2300
-                                  </td>
-                                </tr>
-                                <tr className="bg-gray-50">
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900 rounded-lg rounded-left">
-                                    Payment refund to{" "}
-                                    <span className="font-semibold">
-                                      #00910
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 23 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    -$670
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                    Payment failed from{" "}
-                                    <span className="font-semibold">
-                                      #087651
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 18 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    $234
-                                  </td>
-                                </tr>
-                                <tr className="bg-gray-50">
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900 rounded-lg rounded-left">
-                                    Payment from{" "}
-                                    <span className="font-semibold">
-                                      Lana Byrd
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 15 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    $5000
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                    Payment from{" "}
-                                    <span className="font-semibold">
-                                      Jese Leos
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 15 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    $2300
-                                  </td>
-                                </tr>
-                                <tr className="bg-gray-50">
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900 rounded-lg rounded-left">
-                                    Payment from{" "}
-                                    <span className="font-semibold">
-                                      THEMESBERG LLC
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 11 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    $560
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                    Payment from{" "}
-                                    <span className="font-semibold">
-                                      Lana Lysle
-                                    </span>
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                    Apr 6 ,2021
-                                  </td>
-                                  <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                    $1437
-                                  </td>
-                                </tr>
+                                {transactions.map((transaction, index) => (
+                                  <tr
+                                    key={transaction.id}
+                                    className={
+                                      index % 2 === 1 ? "bg-gray-50" : ""
+                                    }
+                                  >
+                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
+                                      {transaction.id}
+                                    </td>
+                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
+                                      <span className="font-semibold">
+                                        {transaction.description}
+                                      </span>
+                                    </td>
+                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
+                                      {transaction.date}
+                                    </td>
+                                    <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                      {transaction.amount}
+                                    </td>
+                                  </tr>
+                                ))}
                               </tbody>
                             </table>
                           </div>
@@ -615,7 +468,7 @@ const Dashboard = () => {
                           2,340
                         </span>
                         <h3 className="text-base font-normal text-gray-500">
-                          New products this week
+                          Cars
                         </h3>
                       </div>
                       <div className="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
@@ -642,7 +495,7 @@ const Dashboard = () => {
                           5,355
                         </span>
                         <h3 className="text-base font-normal text-gray-500">
-                          Visitors this week
+                          Vans
                         </h3>
                       </div>
                       <div className="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
@@ -669,7 +522,7 @@ const Dashboard = () => {
                           385
                         </span>
                         <h3 className="text-base font-normal text-gray-500">
-                          User signups this week
+                          Trucks
                         </h3>
                       </div>
                       <div className="ml-5 w-0 flex items-center justify-end flex-1 text-red-500 text-base font-bold">
