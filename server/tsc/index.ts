@@ -1,5 +1,5 @@
 import express from "express";
-import userRoutes from "./router/testRoutes";
+import testRoutes from "./router/testRoutes";
 import errorHandler from "./middlewares/errorHandler";
 import dotenv from "dotenv";
 import db from "./config/db";
@@ -12,7 +12,8 @@ const app = express();
 
 app.use(express.json());
 
-app.use(userRoutes);
+app.use(testRoutes);
+
 app.use(errorHandler);
 
 try {
