@@ -13,21 +13,21 @@ current_date = now.date()
 current_time = now.time()
 
 
-mydb = mysql.connector.connect(
-    host="35.240.191.105",
-    user="root",
-    password="root",
-    database="test"
-)
+# mydb = mysql.connector.connect(
+#     host="35.240.191.105",
+#     user="root",
+#     password="root",
+#     database="test"
+# )
 
-print(mydb)
+# print(mydb)
 
 
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\cars.mp4")
-model = YOLO('yolov8x.pt')
+cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\data\vehicles.mp4")
+model = YOLO('yolov8n.pt')
 
 classnames = []
 with open('classes.txt', 'r') as f:
@@ -45,12 +45,17 @@ while True:
     ret, frame = cap.read()
 
     if not ret:
-        cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\cars.mp4")
+        cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\vehicles.mp4")
         continue
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
 
+    frame_height, frame_width = frame.shape[:2]
+    if frame_width > 1920 or frame_height > 1080:
+        scale = min(1920 / frame_width, 1080 / frame_height)
+        frame = cv2.resize(frame, (int(frame_width * scale), int(frame_height * scale)), interpolation=cv2.INTER_AREA)
+    
     detections = np.empty((0, 6))
     result = model(frame, stream=True)
     
@@ -64,7 +69,7 @@ while True:
             classindex = int(classindex)
             objectdetect = classnames[classindex]
 
-            if objectdetect in ['car', 'truck'] and conf > 60:
+            if objectdetect in ['car', 'truck'] and conf > 40:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf, classindex])
                 # print(f'detect object: {new_detections}')
@@ -82,12 +87,12 @@ while True:
         # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
         if id not in detected_objects:
             print("new object detected: ", results[4], classnames[classindex])
-            mycursor = mydb.cursor()
+            # mycursor = mydb.cursor()
 
             sql = "INSERT INTO vehicle_data (id, class, date, time) VALUES (%s, %s, %s, %s)"
             val = (id, classnames[classindex], current_date, current_time)
-            mycursor.execute(sql, val)
-            mydb.commit()
+            # mycursor.execute(sql, val)
+            # mydb.commit()
 
             detected = {
                 "id": id,
