@@ -4,20 +4,11 @@ import React, { useEffect, useState } from "react";
 import { getVehicles } from "../../../config/api";
 import { io } from "socket.io-client";
 import conf from "../../../config/conf";
+import useSocket from "../../../hooks/useSocket";
 const socket = io(conf.apiBaseUrl);
 
 const Dashboard = () => {
-  const [transactions, setTransactions] = useState([]);
-  console.log("🚀 ~ Dashboard ~ transactions:", transactions);
-  // const [isConnected, setIsConnected] = useState(false);
-
-  useEffect(() => {
-    getVehicles(setTransactions);
-
-    return () => {
-      console.log("🔌 Unsubscribing from WebSocket");
-    };
-  }, []);
+  const { vehicles } = useSocket(); // ✅ ใช้ Custom Hook ที่เราสร้างขึ้นมาเพื่อเชื่อมต่อ WebSocket
 
   return (
     <div>
@@ -414,12 +405,12 @@ const Dashboard = () => {
                                   </tr>
                                 </thead>
                                 <tbody className="bg-white">
-                                  {transactions.map((transaction, index) => {
+                                  {vehicles.map((vehicle, index) => {
                                     // ถ้าไม่มีค่า transaction.class ให้ข้ามแถวนี้ไป
-                                    if (!transaction.class) return null;
+                                    if (!vehicle.class) return null;
 
                                     const formattedDate = new Date(
-                                      transaction.date
+                                      vehicle.date
                                     ).toLocaleDateString("th-TH", {
                                       year: "numeric",
                                       month: "short",
@@ -428,17 +419,17 @@ const Dashboard = () => {
 
                                     return (
                                       <tr
-                                        key={transaction.id}
+                                        key={vehicle.id}
                                         className={
                                           index % 2 === 1 ? "bg-gray-50" : ""
                                         }
                                       >
                                         <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                          {transaction.id}
+                                          {vehicle.id}
                                         </td>
                                         <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
                                           <span className="font-semibold">
-                                            {transaction.class}
+                                            {vehicle.class}
                                           </span>
                                         </td>
                                         <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
@@ -446,7 +437,7 @@ const Dashboard = () => {
                                           {/* แสดงวันที่แบบไทย */}
                                         </td>
                                         <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                          {transaction.time}
+                                          {vehicle.time}
                                         </td>
                                       </tr>
                                     );
