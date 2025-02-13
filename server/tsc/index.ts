@@ -8,6 +8,7 @@ import vehicleRoutes from "./router/vehicleRoutes";
 import testRoutes from "./router/testRoutes";
 import errorHandler from "./middlewares/errorHandler";
 import db2 from "./config/db2";
+import usersRoutes from "./router/usersRoutes";
 
 dotenv.config();
 const PORT = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ app.use(express.json());
 
 app.use(testRoutes);
 app.use(vehicleRoutes);
+app.use(usersRoutes);
 
 // WebSocket: ส่งข้อมูล vehicles
 io.on("connection", async (socket) => {

@@ -14,3 +14,12 @@ model vehicle_data {
   date  DateTime? @db.Date
   time  DateTime? @db.Time(0)
 }
+
+model User {
+  id        Int      @id @default(autoincrement()) // Unique identifier
+  name      String // Name of the user
+  email     String   @unique // Unique email address
+  password  String // Hashed password for authentication
+  createdAt DateTime @default(now()) // Date when user was created
+  updatedAt DateTime @updatedAt // Date when user was last updated
+}

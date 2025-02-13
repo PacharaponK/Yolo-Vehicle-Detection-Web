@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction, Router } from "express";
 import AppError from "../utils/appError";
-import isVehicleExists from "../middlewares/isVehicleExists";
 import db2 from "../config/db2";
+import isRecordExists from "../middlewares/isRecordExists";
 const router = Router();
 router.post("/vehicle", async (req, res, next) => {
 	try {
@@ -43,7 +43,7 @@ router.get("/vehicle/:id", async (req, res, next) => {
 	}
 });
 router.put("/vehicle/:id", [
-	isVehicleExists,
+	isRecordExists(db2.vehicle_data),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
@@ -68,7 +68,7 @@ router.put("/vehicle/:id", [
 	},
 ]);
 router.delete("/vehicle/:id", [
-	isVehicleExists,
+	isRecordExists(db2.vehicle_data),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
