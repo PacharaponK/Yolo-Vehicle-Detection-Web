@@ -13,20 +13,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = require("express");
-const db_1 = __importDefault(require("../config/db"));
 const appError_1 = __importDefault(require("../utils/appError"));
 const isVehicleExists_1 = __importDefault(require("../middlewares/isVehicleExists"));
+const db2_1 = __importDefault(require("../config/db2"));
 const router = (0, express_1.Router)();
 router.post("/vehicle", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { class: vehicleClass, date, time } = req.body;
-        const values = [vehicleClass, date, time];
+        const { class: vehicleClass, date, time } = req.body.data;
         if (!vehicleClass && !date && !time) {
             throw new appError_1.default("Request payload is required.", 400);
         }
-        const sql = `INSERT INTO vehicle_data (class,date,time) VALUES (?, ?, ?)`;
-        const [rows] = yield db_1.default.query(sql, values);
-        res.status(201).json({ id: rows.insertId, class: vehicleClass, date: date, time: time });
+        const vehicle = yield db2_1.default.vehicle_data.create({
+            data: {
+                class: vehicleClass,
+                date: date ? new Date(date) : null,
+                time: time ? new Date(`1970-01-01T${time}.000Z`) : null,
+            },
+        });
+        res.status(201).json({ data: vehicle });
     }
     catch (error) {
         next(error);
@@ -34,9 +38,8 @@ router.post("/vehicle", (req, res, next) => __awaiter(void 0, void 0, void 0, fu
 }));
 router.get("/vehicle/all", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const sql = "SELECT * FROM vehicle_data";
-        const [rows, fields] = yield db_1.default.query(sql);
-        res.send(rows);
+        const vehicle = yield db2_1.default.vehicle_data.findMany();
+        res.send(vehicle);
     }
     catch (error) {
         next(error);
@@ -45,11 +48,9 @@ router.get("/vehicle/all", (req, res, next) => __awaiter(void 0, void 0, void 0,
 router.get("/vehicle/:id", (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = req.params;
-        const sql = `SELECT * FROM vehicle_data WHERE id=?`;
-        const values = [id];
-        const [rows, fields] = yield db_1.default.query(sql, values);
-        if (rows.length) {
-            res.send(rows);
+        const vehicle = yield db2_1.default.vehicle_data.findUnique({ where: { id: Number(id) } });
+        if (vehicle) {
+            res.send(vehicle);
             return;
         }
         throw new appError_1.default("Not Found", 404);
@@ -63,16 +64,21 @@ router.put("/vehicle/:id", [
     (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { id } = req.params;
-            const fileds = [];
-            const values = [];
-            Object.entries(req.body).forEach(([key, value]) => {
-                fileds.push(`${key} = ?`);
-                values.push(value);
+            const { class: vehicleClass, date, time } = req.body.data;
+            if (!vehicleClass && !date && !time) {
+                throw new appError_1.default("Request payload is required.", 400);
+            }
+            const vehicle = yield db2_1.default.vehicle_data.update({
+                where: {
+                    id: Number(id),
+                },
+                data: {
+                    class: vehicleClass !== null && vehicleClass !== void 0 ? vehicleClass : undefined,
+                    date: date ? new Date(date) : undefined,
+                    time: time ? new Date(`1970-01-01T${time}.000Z`) : undefined,
+                },
             });
-            values.push(id);
-            const sql = `UPDAte vehicle_data SET ${fileds.join(",")} WHERE id = ?`;
-            yield db_1.default.query(sql, values);
-            res.send({ status: "200", message: "Resource updated successfully.", id: id });
+            res.send({ status: "200", message: "Resource updated successfully.", data: vehicle });
         }
         catch (error) {
             next(error);
@@ -84,10 +90,8 @@ router.delete("/vehicle/:id", [
     (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const { id } = req.params;
-            const sql = `DELETE FROM vehicle_data WHERE id = ?`;
-            const values = [id];
-            yield db_1.default.query(sql, values);
-            res.send({ status: "200", message: "Resource deleted successfully.", id: id });
+            const vehicle = yield db2_1.default.vehicle_data.delete({ where: { id: Number(id) } });
+            res.send({ status: "200", message: "Resource deleted successfully.", data: vehicle });
         }
         catch (error) {
             next(error);

@@ -1,29 +1,30 @@
 import { Request, Response, NextFunction, Router } from "express";
-import db from "../config/db";
 import AppError from "../utils/appError";
-import Ivehicle from "../models/vehicle_data";
 import isVehicleExists from "../middlewares/isVehicleExists";
-import { ResultSetHeader } from "mysql2";
+import db2 from "../config/db2";
 const router = Router();
 router.post("/vehicle", async (req, res, next) => {
 	try {
-		const { class: vehicleClass, date, time } = req.body;
-		const values: Ivehicle[] = [vehicleClass, date, time];
+		const { class: vehicleClass, date, time } = req.body.data;
 		if (!vehicleClass && !date && !time) {
 			throw new AppError("Request payload is required.", 400);
 		}
-		const sql = `INSERT INTO vehicle_data (class,date,time) VALUES (?, ?, ?)`;
-		const [rows] = await db.query<ResultSetHeader>(sql, values);
-		res.status(201).json({ id: rows.insertId, class: vehicleClass, date: date, time: time });
+		const vehicle = await db2.vehicle_data.create({
+			data: {
+				class: vehicleClass,
+				date: date ? new Date(date) : null,
+				time: time ? new Date(`1970-01-01T${time}.000Z`) : null,
+			},
+		});
+		res.status(201).json({ data: vehicle });
 	} catch (error) {
 		next(error);
 	}
 });
 router.get("/vehicle/all", async (req, res, next) => {
 	try {
-		const sql = "SELECT * FROM vehicle_data";
-		const [rows, fields] = await db.query<Ivehicle[]>(sql);
-		res.send(rows);
+		const vehicle = await db2.vehicle_data.findMany();
+		res.send(vehicle);
 	} catch (error) {
 		next(error);
 	}
@@ -31,11 +32,9 @@ router.get("/vehicle/all", async (req, res, next) => {
 router.get("/vehicle/:id", async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		const sql = `SELECT * FROM vehicle_data WHERE id=?`;
-		const values = [id];
-		const [rows, fields] = await db.query<Ivehicle[]>(sql, values);
-		if (rows.length) {
-			res.send(rows);
+		const vehicle = await db2.vehicle_data.findUnique({ where: { id: Number(id) } });
+		if (vehicle) {
+			res.send(vehicle);
 			return;
 		}
 		throw new AppError("Not Found", 404);
@@ -48,16 +47,21 @@ router.put("/vehicle/:id", [
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
-			const fileds: string[] = [];
-			const values: unknown[] = [];
-			Object.entries(req.body).forEach(([key, value]) => {
-				fileds.push(`${key} = ?`);
-				values.push(value);
+			const { class: vehicleClass, date, time } = req.body.data;
+			if (!vehicleClass && !date && !time) {
+				throw new AppError("Request payload is required.", 400);
+			}
+			const vehicle = await db2.vehicle_data.update({
+				where: {
+					id: Number(id),
+				},
+				data: {
+					class: vehicleClass ?? undefined,
+					date: date ? new Date(date) : undefined,
+					time: time ? new Date(`1970-01-01T${time}.000Z`) : undefined,
+				},
 			});
-			values.push(id);
-			const sql = `UPDAte vehicle_data SET ${fileds.join(",")} WHERE id = ?`;
-			await db.query(sql, values);
-			res.send({ status: "200", message: "Resource updated successfully.", id: id });
+			res.send({ status: "200", message: "Resource updated successfully.", data: vehicle });
 		} catch (error) {
 			next(error);
 		}
@@ -68,10 +72,8 @@ router.delete("/vehicle/:id", [
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
-			const sql = `DELETE FROM vehicle_data WHERE id = ?`;
-			const values = [id];
-			await db.query(sql, values);
-			res.send({ status: "200", message: "Resource deleted successfully.", id: id });
+			const vehicle = await db2.vehicle_data.delete({ where: { id: Number(id) } });
+			res.send({ status: "200", message: "Resource deleted successfully.", data: vehicle });
 		} catch (error) {
 			next(error);
 		}
