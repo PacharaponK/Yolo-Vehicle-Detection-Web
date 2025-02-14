@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import AppError from "../utils/appError";
 const errorHandler = (err: Error, req: Request, res: Response, next: NextFunction) => {
-	console.log(err);
+	console.error(err);
 	if (err instanceof AppError) {
 		res.status(err.status).json({ Error: { code: err.status, message: err.message } });
 	} else {

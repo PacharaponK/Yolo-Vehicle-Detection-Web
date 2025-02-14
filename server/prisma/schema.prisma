@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model vehicle_data {
+  id    Int       @id @default(autoincrement())
+  class String?   @db.VarChar(50)
+  date  DateTime? @db.Date
+  time  DateTime? @db.Time(0)
+}
+
+model User {
+  id        Int      @id @default(autoincrement()) // Unique identifier
+  name      String // Name of the user
+  email     String   @unique // Unique email address
+  password  String // Hashed password for authentication
+  createdAt DateTime @default(now()) // Date when user was created
+  updatedAt DateTime @updatedAt // Date when user was last updated
+}
