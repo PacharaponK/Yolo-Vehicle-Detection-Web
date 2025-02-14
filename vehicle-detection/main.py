@@ -13,20 +13,20 @@ current_date = now.date()
 current_time = now.time()
 
 
-# mydb = mysql.connector.connect(
-#     host="35.240.191.105",
-#     user="root",
-#     password="root",
-#     database="test"
-# )
+mydb = mysql.connector.connect(
+    host="34.44.80.130",
+    user="forthree",
+    password="fortree",
+    database="test"
+)
 
-# print(mydb)
+print(mydb)
 
 
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\data\vehicles.mp4")
+cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\data\cars.mp4")
 model = YOLO('yolov8n.pt')
 
 classnames = []
@@ -87,12 +87,12 @@ while True:
         # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
         if id not in detected_objects:
             print("new object detected: ", results[4], classnames[classindex])
-            # mycursor = mydb.cursor()
+            mycursor = mydb.cursor()
 
-            sql = "INSERT INTO vehicle_data (id, class, date, time) VALUES (%s, %s, %s, %s)"
-            val = (id, classnames[classindex], current_date, current_time)
-            # mycursor.execute(sql, val)
-            # mydb.commit()
+            sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+            val = (classnames[classindex], current_date, datetime.datetime.now().time())
+            mycursor.execute(sql, val)
+            mydb.commit()
 
             detected = {
                 "id": id,
@@ -130,6 +130,6 @@ while True:
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
 
-print(on_send_data)
+# print(on_send_data)
 cap.release()
 cv2.destroyAllWindows()

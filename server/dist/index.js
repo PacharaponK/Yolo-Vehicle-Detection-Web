@@ -17,7 +17,7 @@ const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
-const db_js_1 = __importDefault(require("./config/db.js"));
+const db_1 = __importDefault(require("./config/db"));
 dotenv_1.default.config();
 const PORT = process.env.PORT || 3001;
 const URL = process.env.URL || "localhost";
@@ -36,7 +36,7 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
     console.log("✅ Connected to WebSocket Server", socket.id);
     const fetchVehicles = () => __awaiter(void 0, void 0, void 0, function* () {
         try {
-            const [rows] = yield db_js_1.default.execute("SELECT * FROM vehicle_data");
+            const [rows] = yield db_1.default.execute("SELECT * FROM vehicle_data");
             console.log("🚀 Sending vehicles data:", rows); // ✅ ตรวจสอบว่าข้อมูลถูกดึงมาแล้ว
             socket.emit("vehicles", rows); // ✅ ส่งข้อมูลไปยัง client
         }
@@ -51,7 +51,7 @@ io.on("connection", (socket) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 // เชื่อมต่อ MySQL
 try {
-    db_js_1.default.getConnection();
+    db_1.default.getConnection();
     console.log("[server] Connected to MySQL");
 }
 catch (err) {
@@ -59,7 +59,7 @@ catch (err) {
 }
 const testDB = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const [rows] = yield db_js_1.default.execute("SELECT * FROM vehicle_data");
+        const [rows] = yield db_1.default.execute("SELECT * FROM vehicle_data");
         console.log("✅ Database Test: ", rows); // ✅ ตรวจสอบข้อมูล
     }
     catch (error) {
