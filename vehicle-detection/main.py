@@ -34,9 +34,14 @@ with open('classes.txt', 'r') as f:
     classnames = f.read().splitlines()
 
 # ปรับค่า max_age, min_hits และ iou_threshold เพื่อเพิ่มความแม่นยำ
-tracker = Sort(max_age=15, min_hits=3, iou_threshold=0.35)
-first_fw_lane = [356, 482, 802, 482]
-counter = []
+tracker = Sort(max_age=30, min_hits=3, iou_threshold=0.25)
+first_entry_bw_lane = [1043, 607, 1822, 612]
+first_exit_bw_lane = [973, 341, 1253, 344]
+first_entry_fw_lane = [536, 347, 885, 345]
+first_exit_fw_lane = [2, 580, 818, 580]
+entry_counter = []
+exit_counter = []
+
 detected_objects = []
 on_send_data = []
 previous_positions = {}
@@ -57,7 +62,8 @@ while True:
         frame = cv2.resize(frame, (int(frame_width * scale), int(frame_height * scale)), interpolation=cv2.INTER_AREA)
     
     detections = np.empty((0, 6))
-    result = model(frame, stream=True)
+    result = model(frame, stream=True, classes=[0, 2, 7])
+
     
     for info in result:
         boxes = info.boxes
@@ -69,7 +75,7 @@ while True:
             classindex = int(classindex)
             objectdetect = classnames[classindex]
 
-            if objectdetect in ['car', 'truck'] and conf > 40:
+            if objectdetect in ['car', 'truck'] and conf > 50:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf, classindex])
                 # print(f'detect object: {new_detections}')
@@ -77,7 +83,10 @@ while True:
                 # print(f'detect object: {box}')
 
     track_result = tracker.update(detections)
-    cv2.line(frame, (first_fw_lane[0], first_fw_lane[1]), (first_fw_lane[2], first_fw_lane[3]), (0, 255, 255), 7)
+    cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 255, 255), 4)
+    cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 255, 255), 4)
+    cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 255, 255), 4)
+    cv2.line(frame, (first_exit_bw_lane[0], first_exit_bw_lane[1]), (first_exit_bw_lane[2], first_exit_bw_lane[3]), (0, 255, 255), 4)
 
     for results in track_result:
         x1, y1, x2, y2, id, classindex = results
@@ -100,6 +109,7 @@ while True:
                 "date": current_date,
                 "time": current_time
             }
+
             detected_objects.append(id)
             on_send_data.append(detected)
             
@@ -119,13 +129,37 @@ while True:
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
         cvzone.putTextRect(frame, f'{id}', [x1 + 8, y1 - 12], thickness=2, scale=1.5)
 
-        if first_fw_lane[0] < cx < first_fw_lane[2] and first_fw_lane[1] - 20 < cy < first_fw_lane[1] + 20:
-            cv2.line(frame, (first_fw_lane[0], first_fw_lane[1]), (first_fw_lane[2], first_fw_lane[3]), (0, 0, 255), 15)
-            if id not in counter:  # ใช้ not in แทน .count(id) == 0 (เร็วกว่า)
-                counter.append(id)
+        #ตรวจจับขาเข้าเลนแรก
+        if first_entry_fw_lane[0] < cx < first_entry_fw_lane[2] and first_entry_fw_lane[1] - 20 < cy < first_entry_fw_lane[1] + 20:
+            cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 255), 8)
+            if id not in entry_counter:
+                entry_counter.append(id)
+                print(f"Object {id} entered the first forward lane.")
+    
+        # First forward exit (first_exit_fw_lane)
+        if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] - 20 < cy < first_exit_fw_lane[1] + 20:
+            cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 255), 8)
+            if id not in exit_counter:
+                exit_counter.append(id)
+                print(f"Object {id} exited the first forward lane.")
+        
+        # Second forward entry (second_entry_fw_lane)
+        if first_entry_bw_lane[0] < cx < first_entry_bw_lane[2] and first_entry_bw_lane[1] - 20 < cy < first_entry_bw_lane[1] + 20:
+            cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 0, 255), 8)
+            if id not in entry_counter:
+                entry_counter.append(id)
+                print(f"Object {id} entered the second forward lane.")
+
+        # Second forward exit (second_exit_fw_lane)
+        if first_exit_bw_lane[0] < cx < first_exit_bw_lane[2] and first_exit_bw_lane[1] - 20 < cy < first_exit_bw_lane[1] + 20:
+            cv2.line(frame, (first_exit_bw_lane[0], first_exit_bw_lane[1]), (first_exit_bw_lane[2], first_exit_bw_lane[3]), (0, 0, 255), 8)
+            if id not in exit_counter:
+                exit_counter.append(id)
+                print(f"Object {id} exited the second forward lane.")
 
 
-    cvzone.putTextRect(frame, f'count = {len(counter)}', [290, 34], thickness=4, scale=2.3, border=2)
+    cvzone.putTextRect(frame, f'entry_count = {len(entry_counter)}', [10, 34], thickness=4, scale=2.3, border=2)
+    cvzone.putTextRect(frame, f'exit_count = {len(exit_counter)}', [10, 100], thickness=4, scale=2.3, border=2)
 
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
