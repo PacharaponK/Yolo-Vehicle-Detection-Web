@@ -170,7 +170,7 @@ while True:
                     # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
 
         # ตรวจจับถนนขาเข้าเฟรมรถออกเลนแรก
-        if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] + 10 < cy < first_exit_fw_lane[1] - 10:
+        if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] - 10 < cy < first_exit_fw_lane[1] + 10:
             cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
                 first_fw_lane_exit_counter.append(id)
@@ -213,10 +213,10 @@ while True:
                     # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
         
         # ตรวจจับถนนขาเข้าเฟรมรถออกเลนที่สอง
-        if second_exit_fw_lane[0] < cx < second_exit_fw_lane[2] and second_exit_fw_lane[1] + 10 < cy < second_exit_fw_lane[1] - 10:
+        if second_exit_fw_lane[0] < cx < second_exit_fw_lane[2] and second_exit_fw_lane[1] - 10 < cy < second_exit_fw_lane[1] + 10:
             cv2.line(frame, (second_exit_fw_lane[0], second_exit_fw_lane[1]), (second_exit_fw_lane[2], second_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
-                first_fw_lane_exit_counter.append(id)
+                second_fw_lane_exit_counter.append(id)
                 print(f"Object {id} exited the first forward lane.")
                 print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
                 print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
@@ -256,10 +256,10 @@ while True:
                     # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
         
         # ตรวจจับถนนขาเข้าเฟรมรถออกเลนที่สาม
-        if third_exit_fw_lane[0] < cx < third_exit_fw_lane[2] and third_exit_fw_lane[1] + 10 < cy < third_exit_fw_lane[1] - 10:
+        if third_exit_fw_lane[0] < cx < third_exit_fw_lane[2] and third_exit_fw_lane[1] - 10 < cy < third_exit_fw_lane[1] + 10:
             cv2.line(frame, (third_exit_fw_lane[0], third_exit_fw_lane[1]), (third_exit_fw_lane[2], third_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
-                first_fw_lane_exit_counter.append(id)
+                third_fw_lane_exit_counter.append(id)
                 print(f"Object {id} exited the first forward lane.")
                 print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
                 print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
@@ -418,6 +418,6 @@ while True:
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
 
-print(first_bw_lane_entry_counter)
+print(detected_objects)
 cap.release()
 cv2.destroyAllWindows()
