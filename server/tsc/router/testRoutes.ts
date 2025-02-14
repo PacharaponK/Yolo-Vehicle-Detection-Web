@@ -1,15 +1,25 @@
+import dotenv from "dotenv";
 import { Request, Response, NextFunction, Router } from "express";
 import AppError from "../utils/appError";
 import * as argon2 from "argon2";
 import Service from "../service/BaseService";
+import db2 from "../config/db2";
+import authenticateJWT from "../middlewares/authenticateJWT";
+dotenv.config();
 
 const router = Router();
-
-router.get("/test", async (req, res, next) => {
-	const password = "mudd1312312dd";
-	const hashpassword = await Service.hash(password);
-	res.send(hashpassword);
-});
+router.get("/test", [
+	authenticateJWT,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			console.log(req.body);
+			console.log("success");
+			res.send("success");
+		} catch (error) {
+			next(error);
+		}
+	},
+]);
 router.get("/error", async (req, res, next) => {
 	try {
 		throw new AppError();

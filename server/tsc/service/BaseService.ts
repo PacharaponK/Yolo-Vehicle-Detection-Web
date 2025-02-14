@@ -1,6 +1,7 @@
 import * as argon2 from "argon2";
 import dotenv from "dotenv";
 import AppError from "../utils/appError";
+import { sign } from "jsonwebtoken";
 dotenv.config();
 
 class Service {
@@ -17,13 +18,13 @@ class Service {
 			throw new AppError();
 		}
 	}
-	static async check(password: string) {
-		// try {
-		// 	const passwordWithPepper: string = password + (process.env.SECRET_KEY as string);
-		// 	return await argon2.verify(,passwordWithPepper);
-		// } catch (error) {
-		// 	throw new AppError();
-		// }
+	static async generateJWT(userId: number) {
+		try {
+			// 10 minute == 60*10
+			return sign({ userId }, process.env.SECRET_KEY as string, { expiresIn: 60 * 10 });
+		} catch (error) {
+			throw new AppError();
+		}
 	}
 }
 export default Service;

@@ -1,31 +1,26 @@
-// import { sign, decode, verify } from "jsonwebtoken";
-// import { Request, Response, NextFunction } from "express";
-// import dotenv from "dotenv";
+import { sign, decode, verify } from "jsonwebtoken";
+import { Request, Response, NextFunction } from "express";
+import dotenv from "dotenv";
+import AppError from "../utils/appError";
 
-// dotenv.config();
-// const authenticateJWT = async (req: Request, res: Response, next: NextFunction) => {
-// 	const token = req.headers.authorization?.split(" ")[1];
-// 	if (!token) {
-// 		const err: any = new Error("Unauthorized");
-// 		err.status = 401;
-// 		next(err);
-// 		return;
-// 	}
-// 	// console.log("+++token++++");
-// 	// console.log(token);
-// 	verify(token, process.env.SECRET_KEY as string, (error: any, user: any) => {
-// 		// console.log("++++ERROR++++");
-// 		// console.log(error.message);
-// 		if (error) {
-// 			const err: any = new Error(error.message);
-// 			err.status = 401;
-// 			next(err);
-// 			return;
-// 		}
-// 		// console.log("++++USER++++");
-// 		// console.log(user);
-// 	});
-// 	next();
-// };
+dotenv.config();
+const authenticateJWT = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const token = req.headers.authorization?.split(" ")[1];
+		if (!token) {
+			throw new AppError("Access denied. No token provided.", 401);
+		}
 
-// export default authenticateJWT;
+		try {
+			const decoded: any = verify(token, process.env.SECRET_KEY as string);
+			req.body.userID = decoded.userId;
+			next();
+		} catch (error) {
+			throw new AppError("token expired.", 400);
+		}
+	} catch (error) {
+		next(error);
+	}
+};
+
+export default authenticateJWT;
