@@ -14,9 +14,9 @@ current_time = now.time()
 
 
 # mydb = mysql.connector.connect(
-#     host="35.240.191.105",
-#     user="root",
-#     password="root",
+#     host="34.44.80.130",
+#     user="forthree",
+#     password="fortree",
 #     database="test"
 # )
 
@@ -26,7 +26,7 @@ current_time = now.time()
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\data\vehicles.mp4")
+cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\data\cars.mp4")
 model = YOLO('yolov8n.pt')
 
 classnames = []
@@ -34,9 +34,38 @@ with open('classes.txt', 'r') as f:
     classnames = f.read().splitlines()
 
 # ปรับค่า max_age, min_hits และ iou_threshold เพื่อเพิ่มความแม่นยำ
-tracker = Sort(max_age=15, min_hits=3, iou_threshold=0.35)
-line = [320, 350, 620, 350]
-counter = []
+tracker = Sort(max_age=30, min_hits=3, iou_threshold=0.25)
+
+first_entry_fw_lane = [536, 347, 696, 345]
+second_entry_fw_lane = [696, 345, 778, 345]
+third_entry_fw_lane = [778, 345, 885, 345]
+
+first_exit_fw_lane = [2, 581, 384, 581]
+second_exit_fw_lane = [384, 581, 572, 581]
+third_exit_fw_lane = [572, 581, 817, 581]
+
+first_entry_bw_lane = [1822, 611, 1446, 610]
+second_entry_bw_lane = [1446, 610, 1267, 608]
+third_entry_bw_lane = [1267, 608, 1043, 609]
+
+first_exit_bw_lane = [1255, 343, 1129, 344]
+second_exit_bw_lane = [1129, 344, 1058, 343]
+third_exit_bw_lane = [1058, 343, 975, 342]
+
+first_fw_lane_entry_counter = []
+second_fw_lane_entry_counter = []
+third_fw_lane_entry_counter = []
+first_fw_lane_exit_counter = []
+second_fw_lane_exit_counter = []
+third_fw_lane_exit_counter = []
+
+first_bw_lane_entry_counter = []
+second_bw_lane_entry_counter = []
+third_bw_lane_entry_counter = []
+first_bw_lane_exit_counter = []
+second_bw_lane_exit_counter = []
+third_bw_lane_exit_counter = []
+
 detected_objects = []
 on_send_data = []
 previous_positions = {}
@@ -57,7 +86,8 @@ while True:
         frame = cv2.resize(frame, (int(frame_width * scale), int(frame_height * scale)), interpolation=cv2.INTER_AREA)
     
     detections = np.empty((0, 6))
-    result = model(frame, stream=True)
+    result = model(frame, stream=True, classes=[0, 2, 7])
+
     
     for info in result:
         boxes = info.boxes
@@ -77,35 +107,30 @@ while True:
                 # print(f'detect object: {box}')
 
     track_result = tracker.update(detections)
-    cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 255, 255), 7)
+    cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 255), 4)
+    cv2.line(frame, (second_entry_fw_lane[0], second_entry_fw_lane[1]), (second_entry_fw_lane[2], second_entry_fw_lane[3]), (0, 255, 0), 4)
+    cv2.line(frame, (third_entry_fw_lane[0], third_entry_fw_lane[1]), (third_entry_fw_lane[2], third_entry_fw_lane[3]), (255, 0, 0), 4)
+
+    cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 255), 4)
+    cv2.line(frame, (second_exit_fw_lane[0], second_exit_fw_lane[1]), (second_exit_fw_lane[2], second_exit_fw_lane[3]), (0, 255, 0), 4)
+    cv2.line(frame, (third_exit_fw_lane[0], third_exit_fw_lane[1]), (third_exit_fw_lane[2], third_exit_fw_lane[3]), (255, 0, 0), 4)
+
+    cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 0, 255), 4)
+    cv2.line(frame, (second_entry_bw_lane[0], second_entry_bw_lane[1]), (second_entry_bw_lane[2], second_entry_bw_lane[3]), (0, 255, 0), 4)
+    cv2.line(frame, (third_entry_bw_lane[0], third_entry_bw_lane[1]), (third_entry_bw_lane[2], third_entry_bw_lane[3]), (255, 0, 0), 4)
+
+    cv2.line(frame, (first_exit_bw_lane[0], first_exit_bw_lane[1]), (first_exit_bw_lane[2], first_exit_bw_lane[3]), (0, 0, 255), 4)
+    cv2.line(frame, (second_exit_bw_lane[0], second_exit_bw_lane[1]), (second_exit_bw_lane[2], second_exit_bw_lane[3]), (0, 255, 0), 4)
+    cv2.line(frame, (third_exit_bw_lane[0], third_exit_bw_lane[1]), (third_exit_bw_lane[2], third_exit_bw_lane[3]), (255, 0, 0), 4)
+
 
     for results in track_result:
         x1, y1, x2, y2, id, classindex = results
         # print(f'track object: {results}')
         x1, y1, x2, y2, id, classindex = int(x1), int(y1), int(x2), int(y2), int(id), int(classindex)
-
-        # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
-        if id not in detected_objects:
-            print("new object detected: ", results[4], classnames[classindex])
-            # mycursor = mydb.cursor()
-
-            sql = "INSERT INTO vehicle_data (id, class, date, time) VALUES (%s, %s, %s, %s)"
-            val = (id, classnames[classindex], current_date, current_time)
-            # mycursor.execute(sql, val)
-            # mydb.commit()
-
-            detected = {
-                "id": id,
-                "class": classnames[classindex],
-                "date": current_date,
-                "time": current_time
-            }
-            detected_objects.append(id)
-            on_send_data.append(detected)
-            
         
         w, h = x2 - x1, y2 - y1
-        cx, cy = x1 + w // 2, y1 + h // 2
+        cx, cy = x1 + w // 2, y2
 
         # ใช้ค่าเฉลี่ยจากเฟรมก่อนหน้าเพื่อลดการเปลี่ยนแปลง ID
         if id in previous_positions:
@@ -116,20 +141,283 @@ while True:
         previous_positions[id] = (cx, cy)
 
         cv2.circle(frame, (cx, cy), 6, (0, 0, 255), -1)
-        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (127, 0, 255), 3)
         cvzone.putTextRect(frame, f'{id}', [x1 + 8, y1 - 12], thickness=2, scale=1.5)
 
-        if line[0] < cx < line[2] and line[1] - 20 < cy < line[1] + 20:
-            cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 0, 255), 15)
-            if id not in counter:  # ใช้ not in แทน .count(id) == 0 (เร็วกว่า)
-                counter.append(id)
+        # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนแรก
+        if first_entry_fw_lane[0] < cx < first_entry_fw_lane[2] and first_entry_fw_lane[1] - 10 < cy < first_entry_fw_lane[1] + 10:
+            cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 0), 8)
+            if id not in first_fw_lane_entry_counter:
+                if id not in detected_objects:
 
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
 
-    cvzone.putTextRect(frame, f'count = {len(counter)}', [290, 34], thickness=4, scale=2.3, border=2)
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane_type": "forward",
+                        "lane_id": 1
+                    }
+
+                    detected_objects.append([detected])
+                    first_fw_lane_entry_counter.append(id)
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
+        # ตรวจจับถนนขาเข้าเฟรมรถออกเลนแรก
+        if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] - 10 < cy < first_exit_fw_lane[1] + 10:
+            cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 0), 8)
+            if id not in first_fw_lane_exit_counter:
+                first_fw_lane_exit_counter.append(id)
+                print(f"Object {id} exited the first forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                sql = "UPDATE COMMAND"
+                val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                # mycursor.execute(sql, val)
+                # mydb.commit()
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()
+        
+        # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนที่สอง
+        if second_entry_fw_lane[0] < cx < second_entry_fw_lane[2] and second_entry_fw_lane[1] - 10 < cy < second_entry_fw_lane[1] + 10:
+            cv2.line(frame, (second_entry_fw_lane[0], second_entry_fw_lane[1]), (second_entry_fw_lane[2], second_entry_fw_lane[3]), (0, 0, 0), 8)
+            if id not in second_fw_lane_entry_counter:
+                if id not in detected_objects:
+
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
+
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane_type": "forward",
+                        "lane_id": 2
+                    }
+
+                    detected_objects.append([detected])
+                    second_fw_lane_entry_counter.append(id)
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+        
+        # ตรวจจับถนนขาเข้าเฟรมรถออกเลนที่สอง
+        if second_exit_fw_lane[0] < cx < second_exit_fw_lane[2] and second_exit_fw_lane[1] - 10 < cy < second_exit_fw_lane[1] + 10:
+            cv2.line(frame, (second_exit_fw_lane[0], second_exit_fw_lane[1]), (second_exit_fw_lane[2], second_exit_fw_lane[3]), (0, 0, 0), 8)
+            if id not in first_fw_lane_exit_counter:
+                second_fw_lane_exit_counter.append(id)
+                print(f"Object {id} exited the first forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                sql = "UPDATE COMMAND"
+                val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                # mycursor.execute(sql, val)
+                # mydb.commit()
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()
+        
+        # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนที่สอง
+        if third_entry_fw_lane[0] < cx < third_entry_fw_lane[2] and third_entry_fw_lane[1] - 10 < cy < third_entry_fw_lane[1] + 10:
+            cv2.line(frame, (third_entry_fw_lane[0], third_entry_fw_lane[1]), (third_entry_fw_lane[2], third_entry_fw_lane[3]), (0, 0, 0), 8)
+            if id not in third_fw_lane_entry_counter:
+                if id not in detected_objects:
+
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
+
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane_type": "forward",
+                        "lane_id": 2
+                    }
+
+                    detected_objects.append([detected])
+                    third_fw_lane_entry_counter.append(id)
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+        
+        # ตรวจจับถนนขาเข้าเฟรมรถออกเลนที่สาม
+        if third_exit_fw_lane[0] < cx < third_exit_fw_lane[2] and third_exit_fw_lane[1] - 10 < cy < third_exit_fw_lane[1] + 10:
+            cv2.line(frame, (third_exit_fw_lane[0], third_exit_fw_lane[1]), (third_exit_fw_lane[2], third_exit_fw_lane[3]), (0, 0, 0), 8)
+            if id not in first_fw_lane_exit_counter:
+                third_fw_lane_exit_counter.append(id)
+                print(f"Object {id} exited the first forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                sql = "UPDATE COMMAND"
+                val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                # mycursor.execute(sql, val)
+                # mydb.commit()
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()
+
+        # ตรวจจับถนนขาออกเฟรมรถเข้าเลนแรก
+        if first_entry_bw_lane[2] < cx < first_entry_bw_lane[0] and first_entry_bw_lane[1] - 10 < cy < first_entry_bw_lane[1] + 10:
+            cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 0, 0), 8)
+            if id not in first_bw_lane_entry_counter:
+                if id not in detected_objects:
+
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
+
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane_type": "forward",
+                        "lane_id": 1
+                    }
+
+                    detected_objects.append([detected])
+                    first_bw_lane_entry_counter.append(id)
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
+        # ตรวจจับถนนขาออกเฟรมรถออกเลนแรก
+        if first_exit_bw_lane[2] < cx < first_exit_bw_lane[0] and first_exit_bw_lane[1] - 10 < cy < first_exit_bw_lane[1] + 10:
+            cv2.line(frame, (first_exit_bw_lane[0], first_exit_bw_lane[1]), (first_exit_bw_lane[2], first_exit_bw_lane[3]), (0, 0, 0), 8)
+            if id not in first_bw_lane_exit_counter:
+                first_bw_lane_exit_counter.append(id)
+                print(f"Object {id} exited the first forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                sql = "UPDATE COMMAND"
+                val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                # mycursor.execute(sql, val)
+                # mydb.commit()
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()
+        
+        # ตรวจจับถนนขาออกเฟรมรถเข้าเลนที่สอง
+        if second_entry_bw_lane[2] < cx < second_entry_bw_lane[0] and second_entry_bw_lane[1] - 10 < cy < second_entry_bw_lane[1] + 10:
+            cv2.line(frame, (second_entry_bw_lane[0], second_entry_bw_lane[1]), (second_entry_bw_lane[2], second_entry_bw_lane[3]), (0, 0, 0), 8)
+            if id not in second_bw_lane_entry_counter:
+                if id not in detected_objects:
+
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
+
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane_type": "forward",
+                        "lane_id": 2
+                    }
+
+                    detected_objects.append([detected])
+                    second_bw_lane_entry_counter.append(id)
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
+        # ตรวจจับถนนขาออกเฟรมรถออกเลนที่สอง
+        if second_exit_bw_lane[2] < cx < second_exit_bw_lane[0] and second_exit_bw_lane[1] - 10 < cy < second_exit_bw_lane[1] + 10:
+            cv2.line(frame, (second_exit_bw_lane[0], second_exit_bw_lane[1]), (second_exit_bw_lane[2], second_exit_bw_lane[3]), (0, 0, 0), 8)
+            if id not in second_bw_lane_exit_counter:
+                second_bw_lane_exit_counter.append(id)
+                print(f"Object {id} exited the second forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                sql = "UPDATE COMMAND"
+                val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                # mycursor.execute(sql, val)
+                # mydb.commit()
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()
+        
+        # ตรวจจับถนนขาออกเฟรมรถเข้าเลนที่สอง
+        if third_entry_bw_lane[2] < cx < third_entry_bw_lane[0] and third_entry_bw_lane[1] - 10 < cy < third_entry_bw_lane[1] + 10:
+            cv2.line(frame, (third_entry_bw_lane[0], third_entry_bw_lane[1]), (third_entry_bw_lane[2], third_entry_bw_lane[3]), (0, 0, 0), 8)
+            if id not in third_bw_lane_entry_counter:
+                if id not in detected_objects:
+
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
+
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane_type": "forward",
+                        "lane_id": 3
+                    }
+
+                    detected_objects.append([detected])
+                    third_bw_lane_entry_counter.append(id)
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
+        # ตรวจจับถนนขาออกเฟรมรถออกเลนที่สอง
+        if third_exit_bw_lane[2] < cx < third_exit_bw_lane[0] and third_exit_bw_lane[1] - 10 < cy < third_exit_bw_lane[1] + 10:
+            cv2.line(frame, (third_exit_bw_lane[0], third_exit_bw_lane[1]), (third_exit_bw_lane[2], third_exit_bw_lane[3]), (0, 0, 0), 8)
+            if id not in third_bw_lane_exit_counter:
+                third_bw_lane_exit_counter.append(id)
+                print(f"Object {id} exited the third forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                sql = "UPDATE COMMAND"
+                val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                # mycursor.execute(sql, val)
+                # mydb.commit()
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()
+
+    cvzone.putTextRect(frame, f'1st_fw_lane_entry_count = {len(first_fw_lane_entry_counter)}', [10, 30], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'1st_fw_lane_exit_count = {len(first_fw_lane_exit_counter)}', [10, 60], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'2nd_fw_lane_entry_count = {len(second_fw_lane_entry_counter)}', [10, 90], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'2nd_fw_lane_exit_count = {len(second_fw_lane_exit_counter)}', [10, 120], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'3rd_fw_lane_entry_count = {len(third_fw_lane_entry_counter)}', [10, 150], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'3rd_fw_lane_exit_count = {len(third_fw_lane_exit_counter)}', [10, 180], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'1st_bw_lane_entry_count = {len(first_bw_lane_entry_counter)}', [10, 210], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'1st_bw_lane_exit_count = {len(first_bw_lane_exit_counter)}', [10, 240], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'2nd_bw_lane_entry_count = {len(second_bw_lane_entry_counter)}', [10, 270], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'2nd_bw_lane_exit_count = {len(second_bw_lane_exit_counter)}', [10, 300], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'3rd_bw_lane_entry_count = {len(third_bw_lane_entry_counter)}', [10, 330], thickness=1, scale=1.0, border=1)
+    cvzone.putTextRect(frame, f'3rd_bw_lane_exit_count = {len(third_bw_lane_exit_counter)}', [10, 360], thickness=1, scale=1.0, border=1)
 
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
 
-print(on_send_data)
+print(detected_objects)
 cap.release()
 cv2.destroyAllWindows()
