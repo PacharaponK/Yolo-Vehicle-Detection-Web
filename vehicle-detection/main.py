@@ -13,14 +13,14 @@ current_date = now.date()
 current_time = now.time()
 
 
-mydb = mysql.connector.connect(
-    host="34.44.80.130",
-    user="forthree",
-    password="fortree",
-    database="test"
-)
+# mydb = mysql.connector.connect(
+#     host="34.44.80.130",
+#     user="forthree",
+#     password="fortree",
+#     database="test"
+# )
 
-print(mydb)
+# print(mydb)
 
 
 # C:\SDA\vehicle-detection\cars2.mp4
@@ -35,7 +35,7 @@ with open('classes.txt', 'r') as f:
 
 # ปรับค่า max_age, min_hits และ iou_threshold เพื่อเพิ่มความแม่นยำ
 tracker = Sort(max_age=15, min_hits=3, iou_threshold=0.35)
-line = [320, 350, 620, 350]
+first_fw_lane = [356, 482, 802, 482]
 counter = []
 detected_objects = []
 on_send_data = []
@@ -77,7 +77,7 @@ while True:
                 # print(f'detect object: {box}')
 
     track_result = tracker.update(detections)
-    cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 255, 255), 7)
+    cv2.line(frame, (first_fw_lane[0], first_fw_lane[1]), (first_fw_lane[2], first_fw_lane[3]), (0, 255, 255), 7)
 
     for results in track_result:
         x1, y1, x2, y2, id, classindex = results
@@ -87,12 +87,12 @@ while True:
         # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
         if id not in detected_objects:
             print("new object detected: ", results[4], classnames[classindex])
-            mycursor = mydb.cursor()
+            # mycursor = mydb.cursor()
 
             sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
             val = (classnames[classindex], current_date, datetime.datetime.now().time())
-            mycursor.execute(sql, val)
-            mydb.commit()
+            # mycursor.execute(sql, val)
+            # mydb.commit()
 
             detected = {
                 "id": id,
@@ -119,8 +119,8 @@ while True:
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 3)
         cvzone.putTextRect(frame, f'{id}', [x1 + 8, y1 - 12], thickness=2, scale=1.5)
 
-        if line[0] < cx < line[2] and line[1] - 20 < cy < line[1] + 20:
-            cv2.line(frame, (line[0], line[1]), (line[2], line[3]), (0, 0, 255), 15)
+        if first_fw_lane[0] < cx < first_fw_lane[2] and first_fw_lane[1] - 20 < cy < first_fw_lane[1] + 20:
+            cv2.line(frame, (first_fw_lane[0], first_fw_lane[1]), (first_fw_lane[2], first_fw_lane[3]), (0, 0, 255), 15)
             if id not in counter:  # ใช้ not in แทน .count(id) == 0 (เร็วกว่า)
                 counter.append(id)
 
