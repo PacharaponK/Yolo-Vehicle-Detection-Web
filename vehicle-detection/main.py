@@ -75,7 +75,7 @@ while True:
             classindex = int(classindex)
             objectdetect = classnames[classindex]
 
-            if objectdetect in ['car', 'truck'] and conf > 50:
+            if objectdetect in ['car', 'truck'] and conf > 40:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf, classindex])
                 # print(f'detect object: {new_detections}')
@@ -92,27 +92,6 @@ while True:
         x1, y1, x2, y2, id, classindex = results
         # print(f'track object: {results}')
         x1, y1, x2, y2, id, classindex = int(x1), int(y1), int(x2), int(y2), int(id), int(classindex)
-
-        # ตรวจสอบว่า id เป็นไอดีใหม่หรือไม่
-        if id not in detected_objects:
-            print("new object detected: ", results[4], classnames[classindex])
-            # mycursor = mydb.cursor()
-
-            sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-            val = (classnames[classindex], current_date, datetime.datetime.now().time())
-            # mycursor.execute(sql, val)
-            # mydb.commit()
-
-            detected = {
-                "id": id,
-                "class": classnames[classindex],
-                "date": current_date,
-                "time": current_time
-            }
-
-            detected_objects.append(id)
-            on_send_data.append(detected)
-            
         
         w, h = x2 - x1, y2 - y1
         cx, cy = x1 + w // 2, y1 + h // 2
@@ -133,29 +112,78 @@ while True:
         if first_entry_fw_lane[0] < cx < first_entry_fw_lane[2] and first_entry_fw_lane[1] - 20 < cy < first_entry_fw_lane[1] + 20:
             cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 255), 8)
             if id not in entry_counter:
-                entry_counter.append(id)
-                print(f"Object {id} entered the first forward lane.")
-    
-        # First forward exit (first_exit_fw_lane)
+                if id not in detected_objects:
+                    print(f"New object detected: {results[4]} ({classnames[classindex]})")
+                    print(f"Coordinates: ({cx}, {cy}), Lane: Forward Entry")
+                    print(f"Timestamp: {datetime.datetime.now()}")
+
+                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
+                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
+                    # mycursor.execute(sql, val)
+                    # mydb.commit()
+
+                    detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane": "forward"
+                    }
+
+                    detected_objects.append([detected])
+                    on_send_data.append(detected)
+                    entry_counter.append(id)
+                    print(f"Object {id} entered the first forward lane.")
+                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
+        # ตรวจจับขาออกเลนแรก
         if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] - 20 < cy < first_exit_fw_lane[1] + 20:
             cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 255), 8)
             if id not in exit_counter:
                 exit_counter.append(id)
                 print(f"Object {id} exited the first forward lane.")
-        
-        # Second forward entry (second_entry_fw_lane)
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()  # Set exit time
+                        # print(f"Exit time updated for object {id}: {detected[0]['exit_time']}")
+
+        # ตรวจจับขาเข้าเลนที่สอง
         if first_entry_bw_lane[0] < cx < first_entry_bw_lane[2] and first_entry_bw_lane[1] - 20 < cy < first_entry_bw_lane[1] + 20:
             cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 0, 255), 8)
             if id not in entry_counter:
                 entry_counter.append(id)
                 print(f"Object {id} entered the second forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Entry")
+                print(f"Entry details: ID={id}, Time={datetime.datetime.now()}")
+                detected = {
+                        "id": id,
+                        "class": classnames[classindex],
+                        "date": current_date,
+                        "entry_time": datetime.datetime.now(),
+                        "exit_time": None,
+                        "lane": "exit"
+                    }
 
-        # Second forward exit (second_exit_fw_lane)
+                detected_objects.append([detected])
+
+        # ตรวจจับขาออกเลนที่สอง
         if first_exit_bw_lane[0] < cx < first_exit_bw_lane[2] and first_exit_bw_lane[1] - 20 < cy < first_exit_bw_lane[1] + 20:
             cv2.line(frame, (first_exit_bw_lane[0], first_exit_bw_lane[1]), (first_exit_bw_lane[2], first_exit_bw_lane[3]), (0, 0, 255), 8)
             if id not in exit_counter:
                 exit_counter.append(id)
                 print(f"Object {id} exited the second forward lane.")
+                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
+                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
+
+                for detected in detected_objects:
+                    if detected[0]["id"] == id:
+                        detected[0]["exit_time"] = datetime.datetime.now().time()  # Set exit time
+                        print(f"Exit time updated for object {id}: {detected[0]['exit_time']}")
+
 
 
     cvzone.putTextRect(frame, f'entry_count = {len(entry_counter)}', [10, 34], thickness=4, scale=2.3, border=2)
@@ -164,6 +192,6 @@ while True:
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
 
-# print(on_send_data)
+print(detected_objects)
 cap.release()
 cv2.destroyAllWindows()
