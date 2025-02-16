@@ -19,3 +19,36 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+@keyframes slideIn {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.5s ease-out;
+}
+
+@keyframes carMove {
+  0% {
+    left: -100px; /* เริ่มจากซ้ายสุด */
+  }
+  50% {
+    left: 50%; /* กลางหน้าจอ */
+    transform: translateX(-50%);
+  }
+  100% {
+    left: 100%; /* ไปที่ขวาสุด */
+  }
+}
+
+.animate-carMove {
+  position: absolute;
+  animation: carMove 10s linear infinite; /* ทำให้รถเคลื่อนที่ซ้ำไปเรื่อยๆ */
+}
