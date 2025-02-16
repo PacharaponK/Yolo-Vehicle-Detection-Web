@@ -159,7 +159,7 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "date": current_date,
-                        "entry_time": datetime.datetime.now(),
+                        "entry_time": datetime.datetime.now().time(),
                         "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 1
@@ -202,7 +202,7 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "date": current_date,
-                        "entry_time": datetime.datetime.now(),
+                        "entry_time": datetime.datetime.now().time(),
                         "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 2
@@ -245,7 +245,7 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "date": current_date,
-                        "entry_time": datetime.datetime.now(),
+                        "entry_time": datetime.datetime.now().time(),
                         "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 2
@@ -288,7 +288,7 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "date": current_date,
-                        "entry_time": datetime.datetime.now(),
+                        "entry_time": datetime.datetime.now().time(),
                         "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 1
@@ -331,7 +331,7 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "date": current_date,
-                        "entry_time": datetime.datetime.now(),
+                         datetime.datetime.now(),
                         "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 2
@@ -374,7 +374,7 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "date": current_date,
-                        "entry_time": datetime.datetime.now(),
+                        "entry_time": datetime.datetime.now().time(),
                         "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 3
