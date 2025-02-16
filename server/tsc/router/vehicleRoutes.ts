@@ -3,9 +3,10 @@ import AppError from "../utils/appError";
 import db2 from "../config/db2";
 import isRecordExists from "../middlewares/isRecordExists";
 import { io } from "../index";
+import { VehiclesSocket } from "../sockets/VehiclesSocket";
 
 const router = Router();
-router.post("/vehicle", async (req, res, next) => {
+router.post("/vehicle", async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { class: vehicleClass, date, entry_time, exit_time, lane_type, lane_id } = req.body.data;
 		if (!vehicleClass && !date && !entry_time && !exit_time && !lane_type && !lane_id) {
@@ -21,7 +22,7 @@ router.post("/vehicle", async (req, res, next) => {
 				lane_id: lane_id ? Number(lane_id) : undefined,
 			},
 		});
-		// io.emit()
+		VehiclesSocket(io);
 		res.status(201).json({ data: vehicle });
 	} catch (error) {
 		next(error);
@@ -77,6 +78,7 @@ router.put("/vehicle/:id", [
 					lane_id: lane_id ? Number(lane_id) : undefined,
 				},
 			});
+			VehiclesSocket(io);
 			res.send({ status: "200", message: "Resource updated successfully.", data: vehicle });
 		} catch (error) {
 			next(error);
@@ -89,6 +91,8 @@ router.delete("/vehicle/:id", [
 		try {
 			const { id } = req.params;
 			const vehicle = await db2.vehicle_data.delete({ where: { id: Number(id) } });
+			VehiclesSocket(io);
+
 			res.send({ status: "200", message: "Resource deleted successfully.", data: vehicle });
 		} catch (error) {
 			next(error);
