@@ -127,8 +127,8 @@ router.put("/api/vehicle", [
 					},
 				},
 				data: {
-					yolo_id: Number(yolo_id),
-					video_name: video_name,
+					yolo_id: yolo_id ? Number(yolo_id) : undefined,
+					video_name: video_name ? video_name : undefined,
 					class: vehicleClass ? vehicleClass : undefined,
 					date: date ? new Date(date) : undefined,
 					entry_time: entry_time ? new Date(entry_time) : undefined,
