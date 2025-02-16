@@ -8,7 +8,7 @@ import authenticateJWT from "../middlewares/authenticateJWT";
 dotenv.config();
 
 const router = Router();
-router.get("/test", [
+router.get("/api/test", [
 	authenticateJWT,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
@@ -20,7 +20,7 @@ router.get("/test", [
 		}
 	},
 ]);
-router.get("/error", async (req, res, next) => {
+router.get("/api/error", async (req, res, next) => {
 	try {
 		throw new AppError();
 	} catch (error) {

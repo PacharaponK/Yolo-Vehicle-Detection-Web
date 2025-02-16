@@ -6,7 +6,7 @@ import { io } from "../index";
 import { VehiclesSocket } from "../sockets/VehiclesSocket";
 
 const router = Router();
-router.post("/vehicle", async (req: Request, res: Response, next: NextFunction) => {
+router.post("/api/vehicle", async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { class: vehicleClass, date, entry_time, exit_time, lane_type, lane_id } = req.body.data;
 		if (!vehicleClass && !date && !entry_time && !exit_time && !lane_type && !lane_id) {
@@ -28,20 +28,20 @@ router.post("/vehicle", async (req: Request, res: Response, next: NextFunction) 
 		next(error);
 	}
 });
-router.get("/vehicle/all", async (req, res, next) => {
+router.get("/api/vehicle/all", async (req, res, next) => {
 	try {
 		const vehicle = await db2.vehicle_data.findMany();
-		res.send(vehicle);
+		res.send({ data: vehicle });
 	} catch (error) {
 		next(error);
 	}
 });
-router.get("/vehicle/:id", async (req, res, next) => {
+router.get("/api/vehicle/:id", async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const vehicle = await db2.vehicle_data.findUnique({ where: { id: Number(id) } });
 		if (vehicle) {
-			res.send(vehicle);
+			res.send({ data: vehicle });
 			return;
 		}
 		throw new AppError("Not Found", 404);
@@ -49,7 +49,7 @@ router.get("/vehicle/:id", async (req, res, next) => {
 		next(error);
 	}
 });
-router.put("/vehicle/:id", [
+router.put("/api/vehicle/:id", [
 	isRecordExists(db2.vehicle_data),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
@@ -85,7 +85,7 @@ router.put("/vehicle/:id", [
 		}
 	},
 ]);
-router.delete("/vehicle/:id", [
+router.delete("/api/vehicle/:id", [
 	isRecordExists(db2.vehicle_data),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {

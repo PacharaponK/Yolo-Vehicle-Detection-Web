@@ -6,7 +6,7 @@ import * as argon2 from "argon2";
 import Service from "../service/BaseService";
 import authenticateJWT from "../middlewares/authenticateJWT";
 const router = Router();
-router.get("/user/login", [
+router.get("/api/user/login", [
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { email, password } = req.body.data;
@@ -34,7 +34,7 @@ router.get("/user/login", [
 		}
 	},
 ]);
-router.post("/user", async (req, res, next) => {
+router.post("/api/user", async (req, res, next) => {
 	try {
 		const { name, email, password } = req.body.data;
 		if (!name || !email || !password) {
@@ -63,7 +63,7 @@ router.post("/user", async (req, res, next) => {
 		next(error);
 	}
 });
-router.get("/user/all", async (req, res, next) => {
+router.get("/api/user/all", async (req, res, next) => {
 	try {
 		const user = await db2.user.findMany({
 			select: {
@@ -74,12 +74,12 @@ router.get("/user/all", async (req, res, next) => {
 				updatedAt: true,
 			},
 		});
-		res.send(user);
+		res.send({ data: user });
 	} catch (error) {
 		next(error);
 	}
 });
-router.get("/user/:id", async (req, res, next) => {
+router.get("/api/user/:id", async (req, res, next) => {
 	try {
 		const { id } = req.params;
 		const user = await db2.user.findUnique({
@@ -93,7 +93,7 @@ router.get("/user/:id", async (req, res, next) => {
 			},
 		});
 		if (user) {
-			res.send(user);
+			res.send({ data: user });
 			return;
 		}
 		throw new AppError("Not Found", 404);
@@ -101,7 +101,7 @@ router.get("/user/:id", async (req, res, next) => {
 		next(error);
 	}
 });
-router.put("/user/:id", [
+router.put("/api/user/:id", [
 	isRecordExists(db2.user),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
@@ -138,7 +138,7 @@ router.put("/user/:id", [
 		}
 	},
 ]);
-router.delete("/user/:id", [
+router.delete("/api/user/:id", [
 	isRecordExists(db2.user),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
