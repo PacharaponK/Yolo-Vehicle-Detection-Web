@@ -58,8 +58,8 @@ router.post("/api/vehicle", async (req: Request, res: Response, next: NextFuncti
 router.get("/api/vehicle", async (req, res, next) => {
 	try {
 		const { yolo_id, video_name } = req.query;
-		if (!yolo_id && !video_name) {
-			throw new AppError();
+		if (!yolo_id || !video_name) {
+			throw new AppError("query required.", 400);
 		}
 		const vehicle = await db2.vehicle_data.findUnique({
 			where: {
@@ -69,6 +69,9 @@ router.get("/api/vehicle", async (req, res, next) => {
 				},
 			},
 		});
+		if (!vehicle) {
+			throw new AppError("Not Found", 404);
+		}
 		res.send({ data: vehicle });
 	} catch (error) {
 		next(error);
@@ -79,8 +82,20 @@ router.put("/api/vehicle", [
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { yolo_id: yolo_id_query, video_name: video_name_query } = req.query;
-			if (!yolo_id_query && !video_name_query) {
-				throw new AppError();
+			if (!yolo_id_query || !video_name_query) {
+				throw new AppError("query required.", 400);
+			}
+			if (
+				!(await db2.vehicle_data.findUnique({
+					where: {
+						yolo_id_video_name: {
+							yolo_id: Number(yolo_id_query),
+							video_name: String(video_name_query),
+						},
+					},
+				}))
+			) {
+				throw new AppError("Not Found", 404);
 			}
 			const {
 				class: vehicleClass,
@@ -107,8 +122,8 @@ router.put("/api/vehicle", [
 			const vehicle = await db2.vehicle_data.update({
 				where: {
 					yolo_id_video_name: {
-						yolo_id: Number(yolo_id),
-						video_name: String(video_name),
+						yolo_id: Number(yolo_id_query),
+						video_name: String(video_name_query),
 					},
 				},
 				data: {
