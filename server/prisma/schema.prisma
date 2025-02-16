@@ -11,12 +11,15 @@ datasource db {
 model vehicle_data {
   id         String    @id @default(uuid())
   yolo_id    Int
+  video_name String
   class      String?   @db.VarChar(50)
   date       DateTime? @db.Date
   entry_time DateTime?
   exit_time  DateTime?
   lane_type  String?   @db.VarChar(30)
   lane_id    Int?
+
+  @@unique([yolo_id, video_name])
 }
 
 model User {
