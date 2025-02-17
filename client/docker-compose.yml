@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  nextjs:
+    build: .
+    container_name: nextjs_app
+    ports:
+      - "8000:80"
+    restart: always
