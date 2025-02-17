@@ -123,156 +123,132 @@ const Dashboard = () => {
             className="h-full w-full bg-gray-50 relative overflow-y-auto lg:ml-64"
           >
             <main>
-              <div className="pt-6 px-4">
-                <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* กล่องที่ 1 */}
-                  <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 w-full">
-                    <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
-                      <div className="flex-shrink-0">
-                        <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
-                          150
-                        </span>
-                        <h3 className="text-base font-normal text-gray-500">
-                          จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้
-                        </h3>
-                      </div>
-                      <div className="flex items-center justify-end text-green-500 text-base font-bold">
-                        12.5%
-                        <svg
-                          className="w-5 h-5"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-                            clipRule="evenodd"
-                          ></path>
-                        </svg>
-                      </div>
+              <div className="flex flex-col pt-6 px-4">
+                {/* กราฟด้านบน */}
+                <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 w-full">
+                  <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
+                    <div className="flex-shrink-0">
+                      <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
+                        150
+                      </span>
+                      <h3 className="text-base font-normal text-gray-500">
+                        จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้
+                      </h3>
                     </div>
-                    <div id="diagram" className="w-full h-auto">
-                      <TrafficChart vehicleData={vehicles} />
+                    <div className="flex items-center justify-end text-green-500 text-base font-bold">
+                      12.5%
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                          clipRule="evenodd"
+                        ></path>
+                      </svg>
                     </div>
                   </div>
+                  <div id="diagram" className="w-full h-auto">
+                    <TrafficChart vehicleData={vehicles} />
+                  </div>
+                </div>
 
-                  {/* กล่องที่ 2 */}
-                  <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8">
-                    <div className="mb-4 flex items-center justify-between">
-                      <div>
-                        <h3 className="text-xl font-bold text-gray-900 mb-2">
-                          รถที่ตรวจจับได้ล่าสุด
-                        </h3>
-                        <span className="text-base font-normal text-gray-500">
-                          รายการแสดงรถที่ตรวจจับเรียงตามลำดับเวลา
-                        </span>
-                      </div>
-                      <div className="flex-shrink-0">
-                        <Link
-                          href="#"
-                          className="text-sm font-medium text-cyan-600 hover:bg-gray-100 rounded-lg p-2"
-                        >
-                          ดูทั้งหมด
-                        </Link>
-                      </div>
+                {/* ตารางอยู่ด้านล่าง */}
+                <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 mt-4 w-full">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold text-gray-900 mb-2">
+                        รถที่ตรวจจับได้ล่าสุด
+                      </h3>
+                      <span className="text-base font-normal text-gray-500">
+                        รายการแสดงรถที่ตรวจจับเรียงตามลำดับเวลา
+                      </span>
                     </div>
-                    <div className="flex flex-col mt-8">
-                      <div className="overflow-x-auto rounded-lg">
-                        <div className="align-middle inline-block min-w-full">
-                          <div className="shadow overflow-hidden sm:rounded-lg">
-                            <div className="overflow-y-auto max-h-[500px]">
-                              <table className="min-w-full divide-y divide-gray-200">
-                                <thead className="bg-gray-50">
-                                  <tr>
-                                    {/* <th
-                                      scope="col"
-                                      className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    >
-                                      ID
-                                    </th> */}
-                                    <th
-                                      scope="col"
-                                      className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    >
-                                      ประเภทของรถ
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    >
-                                      วันที่
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    >
-                                      เวลา
-                                    </th>
-                                    <th
-                                      scope="col"
-                                      className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                                    >
-                                      ความเร็ว
-                                    </th>
+                    <div className="flex-shrink-0">
+                      <Link
+                        href="#"
+                        className="text-sm font-medium text-cyan-600 hover:bg-gray-100 rounded-lg p-2"
+                      >
+                        ดูทั้งหมด
+                      </Link>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto rounded-lg">
+                    <div className="align-middle inline-block min-w-full">
+                      <div className="shadow overflow-hidden sm:rounded-lg">
+                        <div className="overflow-y-auto max-h-[500px]">
+                          <table className="min-w-full divide-y divide-gray-200">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  ประเภทของรถ
+                                </th>
+                                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  วันที่
+                                </th>
+                                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  เวลา
+                                </th>
+                                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  ความเร็ว
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody className="bg-white">
+                              {vehicles.map((vehicle, index) => {
+                                if (!vehicle.class) return null;
+
+                                const formattedDate = new Date(
+                                  vehicle.entry_time
+                                ).toLocaleDateString("th-TH", {
+                                  year: "numeric",
+                                  month: "short",
+                                  day: "numeric",
+                                });
+                                const timeOnly = new Date(
+                                  vehicle.entry_time
+                                ).toLocaleTimeString("th-TH", {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                  second: "2-digit",
+                                });
+
+                                return (
+                                  <tr
+                                    key={vehicle.id}
+                                    className={
+                                      index % 2 === 1 ? "bg-gray-50" : ""
+                                    }
+                                  >
+                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
+                                      <span className="font-semibold">
+                                        {vehicle.class}
+                                      </span>
+                                    </td>
+                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
+                                      {formattedDate}
+                                    </td>
+                                    <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                      {timeOnly}
+                                    </td>
+                                    <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                      {calculateSpeed(vehicle).speed_kmph}
+                                    </td>
                                   </tr>
-                                </thead>
-                                <tbody className="bg-white">
-                                  {vehicles.map((vehicle, index) => {
-                                    if (!vehicle.class) return null;
-
-                                    const formattedDate = new Date(
-                                      vehicle.date
-                                    ).toLocaleDateString("th-TH", {
-                                      year: "numeric",
-                                      month: "short",
-                                      day: "numeric",
-                                    });
-                                    const timeOnly = new Date(
-                                      vehicle.entry_time
-                                    ).toLocaleTimeString("th-TH", {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                      second: "2-digit",
-                                    });
-
-                                    return (
-                                      <tr
-                                        key={vehicle.id}
-                                        className={
-                                          index % 2 === 1 ? "bg-gray-50" : ""
-                                        }
-                                      >
-                                        {/* <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                          {vehicle.id}
-                                        </td> */}
-                                        <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                          <span className="font-semibold">
-                                            {vehicle.class}
-                                          </span>
-                                        </td>
-                                        <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                          {formattedDate}
-                                        </td>
-                                        <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                          {timeOnly}
-                                        </td>
-                                        <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                          {calculateSpeed(vehicle).speed_kmph}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
+                                );
+                              })}
+                            </tbody>
+                          </table>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
+                {/* สรุปข้อมูลรถแยกประเภท */}
                 <div className="mt-4 w-full">
                   <TrafficSummary vehicleData={vehicles} />
                 </div>

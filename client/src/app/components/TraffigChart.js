@@ -59,7 +59,7 @@ const TrafficChart = ({ vehicleData }) => {
   };
 
   return (
-    <div className="w-full h-[400px] sm:h-[500px] md:h-[600px]">
+    <div className="w-full h-[30vh] max-h-[400px] md:max-h-[500px]">
       <Line
         data={chartData}
         options={{
