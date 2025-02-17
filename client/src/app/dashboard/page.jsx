@@ -17,7 +17,7 @@ const Dashboard = () => {
   const calculateSpeed = (vehicle) => {
     const startTime = new Date(vehicle.entry_time);
     const endTime = new Date(vehicle.exit_time);
-    const distance = 300; // ระยะทางเป็นเมตร
+    const distance = 200; // ระยะทางเป็นเมตร
     const timeDiff = (endTime - startTime) / 1000; // แปลงจากมิลลิวินาทีเป็นวินาที
 
     if (timeDiff <= 0) return "เวลาไม่ถูกต้อง";
@@ -154,6 +154,11 @@ const Dashboard = () => {
                   <div id="diagram" className="w-full h-auto">
                     <TrafficChart vehicleData={vehicles} />
                   </div>
+                  <div className="w-[30%]">
+                    <div className="mt-4 w-full">
+                      <TrafficSummary vehicleData={vehicles} />
+                    </div>
+                  </div>
                 </div>
 
                 {/* ตารางอยู่ด้านล่าง */}
@@ -184,6 +189,9 @@ const Dashboard = () => {
                             <thead className="bg-gray-50">
                               <tr>
                                 <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                  ID
+                                </th>
+                                <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   ประเภทของรถ
                                 </th>
                                 <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -198,48 +206,59 @@ const Dashboard = () => {
                               </tr>
                             </thead>
                             <tbody className="bg-white">
-                              {vehicles.map((vehicle, index) => {
-                                if (!vehicle.class) return null;
+                              {vehicles
+                                .slice() // สร้างสำเนาอาร์เรย์เพื่อป้องกันการเปลี่ยนแปลงค่าเดิม
+                                .sort(
+                                  (a, b) =>
+                                    new Date(b.entry_time) -
+                                    new Date(a.entry_time)
+                                ) // เรียงลำดับจากใหม่ → เก่า
+                                .map((vehicle, index) => {
+                                  if (!vehicle.class) return null;
 
-                                const formattedDate = new Date(
-                                  vehicle.entry_time
-                                ).toLocaleDateString("th-TH", {
-                                  year: "numeric",
-                                  month: "short",
-                                  day: "numeric",
-                                });
-                                const timeOnly = new Date(
-                                  vehicle.entry_time
-                                ).toLocaleTimeString("th-TH", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                  second: "2-digit",
-                                });
+                                  const formattedDate = new Date(
+                                    vehicle.entry_time
+                                  ).toLocaleDateString("th-TH", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  });
 
-                                return (
-                                  <tr
-                                    key={vehicle.id}
-                                    className={
-                                      index % 2 === 1 ? "bg-gray-50" : ""
-                                    }
-                                  >
-                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                      <span className="font-semibold">
-                                        {vehicle.class}
-                                      </span>
-                                    </td>
-                                    <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
-                                      {formattedDate}
-                                    </td>
-                                    <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                      {timeOnly}
-                                    </td>
-                                    <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                      {calculateSpeed(vehicle).speed_kmph}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
+                                  const timeOnly = new Date(
+                                    vehicle.entry_time
+                                  ).toLocaleTimeString("th-TH", {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                    second: "2-digit",
+                                  });
+
+                                  return (
+                                    <tr
+                                      key={vehicle.id}
+                                      className={
+                                        index % 2 === 1 ? "bg-gray-50" : ""
+                                      }
+                                    >
+                                      <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
+                                        {vehicle.yolo_id}
+                                      </td>
+                                      <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
+                                        <span className="font-semibold">
+                                          {vehicle.class}
+                                        </span>
+                                      </td>
+                                      <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
+                                        {formattedDate}
+                                      </td>
+                                      <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                        {timeOnly}
+                                      </td>
+                                      <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
+                                        {calculateSpeed(vehicle).speed_kmph}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
                             </tbody>
                           </table>
                         </div>
@@ -249,9 +268,6 @@ const Dashboard = () => {
                 </div>
 
                 {/* สรุปข้อมูลรถแยกประเภท */}
-                <div className="mt-4 w-full">
-                  <TrafficSummary vehicleData={vehicles} />
-                </div>
               </div>
             </main>
             <Footer />
