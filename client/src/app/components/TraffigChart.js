@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -22,41 +23,62 @@ ChartJS.register(
 
 const TrafficChart = ({ vehicleData }) => {
   const vehicleTypes = ["car", "truck", "bus", "motorcycle"];
-  const hourlyTraffic = {};
+  const [chartData, setChartData] = useState({ labels: [], datasets: [] });
 
-  vehicleTypes.forEach((type) => {
-    hourlyTraffic[type] = Array(24).fill(0);
-  });
+  useEffect(() => {
+    if (!vehicleData || vehicleData.length === 0) return; // ถ้าไม่มีข้อมูล ไม่ต้องอัปเดต
 
-  vehicleData.forEach(({ class: type, entry_time }) => {
-    const hour = new Date(entry_time).getHours();
-    if (hourlyTraffic[type]) {
-      hourlyTraffic[type][hour] += 1;
-    }
-  });
+    const now = new Date(); // เวลาปัจจุบัน
+    const startTime = new Date(now.getTime() - 12 * 60 * 60 * 1000); // 12 ชม. ก่อนหน้า
 
-  const colors = {
-    car: "rgba(54, 162, 235, 1)", // ฟ้า
-    truck: "rgba(255, 99, 132, 1)", // แดง
-    bus: "rgba(255, 206, 86, 1)", // เหลือง
-    motorcycle: "rgba(75, 192, 192, 1)", // เขียวอมฟ้า
-  };
+    const numIntervals = 24; // 12 ชั่วโมง (ทุกๆ 30 นาที)
+    const halfHourlyTraffic = {};
 
-  const datasets = vehicleTypes.map((type) => ({
-    label: `จำนวน ${type}`,
-    data: hourlyTraffic[type],
-    borderColor: colors[type] || "rgba(0, 0, 0, 1)",
-    backgroundColor:
-      colors[type]?.replace("1)", "0.2)") || "rgba(0, 0, 0, 0.2)",
-    borderWidth: 2,
-    pointRadius: 4,
-    fill: false,
-  }));
+    vehicleTypes.forEach((type) => {
+      halfHourlyTraffic[type] = Array(numIntervals).fill(0);
+    });
 
-  const chartData = {
-    labels: Array.from({ length: 24 }, (_, i) => `${i}:00`),
-    datasets,
-  };
+    vehicleData.forEach(({ class: type, entry_time }) => {
+      const entryDate = new Date(entry_time);
+
+      if (entryDate >= startTime && entryDate <= now) {
+        const timeDiff = entryDate - startTime;
+        const index = Math.floor(timeDiff / (30 * 60 * 1000)); // คำนวณ index เป็นช่วงครึ่งชั่วโมง
+
+        if (halfHourlyTraffic[type] && index < numIntervals) {
+          halfHourlyTraffic[type][index] += 1;
+        }
+      }
+    });
+
+    const labels = Array.from({ length: numIntervals }, (_, i) => {
+      const time = new Date(startTime.getTime() + i * 30 * 60 * 1000);
+      return time.toLocaleTimeString("th-TH", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    });
+
+    const colors = {
+      car: "rgba(54, 162, 235, 1)",
+      truck: "rgba(255, 99, 132, 1)",
+      bus: "rgba(255, 206, 86, 1)",
+      motorcycle: "rgba(75, 192, 192, 1)",
+    };
+
+    const datasets = vehicleTypes.map((type) => ({
+      label: `จำนวน ${type}`,
+      data: halfHourlyTraffic[type],
+      borderColor: colors[type] || "rgba(0, 0, 0, 1)",
+      backgroundColor:
+        colors[type]?.replace("1)", "0.2)") || "rgba(0, 0, 0, 0.2)",
+      borderWidth: 2,
+      pointRadius: 5,
+      fill: false,
+    }));
+
+    setChartData({ labels, datasets });
+  }, [vehicleData]); // อัปเดตทุกครั้งที่ vehicleData เปลี่ยน
 
   return (
     <div className="w-full h-[30vh] max-h-[400px] md:max-h-[500px]">
@@ -65,7 +87,21 @@ const TrafficChart = ({ vehicleData }) => {
         options={{
           responsive: true,
           maintainAspectRatio: false,
-          scales: { y: { beginAtZero: true } },
+          animation: {
+            duration: 500,
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+            },
+            x: {
+              ticks: {
+                autoSkip: false,
+                maxRotation: 45,
+                minRotation: 45,
+              },
+            },
+          },
         }}
       />
     </div>
