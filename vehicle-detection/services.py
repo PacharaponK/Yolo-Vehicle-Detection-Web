@@ -4,7 +4,13 @@ import threading
 services = {
     "create_vehicle_url": "http://localhost:3001/api/vehicle",
     "update_vehicle_url": "http://localhost:3001/api/vehicle/{}",
+    "create_video_url": "http://localhost:3001/api/video"
 }
+
+def post_video(data): 
+    data = { "data" : data }
+    response = requests.post(services["create_video_url"], json=data)
+    return response.json()
 
 def post_task(data):
     response = requests.post(services["create_vehicle_url"], json=data)

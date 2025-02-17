@@ -5,7 +5,7 @@ import numpy as np
 from ultralytics import YOLO
 import cvzone
 import datetime
-from services import update_and_forget, fire_and_forget
+from services import update_and_forget, fire_and_forget, post_video
 import os
 
 now = datetime.datetime.now()
@@ -23,6 +23,12 @@ services = {
 video_path = r"C:\SDA\vehicle-detection\data\cars.mp4"
 cap = cv2.VideoCapture(video_path)
 video_name = os.path.basename(video_path)
+
+post_video_response = post_video({"title": video_name})
+print(post_video_response)
+video_id = post_video_response["data"]["id"]
+print(video_id)
+
 model = YOLO('yolov8n.pt')
 
 classnames = []
@@ -145,7 +151,7 @@ while True:
             cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_entry_counter:
                 if id not in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
@@ -161,7 +167,7 @@ while True:
                             "exit_time": None,
                             "lane_type": "forward",
                             "lane_id": 1,
-                            "video_name": video_name
+                            "video_id": video_id
                         }
                     }
                     response = fire_and_forget(on_send_data)
@@ -172,7 +178,7 @@ while True:
         if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] - 10 < cy < first_exit_fw_lane[1] + 10:
             cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
-                entry_datetime = datetime.datetime.combine(current_date, current_time)
+                entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                 first_fw_lane_exit_counter.append(id)
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
@@ -190,7 +196,7 @@ while True:
             cv2.line(frame, (second_entry_fw_lane[0], second_entry_fw_lane[1]), (second_entry_fw_lane[2], second_entry_fw_lane[3]), (0, 0, 0), 8)
             if id not in second_fw_lane_entry_counter:
                 if id not in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
@@ -206,7 +212,7 @@ while True:
                             "exit_time": None,
                             "lane_type": "forward",
                             "lane_id": 2,
-                            "video_name": video_name
+                            "video_id": video_id
                         }
                     }
                     response = fire_and_forget(on_send_data)
@@ -217,7 +223,7 @@ while True:
         if second_exit_fw_lane[0] < cx < second_exit_fw_lane[2] and second_exit_fw_lane[1] - 10 < cy < second_exit_fw_lane[1] + 10:
             cv2.line(frame, (second_exit_fw_lane[0], second_exit_fw_lane[1]), (second_exit_fw_lane[2], second_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
-                entry_datetime = datetime.datetime.combine(current_date, current_time)
+                entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                 second_fw_lane_exit_counter.append(id)
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
@@ -235,7 +241,7 @@ while True:
             cv2.line(frame, (third_entry_fw_lane[0], third_entry_fw_lane[1]), (third_entry_fw_lane[2], third_entry_fw_lane[3]), (0, 0, 0), 8)
             if id not in third_fw_lane_entry_counter:
                 if id not in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
@@ -251,7 +257,7 @@ while True:
                             "exit_time": None,
                             "lane_type": "forward",
                             "lane_id": 3,
-                            "video_name": video_name
+                            "video_id": video_id
                         }
                     }
                     response = fire_and_forget(on_send_data)
@@ -263,7 +269,7 @@ while True:
             cv2.line(frame, (third_exit_fw_lane[0], third_exit_fw_lane[1]), (third_exit_fw_lane[2], third_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
                 third_fw_lane_exit_counter.append(id)
-                entry_datetime = datetime.datetime.combine(current_date, current_time)
+                entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
@@ -280,7 +286,7 @@ while True:
             cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 0, 0), 8)
             if id not in first_bw_lane_entry_counter:
                 if id not in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
@@ -296,7 +302,7 @@ while True:
                             "exit_time": None,
                             "lane_type": "backward",
                             "lane_id": 1,
-                            "video_name": video_name
+                            "video_id": video_id
                         }
                     }
                     response = fire_and_forget(on_send_data)
@@ -311,7 +317,7 @@ while True:
                 first_bw_lane_exit_counter.append(id)
 
                 for detected in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
                         data = {
@@ -327,7 +333,7 @@ while True:
             cv2.line(frame, (second_entry_bw_lane[0], second_entry_bw_lane[1]), (second_entry_bw_lane[2], second_entry_bw_lane[3]), (0, 0, 0), 8)
             if id not in second_bw_lane_entry_counter:
                 if id not in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
@@ -343,7 +349,7 @@ while True:
                             "exit_time": None,
                             "lane_type": "backward",
                             "lane_id": 2,
-                            "video_name": video_name
+                            "video_id": video_id
                         }
                     }
                     response = fire_and_forget(on_send_data)
@@ -355,7 +361,7 @@ while True:
             cv2.line(frame, (second_exit_bw_lane[0], second_exit_bw_lane[1]), (second_exit_bw_lane[2], second_exit_bw_lane[3]), (0, 0, 0), 8)
             if id not in second_bw_lane_exit_counter:
                 second_bw_lane_exit_counter.append(id)
-                entry_datetime = datetime.datetime.combine(current_date, current_time)
+                entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
 
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
@@ -373,7 +379,7 @@ while True:
             cv2.line(frame, (third_entry_bw_lane[0], third_entry_bw_lane[1]), (third_entry_bw_lane[2], third_entry_bw_lane[3]), (0, 0, 0), 8)
             if id not in third_bw_lane_entry_counter:
                 if id not in detected_objects:
-                    entry_datetime = datetime.datetime.combine(current_date, current_time)
+                    entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
@@ -389,7 +395,7 @@ while True:
                             "exit_time": None,
                             "lane_type": "backward",
                             "lane_id": 3,
-                            "video_name": video_name
+                            "video_id": video_id
                         }
                     }
                     response = fire_and_forget(on_send_data)
@@ -402,7 +408,7 @@ while True:
             cv2.line(frame, (third_exit_bw_lane[0], third_exit_bw_lane[1]), (third_exit_bw_lane[2], third_exit_bw_lane[3]), (0, 0, 0), 8)
             if id not in third_bw_lane_exit_counter:
                 third_bw_lane_exit_counter.append(id)
-                entry_datetime = datetime.datetime.combine(current_date, current_time)
+                entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
 
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
@@ -431,6 +437,5 @@ while True:
     cv2.imshow('frame', frame)
     cv2.waitKey(1)
 
-print(detected_objects)
 cap.release()
 cv2.destroyAllWindows()
