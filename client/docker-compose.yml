@@ -1,0 +1,19 @@
+version: '3'
+services:
+  nextjs:
+    build: .
+    container_name: nextjs-app
+    ports:
+      - "3000:3000"  # Add this to expose port 3000 externally
+    restart: always
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx-proxy
+    ports:
+      - "8000:80"
+    depends_on:
+      - nextjs
+    restart: always
