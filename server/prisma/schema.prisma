@@ -15,7 +15,6 @@ model vehicle_data {
   video_id   Int       @map("video_id")
   video      video     @relation(fields: [video_id], references: [id])
   class      String?   @db.VarChar(50)
-  date       DateTime? @db.Date
   entry_time DateTime?
   exit_time  DateTime?
   lane_type  String?   @db.VarChar(30)

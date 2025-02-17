@@ -4,29 +4,25 @@ import math
 import numpy as np
 from ultralytics import YOLO
 import cvzone
-import mysql.connector
 import datetime
+from services import update_and_forget, fire_and_forget
+import os
 
 now = datetime.datetime.now()
-
 current_date = now.date()
 current_time = now.time()
 
-
-# mydb = mysql.connector.connect(
-#     host="34.44.80.130",
-#     user="forthree",
-#     password="fortree",
-#     database="test"
-# )
-
-# print(mydb)
-
+services = {
+    "create_vehicle_url": "http://localhost:3001/api/vehicle",
+    "update_vehicle_url": "http://localhost:3001/api/vehicle/{}",
+}
 
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\data\cars.mp4")
+video_path = r"C:\SDA\vehicle-detection\data\cars.mp4"
+cap = cv2.VideoCapture(video_path)
+video_name = os.path.basename(video_path)
 model = YOLO('yolov8n.pt')
 
 classnames = []
@@ -149,258 +145,275 @@ while True:
             cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_entry_counter:
                 if id not in detected_objects:
-
-                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                    # mycursor.execute(sql, val)
-                    # mydb.commit()
-
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
-                        "date": current_date,
-                        "entry_time": datetime.datetime.now().time(),
-                        "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 1
                     }
 
+                    on_send_data = {
+                        'data' : {
+                            "yolo_id": id,
+                            "class": classnames[classindex],
+                            "entry_time": entry_datetime.isoformat(),
+                            "exit_time": None,
+                            "lane_type": "forward",
+                            "lane_id": 1,
+                            "video_name": video_name
+                        }
+                    }
+                    response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     first_fw_lane_entry_counter.append(id)
-                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
 
         # ตรวจจับถนนขาเข้าเฟรมรถออกเลนแรก
         if first_exit_fw_lane[0] < cx < first_exit_fw_lane[2] and first_exit_fw_lane[1] - 10 < cy < first_exit_fw_lane[1] + 10:
             cv2.line(frame, (first_exit_fw_lane[0], first_exit_fw_lane[1]), (first_exit_fw_lane[2], first_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
+                entry_datetime = datetime.datetime.combine(current_date, current_time)
                 first_fw_lane_exit_counter.append(id)
-                print(f"Object {id} exited the first forward lane.")
-                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
-                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
-
-                sql = "UPDATE COMMAND"
-                val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                # mycursor.execute(sql, val)
-                # mydb.commit()
-
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
+                        data = {
+                            "data": {
+                                "exit_time": entry_datetime.isoformat()
+                            }
+                        }
+                        query = f'?yolo_id={id}&video_name={video_name}'
+                        response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนที่สอง
         if second_entry_fw_lane[0] < cx < second_entry_fw_lane[2] and second_entry_fw_lane[1] - 10 < cy < second_entry_fw_lane[1] + 10:
             cv2.line(frame, (second_entry_fw_lane[0], second_entry_fw_lane[1]), (second_entry_fw_lane[2], second_entry_fw_lane[3]), (0, 0, 0), 8)
             if id not in second_fw_lane_entry_counter:
                 if id not in detected_objects:
-
-                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                    # mycursor.execute(sql, val)
-                    # mydb.commit()
-
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
-                        "date": current_date,
-                        "entry_time": datetime.datetime.now().time(),
-                        "exit_time": None,
                         "lane_type": "forward",
                         "lane_id": 2
                     }
 
+                    on_send_data = {
+                        'data' : {
+                            "yolo_id": id,
+                            "class": classnames[classindex],
+                            "entry_time": entry_datetime.isoformat(),
+                            "exit_time": None,
+                            "lane_type": "forward",
+                            "lane_id": 2,
+                            "video_name": video_name
+                        }
+                    }
+                    response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     second_fw_lane_entry_counter.append(id)
-                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
         
         # ตรวจจับถนนขาเข้าเฟรมรถออกเลนที่สอง
         if second_exit_fw_lane[0] < cx < second_exit_fw_lane[2] and second_exit_fw_lane[1] - 10 < cy < second_exit_fw_lane[1] + 10:
             cv2.line(frame, (second_exit_fw_lane[0], second_exit_fw_lane[1]), (second_exit_fw_lane[2], second_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
+                entry_datetime = datetime.datetime.combine(current_date, current_time)
                 second_fw_lane_exit_counter.append(id)
-                print(f"Object {id} exited the first forward lane.")
-                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
-                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
-
-                sql = "UPDATE COMMAND"
-                val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                # mycursor.execute(sql, val)
-                # mydb.commit()
-
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
+                        data = {
+                            "data": {
+                                "exit_time": entry_datetime.isoformat()
+                            }
+                        }
+                        query = f'?yolo_id={id}&video_name={video_name}'
+                        response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนที่สอง
         if third_entry_fw_lane[0] < cx < third_entry_fw_lane[2] and third_entry_fw_lane[1] - 10 < cy < third_entry_fw_lane[1] + 10:
             cv2.line(frame, (third_entry_fw_lane[0], third_entry_fw_lane[1]), (third_entry_fw_lane[2], third_entry_fw_lane[3]), (0, 0, 0), 8)
             if id not in third_fw_lane_entry_counter:
                 if id not in detected_objects:
-
-                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                    # mycursor.execute(sql, val)
-                    # mydb.commit()
-
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
-                        "date": current_date,
-                        "entry_time": datetime.datetime.now().time(),
-                        "exit_time": None,
                         "lane_type": "forward",
-                        "lane_id": 2
+                        "lane_id": 3
                     }
 
+                    on_send_data = {
+                        'data' : {
+                            "yolo_id": id,
+                            "class": classnames[classindex],
+                            "entry_time": entry_datetime.isoformat(),
+                            "exit_time": None,
+                            "lane_type": "forward",
+                            "lane_id": 3,
+                            "video_name": video_name
+                        }
+                    }
+                    response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     third_fw_lane_entry_counter.append(id)
-                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
         
         # ตรวจจับถนนขาเข้าเฟรมรถออกเลนที่สาม
         if third_exit_fw_lane[0] < cx < third_exit_fw_lane[2] and third_exit_fw_lane[1] - 10 < cy < third_exit_fw_lane[1] + 10:
             cv2.line(frame, (third_exit_fw_lane[0], third_exit_fw_lane[1]), (third_exit_fw_lane[2], third_exit_fw_lane[3]), (0, 0, 0), 8)
             if id not in first_fw_lane_exit_counter:
                 third_fw_lane_exit_counter.append(id)
-                print(f"Object {id} exited the first forward lane.")
-                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
-                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
-
-                sql = "UPDATE COMMAND"
-                val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                # mycursor.execute(sql, val)
-                # mydb.commit()
-
+                entry_datetime = datetime.datetime.combine(current_date, current_time)
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
+                        data = {
+                            "data": {
+                                "exit_time": entry_datetime.isoformat()
+                            }
+                        }
+                        query = f'?yolo_id={id}&video_name={video_name}'
+                        response = update_and_forget(data, query)
 
         # ตรวจจับถนนขาออกเฟรมรถเข้าเลนแรก
         if first_entry_bw_lane[2] < cx < first_entry_bw_lane[0] and first_entry_bw_lane[1] - 10 < cy < first_entry_bw_lane[1] + 10:
             cv2.line(frame, (first_entry_bw_lane[0], first_entry_bw_lane[1]), (first_entry_bw_lane[2], first_entry_bw_lane[3]), (0, 0, 0), 8)
             if id not in first_bw_lane_entry_counter:
                 if id not in detected_objects:
-
-                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                    # mycursor.execute(sql, val)
-                    # mydb.commit()
-
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
-                        "date": current_date,
-                        "entry_time": datetime.datetime.now().time(),
-                        "exit_time": None,
-                        "lane_type": "forward",
+                        "lane_type": "backward",
                         "lane_id": 1
                     }
 
+                    on_send_data = {
+                        'data' : {
+                            "yolo_id": id,
+                            "class": classnames[classindex],
+                            "entry_time": entry_datetime.isoformat(),
+                            "exit_time": None,
+                            "lane_type": "backward",
+                            "lane_id": 1,
+                            "video_name": video_name
+                        }
+                    }
+                    response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     first_bw_lane_entry_counter.append(id)
-                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
 
         # ตรวจจับถนนขาออกเฟรมรถออกเลนแรก
         if first_exit_bw_lane[2] < cx < first_exit_bw_lane[0] and first_exit_bw_lane[1] - 10 < cy < first_exit_bw_lane[1] + 10:
             cv2.line(frame, (first_exit_bw_lane[0], first_exit_bw_lane[1]), (first_exit_bw_lane[2], first_exit_bw_lane[3]), (0, 0, 0), 8)
             if id not in first_bw_lane_exit_counter:
                 first_bw_lane_exit_counter.append(id)
-                print(f"Object {id} exited the first forward lane.")
-                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
-                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
-
-                sql = "UPDATE COMMAND"
-                val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                # mycursor.execute(sql, val)
-                # mydb.commit()
 
                 for detected in detected_objects:
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
+                        data = {
+                            "data": {
+                                "exit_time": entry_datetime.isoformat()
+                            }
+                        }
+                        query = f'?yolo_id={id}&video_name={video_name}'
+                        response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาออกเฟรมรถเข้าเลนที่สอง
         if second_entry_bw_lane[2] < cx < second_entry_bw_lane[0] and second_entry_bw_lane[1] - 10 < cy < second_entry_bw_lane[1] + 10:
             cv2.line(frame, (second_entry_bw_lane[0], second_entry_bw_lane[1]), (second_entry_bw_lane[2], second_entry_bw_lane[3]), (0, 0, 0), 8)
             if id not in second_bw_lane_entry_counter:
                 if id not in detected_objects:
-
-                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                    # mycursor.execute(sql, val)
-                    # mydb.commit()
-
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
-                        "date": current_date,
-                         datetime.datetime.now(),
-                        "exit_time": None,
-                        "lane_type": "forward",
+                        "lane_type": "backward",
                         "lane_id": 2
                     }
 
+                    on_send_data = {
+                        'data' : {
+                            "yolo_id": id,
+                            "class": classnames[classindex],
+                            "entry_time": entry_datetime.isoformat(),
+                            "exit_time": None,
+                            "lane_type": "backward",
+                            "lane_id": 2,
+                            "video_name": video_name
+                        }
+                    }
+                    response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     second_bw_lane_entry_counter.append(id)
-                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
 
         # ตรวจจับถนนขาออกเฟรมรถออกเลนที่สอง
         if second_exit_bw_lane[2] < cx < second_exit_bw_lane[0] and second_exit_bw_lane[1] - 10 < cy < second_exit_bw_lane[1] + 10:
             cv2.line(frame, (second_exit_bw_lane[0], second_exit_bw_lane[1]), (second_exit_bw_lane[2], second_exit_bw_lane[3]), (0, 0, 0), 8)
             if id not in second_bw_lane_exit_counter:
                 second_bw_lane_exit_counter.append(id)
-                print(f"Object {id} exited the second forward lane.")
-                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
-                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
-
-                sql = "UPDATE COMMAND"
-                val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                # mycursor.execute(sql, val)
-                # mydb.commit()
+                entry_datetime = datetime.datetime.combine(current_date, current_time)
 
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
+                        data = {
+                            "data": {
+                                "exit_time": entry_datetime.isoformat()
+                            }
+                        }
+                        query = f'?yolo_id={id}&video_name={video_name}'
+                        response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาออกเฟรมรถเข้าเลนที่สอง
         if third_entry_bw_lane[2] < cx < third_entry_bw_lane[0] and third_entry_bw_lane[1] - 10 < cy < third_entry_bw_lane[1] + 10:
             cv2.line(frame, (third_entry_bw_lane[0], third_entry_bw_lane[1]), (third_entry_bw_lane[2], third_entry_bw_lane[3]), (0, 0, 0), 8)
             if id not in third_bw_lane_entry_counter:
                 if id not in detected_objects:
-
-                    sql = "INSERT INTO vehicle_data (class, date, time) VALUES (%s, %s, %s)"
-                    val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                    # mycursor.execute(sql, val)
-                    # mydb.commit()
-
+                    entry_datetime = datetime.datetime.combine(current_date, current_time)
                     detected = {
                         "id": id,
                         "class": classnames[classindex],
-                        "date": current_date,
-                        "entry_time": datetime.datetime.now().time(),
-                        "exit_time": None,
-                        "lane_type": "forward",
+                        "lane_type": "backward",
                         "lane_id": 3
                     }
 
+                    on_send_data = {
+                        'data' : {
+                            "yolo_id": id,
+                            "class": classnames[classindex],
+                            "entry_time": entry_datetime.isoformat(),
+                            "exit_time": None,
+                            "lane_type": "backward",
+                            "lane_id": 3,
+                            "video_name": video_name
+                        }
+                    }
+                    response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     third_bw_lane_entry_counter.append(id)
-                    # print(f"Entry details: ID={id}, Class={classnames[classindex]}, Time={current_time}")
+
 
         # ตรวจจับถนนขาออกเฟรมรถออกเลนที่สอง
         if third_exit_bw_lane[2] < cx < third_exit_bw_lane[0] and third_exit_bw_lane[1] - 10 < cy < third_exit_bw_lane[1] + 10:
             cv2.line(frame, (third_exit_bw_lane[0], third_exit_bw_lane[1]), (third_exit_bw_lane[2], third_exit_bw_lane[3]), (0, 0, 0), 8)
             if id not in third_bw_lane_exit_counter:
                 third_bw_lane_exit_counter.append(id)
-                print(f"Object {id} exited the third forward lane.")
-                print(f"Coordinates: ({cx}, {cy}), Lane: Forward Exit")
-                print(f"Exit details: ID={id}, Time={datetime.datetime.now()}")
-
-                sql = "UPDATE COMMAND"
-                val = (classnames[classindex], current_date, datetime.datetime.now().time())
-                # mycursor.execute(sql, val)
-                # mydb.commit()
+                entry_datetime = datetime.datetime.combine(current_date, current_time)
 
                 for detected in detected_objects:
                     if detected[0]["id"] == id:
                         detected[0]["exit_time"] = datetime.datetime.now().time()
+                        data = {
+                            "data": {
+                                "exit_time": entry_datetime.isoformat()
+                            }
+                        }
+                        query = f'?yolo_id={id}&video_name={video_name}'
+                        response = update_and_forget(data, query)
 
     cvzone.putTextRect(frame, f'1st_fw_lane_entry_count = {len(first_fw_lane_entry_counter)}', [10, 30], thickness=1, scale=1.0, border=1)
     cvzone.putTextRect(frame, f'1st_fw_lane_exit_count = {len(first_fw_lane_exit_counter)}', [10, 60], thickness=1, scale=1.0, border=1)
