@@ -9,7 +9,7 @@ const TrafficSummary = ({ vehicleData }) => {
   const vehicleCounts = countVehiclesByType(vehicleData);
 
   return (
-    <div className="w-full h-full grid grid-cols-2 sm:grid-cols-5 gap-4">
+    <div className="w-full h-full grid grid-cols-2 sm:grid-cols-2 gap-4">
       {Object.entries(vehicleCounts).map(([type, count]) => (
         <div
           key={type}

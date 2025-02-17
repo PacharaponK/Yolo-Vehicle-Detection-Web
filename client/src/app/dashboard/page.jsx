@@ -100,69 +100,55 @@ const Dashboard = () => {
             </div>
           </div>
         </nav>
+
         <div className="flex overflow-hidden bg-white pt-16">
-          <aside
-            id="sidebar"
-            className="fixed hidden z-20 h-full top-0 left-0 pt-16 flex lg:flex flex-shrink-0 flex-col w-64 transition-width duration-75"
-            aria-label="Sidebar"
-          >
-            <div className="relative flex-1 flex flex-col min-h-0 border-r border-gray-200 bg-white pt-0">
-              <div className="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
-                <div className="flex-1 px-3 bg-white divide-y space-y-1">
-                  <div className="space-y-2 pt-2"></div>
-                </div>
-              </div>
-            </div>
-          </aside>
-          <div
-            className="bg-gray-900 opacity-50 hidden fixed inset-0 z-10"
-            id="sidebarBackdrop"
-          ></div>
           <div
             id="main-content"
-            className="h-full w-full bg-gray-50 relative overflow-y-auto lg:ml-64"
+            className="h-full w-full bg-gray-50 relative overflow-y-auto mx-24"
           >
             <main>
               <div className="flex flex-col pt-6 px-4">
-                {/* กราฟด้านบน */}
-                <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 w-full">
-                  <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
-                    <div className="flex-shrink-0">
-                      <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
-                        150
-                      </span>
-                      <h3 className="text-base font-normal text-gray-500">
-                        จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้
-                      </h3>
+                <div className="flex flex-col md:flex-row pt-6 ">
+                  {/* กราฟด้านบน (60%) */}
+                  <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 md:w-[75%] w-full">
+                    <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
+                      <div className="flex-shrink-0">
+                        <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
+                          150
+                        </span>
+                        <h3 className="text-base font-normal text-gray-500">
+                          จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้
+                        </h3>
+                      </div>
+                      <div className="flex items-center justify-end text-green-500 text-base font-bold">
+                        12.5%
+                        <svg
+                          className="w-5 h-5"
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
+                            clipRule="evenodd"
+                          ></path>
+                        </svg>
+                      </div>
                     </div>
-                    <div className="flex items-center justify-end text-green-500 text-base font-bold">
-                      12.5%
-                      <svg
-                        className="w-5 h-5"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
-                          clipRule="evenodd"
-                        ></path>
-                      </svg>
+                    <div id="diagram" className="w-full h-auto">
+                      <TrafficChart vehicleData={vehicles} />
                     </div>
                   </div>
-                  <div id="diagram" className="w-full h-auto">
-                    <TrafficChart vehicleData={vehicles} />
-                  </div>
-                  <div className="w-[30%]">
-                    <div className="mt-4 w-full">
-                      <TrafficSummary vehicleData={vehicles} />
-                    </div>
+
+                  {/* Traffic Summary (40%) */}
+                  <div className="md:w-[25%] w-full mt-6 md:mt-0 md:pl-6">
+                    <TrafficSummary vehicleData={vehicles} />
                   </div>
                 </div>
 
                 {/* ตารางอยู่ด้านล่าง */}
-                <div className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8 mt-4 w-full">
+                <div className="bg-white shadow rounded-lg p-4  sm:p-6 xl:p-8 mt-4 w-full">
                   <div className="mb-4 flex items-center justify-between">
                     <div>
                       <h3 className="text-xl font-bold text-gray-900 mb-2">
