@@ -25,9 +25,7 @@ cap = cv2.VideoCapture(video_path)
 video_name = os.path.basename(video_path)
 
 post_video_response = post_video({"title": video_name})
-print(post_video_response)
 video_id = post_video_response["data"]["id"]
-print(video_id)
 
 model = YOLO('yolov8n.pt')
 
@@ -36,7 +34,7 @@ with open('classes.txt', 'r') as f:
     classnames = f.read().splitlines()
 
 # ปรับค่า max_age, min_hits และ iou_threshold เพื่อเพิ่มความแม่นยำ
-tracker = Sort(max_age=30, min_hits=3, iou_threshold=0.25)
+tracker = Sort(max_age=30, min_hits=3, iou_threshold=0.20)
 
 first_entry_fw_lane = [536, 347, 696, 345]
 second_entry_fw_lane = [696, 345, 778, 345]
@@ -76,7 +74,7 @@ while True:
     ret, frame = cap.read()
 
     if not ret:
-        cap = cv2.VideoCapture(r"C:\SDA\vehicle-detection\vehicles.mp4")
+        cap = cv2.VideoCapture(video_path)
         continue
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -104,9 +102,7 @@ while True:
             if objectdetect in ['car', 'truck'] and conf > 40:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf, classindex])
-                # print(f'detect object: {new_detections}')
                 detections = np.vstack((detections, new_detections))
-                # print(f'detect object: {box}')
 
     track_result = tracker.update(detections)
     cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 255), 4)
@@ -128,7 +124,6 @@ while True:
 
     for results in track_result:
         x1, y1, x2, y2, id, classindex = results
-        # print(f'track object: {results}')
         x1, y1, x2, y2, id, classindex = int(x1), int(y1), int(x2), int(y2), int(id), int(classindex)
         
         w, h = x2 - x1, y2 - y1
@@ -145,7 +140,7 @@ while True:
         cv2.circle(frame, (cx, cy), 6, (0, 0, 255), -1)
         cv2.rectangle(frame, (x1, y1), (x2, y2), (127, 0, 255), 3)
         cvzone.putTextRect(frame, f'{id}', [x1 + 8, y1 - 12], thickness=2, scale=1.5)
-
+    
         # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนแรก
         if first_entry_fw_lane[0] < cx < first_entry_fw_lane[2] and first_entry_fw_lane[1] - 10 < cy < first_entry_fw_lane[1] + 10:
             cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 0), 8)
@@ -188,7 +183,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
-                        query = f'?yolo_id={id}&video_name={video_name}'
+                        query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนที่สอง
@@ -233,7 +228,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
-                        query = f'?yolo_id={id}&video_name={video_name}'
+                        query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนที่สอง
@@ -278,7 +273,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
-                        query = f'?yolo_id={id}&video_name={video_name}'
+                        query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
 
         # ตรวจจับถนนขาออกเฟรมรถเข้าเลนแรก
@@ -325,7 +320,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
-                        query = f'?yolo_id={id}&video_name={video_name}'
+                        query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาออกเฟรมรถเข้าเลนที่สอง
@@ -371,7 +366,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
-                        query = f'?yolo_id={id}&video_name={video_name}'
+                        query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
         
         # ตรวจจับถนนขาออกเฟรมรถเข้าเลนที่สอง
@@ -418,7 +413,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
-                        query = f'?yolo_id={id}&video_name={video_name}'
+                        query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
 
     cvzone.putTextRect(frame, f'1st_fw_lane_entry_count = {len(first_fw_lane_entry_counter)}', [10, 30], thickness=1, scale=1.0, border=1)
