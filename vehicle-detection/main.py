@@ -5,22 +5,17 @@ import numpy as np
 from ultralytics import YOLO
 import cvzone
 import datetime
-import asyncio
 from services import update_and_forget, fire_and_forget
 import os
-import requests
 
 now = datetime.datetime.now()
-
 current_date = now.date()
 current_time = now.time()
-
 
 services = {
     "create_vehicle_url": "http://localhost:3001/api/vehicle",
     "update_vehicle_url": "http://localhost:3001/api/vehicle/{}",
 }
-
 
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
@@ -399,7 +394,7 @@ while True:
                     }
                     response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
-                    third_fw_lane_entry_counter.append(id)
+                    third_bw_lane_entry_counter.append(id)
 
 
         # ตรวจจับถนนขาออกเฟรมรถออกเลนที่สอง
