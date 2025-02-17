@@ -8,6 +8,7 @@ import errorHandler from "./middlewares/errorHandler";
 import db2 from "./config/db2";
 import usersRoutes from "./router/usersRoutes";
 import { setupSocket } from "./config/socketSetup";
+import videoRoutes from "./router/videoRoutes";
 
 dotenv.config();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +23,7 @@ app.use(express.json());
 
 app.use(testRoutes);
 app.use(vehicleRoutes);
+app.use(videoRoutes);
 app.use(usersRoutes);
 
 app.use(errorHandler);
