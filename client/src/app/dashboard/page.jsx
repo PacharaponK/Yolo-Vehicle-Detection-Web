@@ -8,6 +8,7 @@ import useSocket from "../../../hooks/useSocket";
 import Footer from "../components/Footer";
 import TrafficChart from "../components/TraffigChart";
 import TrafficSummary from "../components/TrafficSummary";
+import Navbar from "../components/Navbar";
 
 const socket = io(conf.apiBaseUrl);
 
@@ -39,72 +40,33 @@ const Dashboard = () => {
 
   return (
     <div>
-      <div>
+      <div className="bg-rose-200">
         {/* <p>Status: {isConnected ? "🟢 Connected" : "🔴 Disconnected"}</p> */}
-        <nav className="bg-white border-b border-gray-200 fixed z-30 w-full">
-          <div className="px-3 py-3 lg:px-5 lg:pl-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center justify-start">
-                <button
-                  id="toggleSidebarMobile"
-                  aria-expanded="true"
-                  aria-controls="sidebar"
-                  className="lg:hidden mr-2 text-gray-600 hover:text-gray-900 cursor-pointer p-2 hover:bg-gray-100 focus:bg-gray-100 focus:ring-2 focus:ring-gray-100 rounded"
-                >
-                  <svg
-                    id="toggleSidebarMobileHamburger"
-                    className="w-6 h-6"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h6a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                  <svg
-                    id="toggleSidebarMobileClose"
-                    className="w-6 h-6 hidden"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    ></path>
-                  </svg>
-                </button>
-
-                <Link href="/">
-                  <h2 className="font-bold text-3xl">
-                    CAR{" "}
-                    <span className="bg-[#FF8295] text-white px-2 rounded-md">
-                      TALLY
-                    </span>
-                  </h2>
-                </Link>
-              </div>
-              <div className="flex items-center">
-                <div className="hidden lg:flex items-center"></div>
-                <Link
-                  href="#"
-                  className="hidden sm:inline-flex ml-5 text-white bg-[#FF8295] hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 font-medium rounded-lg text-sm px-5 py-2.5 text-center items-center mr-3"
-                >
-                  Login
-                </Link>
-              </div>
+        <Navbar />
+        <div className="py-12 px-10 md:flex-row bg-white rounded-b-3xl drop-shadow-xl">
+          <div className="mt-12 mb-3 flex flex-col w-full">
+            <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
+          </div>
+          <div className="flex w-full flex-wrap md:flex-nowrap space-x-10 justify-center items-end mt-3">
+            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
+              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
+              <p className="text-black">This is the content of the card. You can add more text or elements here.</p>
+            </div>
+            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
+              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
+              <p className="text-black">This is the content of the card. You can add more text or elements here.</p>
+            </div>
+            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
+              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
+              <p className="text-black">This is the content of the card. You can add more text or elements here.</p>
             </div>
           </div>
-        </nav>
+        </div>
 
-        <div className="flex overflow-hidden bg-white pt-16">
+        <div className="flex overflow-hidden bg-gradient-to-b from-rose-200 to-gray-100">
           <div
             id="main-content"
-            className="h-full w-full bg-gray-50 relative overflow-y-auto mx-24"
+            className="h-full w-full bg-gradient-to-b from-rose-200 to-gray-100 relative overflow-y-auto mx-12"
           >
             <main>
               <div className="flex flex-col pt-6 px-4">
@@ -230,7 +192,7 @@ const Dashboard = () => {
                                       </td>
                                       <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
                                         <span className="font-semibold">
-                                          {vehicle.class}
+                                          {vehicle.class === "car" ? "รถยนต์" : "รถบรรทุก"}
                                         </span>
                                       </td>
                                       <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
