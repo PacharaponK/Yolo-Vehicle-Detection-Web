@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: express-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: express-app
+  template:
+    metadata:
+      labels:
+        app: express-app
+    spec:
+      containers:
+        - name: express-app
+          image: alivefordie/express-server:v1.2
+          resources:
+            requests:
+              memory: "512Mi"  # Minimum memory allocated at startup
+              cpu: "500m"      # Minimum CPU (0.5 cores)
+            limits:
+              memory: "1Gi"    # Max memory
+              cpu: "1"         # Max CPU (1 core)
+          ports:
+            - containerPort: 3001
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: express-env
+                  key: DATABASE_URL
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: express-env
+                  key: SECRET_KEY
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: express-config
+                  key: PORT
+            - name: URL
+              valueFrom:
+                configMapKeyRef:
+                  name: express-config
+                  key: URL
+            - name: FRONT_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: express-config
+                  key: FRONT_URL
+            - name: FRONT_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: express-config
+                  key: FRONT_PORT
