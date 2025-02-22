@@ -4,99 +4,19 @@ import db2 from "../config/db2";
 import isRecordExists from "../middlewares/isRecordExists";
 import { io } from "../index";
 import { VehiclesSocket } from "../sockets/VehiclesSocket";
+import reqValidator from "../middlewares/reqValidator";
+import {
+	createVehicleDataSchema,
+	queryVehicleSchema,
+	updateVehicleDataSchema,
+} from "../utils/validatorSchema";
+import queryValidator from "../middlewares/queryValidator";
 
 const router = Router();
-router.post("/api/vehicle", async (req: Request, res: Response, next: NextFunction) => {
-	try {
-		const {
-			class: vehicleClass,
-			entry_time,
-			exit_time,
-			lane_type,
-			lane_id,
-			yolo_id,
-			video_id,
-		} = req.body.data;
-		if (
-			!yolo_id ||
-			!video_id ||
-			(!vehicleClass && !entry_time && !exit_time && !lane_type && !lane_id)
-		) {
-			throw new AppError("Request payload is required.", 400);
-		}
-		if (
-			await db2.vehicle_data.findUnique({
-				where: {
-					yolo_id_video_id: {
-						yolo_id: Number(yolo_id),
-						video_id: video_id,
-					},
-				},
-			})
-		) {
-			throw new AppError("not unique yolo_id&video_id Request", 400);
-		}
-		const vehicle = await db2.vehicle_data.create({
-			data: {
-				yolo_id: Number(yolo_id),
-				video: { connect: { id: video_id } },
-				class: vehicleClass,
-				entry_time: entry_time ? new Date(entry_time) : undefined,
-				exit_time: exit_time ? new Date(exit_time) : undefined,
-				lane_type: lane_type ? lane_type : undefined,
-				lane_id: lane_id ? Number(lane_id) : undefined,
-			},
-			include: { video: true },
-		});
-		VehiclesSocket(io);
-		res.status(201).json({ data: vehicle });
-	} catch (error) {
-		next(error);
-	}
-});
-router.get("/api/vehicle", async (req, res, next) => {
-	try {
-		const { yolo_id, video_id } = req.query;
-		if (!yolo_id || !video_id) {
-			throw new AppError("query required.", 400);
-		}
-		const vehicle = await db2.vehicle_data.findUnique({
-			where: {
-				yolo_id_video_id: {
-					yolo_id: Number(yolo_id),
-					video_id: Number(video_id),
-				},
-			},
-			include: { video: true },
-		});
-		if (!vehicle) {
-			throw new AppError("Not Found", 404);
-		}
-		res.send({ data: vehicle });
-	} catch (error) {
-		next(error);
-	}
-});
-router.put("/api/vehicle", [
-	// isRecordExists(db2.vehicle_data),
+router.post("/api/vehicle", [
+	reqValidator(createVehicleDataSchema),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			const { yolo_id: yolo_id_query, video_id: video_id_query } = req.query;
-			if (!yolo_id_query || !video_id_query) {
-				throw new AppError("query required.", 400);
-			}
-			if (
-				!(await db2.vehicle_data.findUnique({
-					where: {
-						yolo_id_video_id: {
-							yolo_id: Number(yolo_id_query),
-							video_id: Number(video_id_query),
-						},
-					},
-				}))
-			) {
-				throw new AppError("Not Found", 404);
-			}
 			const {
 				class: vehicleClass,
 				entry_time,
@@ -106,16 +26,113 @@ router.put("/api/vehicle", [
 				yolo_id,
 				video_id,
 			} = req.body.data;
-			if (
-				!vehicleClass &&
-				!entry_time &&
-				!exit_time &&
-				!lane_type &&
-				!lane_id &&
-				!yolo_id &&
-				!video_id
-			) {
-				throw new AppError("Request payload is required.", 400);
+
+			const alreadyExists = await db2.vehicle_data.findUnique({
+				where: {
+					yolo_id_video_id: {
+						yolo_id: Number(yolo_id),
+						video_id: Number(video_id),
+					},
+				},
+			});
+			if (alreadyExists) {
+				throw new AppError("not unique yolo_id and video_id Request", 400);
+			}
+			const video = await db2.video.findUnique({
+				where: { id: video_id },
+			});
+			if (!video) {
+				throw new AppError("not found video", 400);
+			}
+			const vehicle = await db2.vehicle_data.create({
+				data: {
+					yolo_id: Number(yolo_id),
+					video: { connect: { id: Number(video_id) } },
+					class: vehicleClass ?? undefined,
+					entry_time: entry_time ? new Date(entry_time) : undefined,
+					exit_time: exit_time ? new Date(exit_time) : undefined,
+					lane_type: lane_type ?? undefined,
+					lane_id: lane_id ? Number(lane_id) : undefined,
+				},
+				include: { video: true },
+			});
+			VehiclesSocket(io);
+			res.status(201).json({ data: vehicle });
+		} catch (error) {
+			next(error);
+		}
+	},
+]);
+router.get("/api/vehicle", [
+	queryValidator(queryVehicleSchema),
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { yolo_id, video_id } = req.query;
+			const vehicle = await db2.vehicle_data.findUnique({
+				where: {
+					yolo_id_video_id: {
+						yolo_id: Number(yolo_id),
+						video_id: Number(video_id),
+					},
+				},
+				include: { video: true },
+			});
+			if (!vehicle) {
+				throw new AppError("Not Found", 404);
+			}
+			res.send({ data: vehicle });
+		} catch (error) {
+			next(error);
+		}
+	},
+]);
+router.put("/api/vehicle", [
+	queryValidator(queryVehicleSchema),
+	reqValidator(updateVehicleDataSchema),
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { yolo_id: yolo_id_query, video_id: video_id_query } = req.query;
+
+			const Found = await db2.vehicle_data.findUnique({
+				where: {
+					yolo_id_video_id: {
+						yolo_id: Number(yolo_id_query),
+						video_id: Number(video_id_query),
+					},
+				},
+			});
+			if (!Found) {
+				throw new AppError("Not Found", 404);
+			}
+
+			const {
+				class: vehicleClass,
+				entry_time,
+				exit_time,
+				lane_type,
+				lane_id,
+				yolo_id,
+				video_id,
+			} = req.body.data;
+			if (yolo_id || video_id) {
+				const alreadyExists = await db2.vehicle_data.findUnique({
+					where: {
+						yolo_id_video_id: {
+							yolo_id: yolo_id ? Number(yolo_id) : Found.yolo_id,
+							video_id: video_id ? Number(video_id) : Found.video_id,
+						},
+						NOT: { id: Found.id },
+					},
+				});
+				if (alreadyExists) {
+					throw new AppError("not unique yolo_id and video_id Request", 400);
+				}
+			}
+			const video = await db2.video.findUnique({
+				where: { id: video_id },
+			});
+			if (!video) {
+				throw new AppError("not found video", 400);
 			}
 			const vehicle = await db2.vehicle_data.update({
 				where: {
@@ -143,13 +160,12 @@ router.put("/api/vehicle", [
 	},
 ]);
 router.delete("/api/vehicle", [
+	queryValidator(queryVehicleSchema),
 	// isRecordExists(db2.vehicle_data),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { yolo_id, video_id } = req.query;
-			if (!yolo_id || !video_id) {
-				throw new AppError();
-			}
+
 			const vehicle = await db2.vehicle_data.delete({
 				where: {
 					yolo_id_video_id: {
@@ -182,16 +198,16 @@ router.get("/api/vehicle/:id", async (req, res, next) => {
 			include: { video: true },
 		});
 
-		if (vehicle) {
-			res.send({ data: vehicle });
-			return;
+		if (!vehicle) {
+			throw new AppError("Not Found", 404);
 		}
-		throw new AppError("Not Found", 404);
+		res.send({ data: vehicle });
 	} catch (error) {
 		next(error);
 	}
 });
 router.put("/api/vehicle/:id", [
+	reqValidator(updateVehicleDataSchema),
 	isRecordExists(db2.vehicle_data),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
@@ -205,23 +221,28 @@ router.put("/api/vehicle/:id", [
 				yolo_id,
 				video_id,
 			} = req.body.data;
-			if (
-				!vehicleClass &&
-				!entry_time &&
-				!exit_time &&
-				!lane_type &&
-				!lane_id &&
-				!yolo_id &&
-				!video_id
-			) {
-				throw new AppError("Request payload is required.", 400);
+			const alreadyExists = await db2.vehicle_data.findUnique({
+				where: {
+					yolo_id_video_id: {
+						yolo_id: Number(yolo_id),
+						video_id: Number(video_id),
+					},
+					NOT: { id: id },
+				},
+			});
+			if (alreadyExists) {
+				throw new AppError("not unique yolo_id and video_id Request", 400);
+			}
+			const video = await db2.video.findUnique({
+				where: { id: video_id },
+			});
+			if (!video) {
+				throw new AppError("not found video", 400);
 			}
 			const vehicle = await db2.vehicle_data.update({
-				where: {
-					id: id,
-				},
+				where: { id: id },
 				data: {
-					yolo_id: Number(yolo_id),
+					yolo_id: yolo_id ? Number(yolo_id) : undefined,
 					video: video_id ? { connect: { id: video_id } } : undefined,
 					class: vehicleClass ? vehicleClass : undefined,
 					entry_time: entry_time ? new Date(entry_time) : undefined,

@@ -5,22 +5,20 @@ import isRecordExists from "../middlewares/isRecordExists";
 import * as argon2 from "argon2";
 import Service from "../service/BaseService";
 import authenticateJWT from "../middlewares/authenticateJWT";
+import reqValidator from "../middlewares/reqValidator";
+import { loginUserSchema, createUserSchema, updateUserSchema } from "../utils/validatorSchema";
 const router = Router();
 router.get("/api/user/login", [
+	reqValidator(loginUserSchema),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { email, password } = req.body.data;
-			if (!email || !password) {
-				throw new AppError("Email or password missing", 400);
-			}
 
-			const user = await db2.user.findUnique({
-				where: { email: email },
-			});
+			const user = await db2.user.findUnique({ where: { email: email } });
 			if (!user) {
 				throw new AppError("Account not found. Please sign up.", 404);
 			}
-			const hashpassword = user?.password;
+			const hashpassword = user.password;
 			const passwordWithPepper = password + (process.env.SECRET_KEY as string);
 			const isValid = await argon2.verify(hashpassword, passwordWithPepper);
 			if (!isValid) {
@@ -34,35 +32,36 @@ router.get("/api/user/login", [
 		}
 	},
 ]);
-router.post("/api/user", async (req, res, next) => {
-	try {
-		const { name, email, password } = req.body.data;
-		if (!name || !email || !password) {
-			throw new AppError("Request payload is required.", 400);
+router.post("/api/user", [
+	reqValidator(createUserSchema),
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const { name, email, password } = req.body.data;
+
+			const alreadyExists = await db2.user.findUnique({ where: { email: email } });
+			if (alreadyExists) {
+				throw new AppError("Email already in use", 400);
+			}
+			const user = await db2.user.create({
+				data: {
+					name: name,
+					email: email,
+					password: await Service.hash(password),
+				},
+				select: {
+					id: true,
+					name: true,
+					email: true,
+					createdAt: true,
+					updatedAt: true,
+				},
+			});
+			res.status(201).json({ data: user });
+		} catch (error) {
+			next(error);
 		}
-		const alreadyExists = await db2.user.findUnique({ where: { email: email } });
-		if (alreadyExists) {
-			throw new AppError("Email already in use", 400);
-		}
-		const user = await db2.user.create({
-			data: {
-				name: name,
-				email: email,
-				password: await Service.hash(password),
-			},
-			select: {
-				id: true,
-				name: true,
-				email: true,
-				createdAt: true,
-				updatedAt: true,
-			},
-		});
-		res.status(201).json({ data: user });
-	} catch (error) {
-		next(error);
-	}
-});
+	},
+]);
 router.get("/api/user/all", async (req, res, next) => {
 	try {
 		const user = await db2.user.findMany({
@@ -92,24 +91,22 @@ router.get("/api/user/:id", async (req, res, next) => {
 				updatedAt: true,
 			},
 		});
-		if (user) {
-			res.send({ data: user });
-			return;
+		if (!user) {
+			throw new AppError("Not Found", 404);
 		}
-		throw new AppError("Not Found", 404);
+		res.send({ data: user });
 	} catch (error) {
 		next(error);
 	}
 });
 router.put("/api/user/:id", [
+	reqValidator(updateUserSchema),
 	isRecordExists(db2.user),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const { id } = req.params;
 			const { name, email, password } = req.body.data;
-			if (!name && !email && !password) {
-				throw new AppError("Request payload is required.", 400);
-			}
+
 			if (email) {
 				const alreadyExists = await db2.user.findUnique({ where: { email: email } });
 				if (alreadyExists) {
@@ -117,13 +114,11 @@ router.put("/api/user/:id", [
 				}
 			}
 			const user = await db2.user.update({
-				where: {
-					id: Number(id),
-				},
+				where: { id: Number(id) },
 				data: {
 					name: name ?? undefined,
 					email: email ?? undefined,
-					password: (await Service.hash(password)) ?? undefined,
+					password: password ? await Service.hash(password) : undefined,
 				},
 				select: {
 					id: true,

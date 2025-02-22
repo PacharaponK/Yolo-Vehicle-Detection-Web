@@ -5,7 +5,7 @@ import db2 from "../config/db2";
 const isRecordExists = (model: any) => async (req: Request, res: Response, next: NextFunction) => {
 	try {
 		const { id } = req.params;
-		const record = await model.findUnique({ where: { id: Number(id) } });
+		const record = await model.findUnique({ where: { id: id } });
 		if (record) {
 			next();
 			return;
