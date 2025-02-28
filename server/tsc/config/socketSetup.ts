@@ -11,7 +11,7 @@ const FRONT_URL = process.env.FRONT_URL || "localhost";
 export const setupSocket = (server: http.Server) => {
 	const io = new Server(server, {
 		cors: {
-			origin: `http://${FRONT_URL}:${FRONT_PORT}`,
+			origin: `*`,
 			methods: ["GET", "POST"],
 		},
 	});
@@ -20,7 +20,9 @@ export const setupSocket = (server: http.Server) => {
 		console.log("✅ Connected to WebSocket Server", socket.id);
 
 		VehiclesSocket(io, socket); // ดึงข้อมูลเมื่อ Client เชื่อมต่อ
-
+		socket.on("frame", (data) => {
+			io.emit("frame", data); // Broadcast frame to all clients
+		});
 		socket.on("disconnect", () => {
 			console.log("❌ Disconnected from WebSocket Server");
 		});
