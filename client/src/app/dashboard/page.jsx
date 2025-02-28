@@ -40,20 +40,25 @@ const Dashboard = () => {
   };
   const countTodayVehicles = (vehicles) => {
     const today = new Date().toISOString().split("T")[0]; // ได้วันที่วันนี้ในรูปแบบ YYYY-MM-DD
-  
+
     return vehicles.filter((vehicle) => {
-      const vehicleDate = new Date(vehicle.entry_time).toISOString().split("T")[0];
+      const vehicleDate = new Date(vehicle.entry_time)
+        .toISOString()
+        .split("T")[0];
       return vehicleDate === today;
     }).length; // คืนค่าจำนวนรถที่ตรวจจับได้
   };
-  console.log("🚀 ~ file: page.jsx ~ line 100 ~ Dashboard ~ vehicles", countTodayVehicles(vehicles))
+  console.log(
+    "🚀 ~ file: page.jsx ~ line 100 ~ Dashboard ~ vehicles",
+    countTodayVehicles(vehicles)
+  );
 
   return (
     <div>
       <div className="bg-rose-200">
         {/* <p>Status: {isConnected ? "🟢 Connected" : "🔴 Disconnected"}</p> */}
         <Navbar />
-        <div className="py-12 px-10 md:flex-row bg-white rounded-b-3xl drop-shadow-xl">
+        <div className="py-12 px-10 md:flex-row rounded-b-3xl drop-shadow-xl">
           <div className="mt-12 mb-3 flex flex-col w-full">
             <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
           </div>
@@ -81,7 +86,7 @@ const Dashboard = () => {
                         </h3>
                       </div>
                       <div className="flex items-center justify-end text-green-500 text-base font-bold">
-                        12.5%
+                        {/* 12.5%
                         <svg
                           className="w-5 h-5"
                           fill="currentColor"
@@ -93,7 +98,7 @@ const Dashboard = () => {
                             d="M5.293 7.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 5.414V17a1 1 0 11-2 0V5.414L6.707 7.707a1 1 0 01-1.414 0z"
                             clipRule="evenodd"
                           ></path>
-                        </svg>
+                        </svg> */}
                       </div>
                     </div>
                     <div id="diagram" className="w-full h-auto">
@@ -120,7 +125,7 @@ const Dashboard = () => {
                     </div>
                     <div className="flex-shrink-0">
                       <Link
-                        href="#"
+                        href="vehiclehistory"
                         className="text-sm font-medium text-cyan-600 hover:bg-gray-100 rounded-lg p-2"
                       >
                         ดูทั้งหมด
@@ -155,29 +160,29 @@ const Dashboard = () => {
                             <tbody className="bg-white">
                               {vehicles
                                 .slice() // สร้างสำเนาอาร์เรย์เพื่อป้องกันการเปลี่ยนแปลงค่าเดิม
-                                .sort(
-                                  (a, b) =>
-                                    new Date(b.entry_time) -
-                                    new Date(a.entry_time)
-                                ) // เรียงลำดับจากใหม่ → เก่า
+                                .sort((a, b) => {
+                                  const dateA = new Date(
+                                    a.entry_time.replace(
+                                      /(\d+)\/(\d+)\/(\d+)/,
+                                      "$3-$2-$1"
+                                    )
+                                  );
+                                  const dateB = new Date(
+                                    b.entry_time.replace(
+                                      /(\d+)\/(\d+)\/(\d+)/,
+                                      "$3-$2-$1"
+                                    )
+                                  );
+                                  return dateB - dateA; // เรียงจากใหม่ → เก่า
+                                })
                                 .map((vehicle, index) => {
                                   if (!vehicle.class) return null;
 
-                                  const formattedDate = new Date(
-                                    vehicle.entry_time
-                                  ).toLocaleDateString("th-TH", {
-                                    year: "numeric",
-                                    month: "short",
-                                    day: "numeric",
-                                  });
-
-                                  const timeOnly = new Date(
-                                    vehicle.entry_time
-                                  ).toLocaleTimeString("th-TH", {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                    second: "2-digit",
-                                  });
+                                  // แยกวันที่และเวลาจาก entry_time โดยตรง
+                                  const [datePart, timePart] =
+                                    vehicle.entry_time.split(" ");
+                                  const formattedDate = datePart; // เช่น "28/02/2025"
+                                  const timeOnly = timePart; // เช่น "10:00:00"
 
                                   return (
                                     <tr

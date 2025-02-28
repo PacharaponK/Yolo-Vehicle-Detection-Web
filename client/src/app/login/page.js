@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ax from "../../../config/ax";
+import ax ,{axData} from "../../../config/ax";
 
 
 
@@ -20,6 +20,7 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
+      console.log("🚀 ~ handleLogin ~ res:", res)
 
       // ตรวจสอบว่า login สำเร็จหรือไม่
       if (res.status === 200) {
@@ -29,6 +30,7 @@ export default function Login() {
         router.push("/dashboard"); // เปลี่ยนเส้นทางไปหน้าหลัก
       }
     } catch (error) {
+      console.log("🚀 ~ handleLogin ~ error:", error)
       if (error.response && error.response.data) {
         setError(error.response.data.message); // แสดงข้อความ error จาก response
       } else {
@@ -67,13 +69,13 @@ export default function Login() {
 
           <form onSubmit={handleLogin}>
             <div className="py-8 text-center">
-              <span className="text-2xl font-semibold">Log In</span>
+              <span className="text-2xl font-semibold">ลงชื่อเข้าใช้</span>
             </div>
 
             {/* Email */}
             <div>
               <label className="block font-medium text-sm text-gray-700">
-                Email
+                อีเมล
               </label>
               <input
                 type="email"
@@ -89,7 +91,7 @@ export default function Login() {
             {/* Password */}
             <div className="mt-4">
               <label className="block font-medium text-sm text-gray-700">
-                Password
+                รหัสผ่าน
               </label>
               <div className="relative">
                 <input
@@ -115,7 +117,7 @@ export default function Login() {
             <div className="block mt-4">
               <label className="flex items-center">
                 <input type="checkbox" className="rounded border-gray-300" />
-                <span className="ml-2 text-sm text-gray-600">Remember Me</span>
+                <span className="ml-2 text-sm text-gray-600">จดจำฉันไว้</span>
               </label>
             </div>
 
@@ -125,21 +127,21 @@ export default function Login() {
                 className="text-sm text-gray-600 hover:text-gray-900"
                 href="/password-reset"
               >
-                Forgot password?
+                ลืมรหัสผ่าน?
               </a>
               <button
                 type="submit"
                 className="ml-4 px-4 py-2 bg-[#FF8295] rounded-md text-white font-semibold"
               >
-                Sign In
+                ลงชื่อเข้าใช้
               </button>
             </div>
 
             {/* Register Link */}
             <div className="mt-6 text-center">
-              <span className="text-sm">Don't have an account? </span>
+              <span className="text-sm">ไม่มีบัญชีหรอ? </span>
               <a className="text-[#FF8295] hover:underline" href="/register">
-                Register here
+                สมัครสมาชิกที่นี่
               </a>
             </div>
           </form>

@@ -15,14 +15,14 @@ const TrafficSummary = ({ vehicleData }) => {
           key={type}
           className="bg-white shadow rounded-lg p-4 sm:p-6 xl:p-8"
         >
-          <div className="flex items-center">
+          <div className="flex items-center justify-center">
             <div className="flex-shrink-0">
               <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
                 {count}
               </span>
               <h3 className="text-base font-normal text-gray-500">{type}</h3>
             </div>
-            <div className="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
+            {/* <div className="ml-5 w-0 flex items-center justify-end flex-1 text-green-500 text-base font-bold">
               14.6%
               <svg
                 className="w-5 h-5"
@@ -36,7 +36,7 @@ const TrafficSummary = ({ vehicleData }) => {
                   clipRule="evenodd"
                 ></path>
               </svg>
-            </div>
+            </div> */}
           </div>
         </div>
       ))}
