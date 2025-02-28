@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import TrafficChart from "../components/TraffigChart";
 import TrafficSummary from "../components/TrafficSummary";
 import Navbar from "../components/Navbar";
+import ReportBytime from "../components/ReportByTime";
 
 const socket = io(conf.apiBaseUrl);
 
@@ -27,7 +28,7 @@ const Dashboard = () => {
     const speed_kmph = speed_mps * 3.6; // แปลงเป็น km/h
 
     return {
-      speed_kmph: `${speed_kmph.toFixed(2)} km/h`,
+      speed_kmph: `${speed_kmph.toFixed(2)}`,
     };
   };
 
@@ -38,6 +39,7 @@ const Dashboard = () => {
     }, {});
   };
 
+
   return (
     <div>
       <div className="bg-rose-200">
@@ -47,20 +49,9 @@ const Dashboard = () => {
           <div className="mt-12 mb-3 flex flex-col w-full">
             <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
           </div>
-          <div className="flex w-full flex-wrap md:flex-nowrap space-x-10 justify-center items-end mt-3">
-            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
-              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
-              <p className="text-black">This is the content of the card. You can add more text or elements here.</p>
-            </div>
-            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
-              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
-              <p className="text-black">This is the content of the card. You can add more text or elements here.</p>
-            </div>
-            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
-              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
-              <p className="text-black">This is the content of the card. You can add more text or elements here.</p>
-            </div>
-          </div>
+       
+            <ReportBytime vehicles={vehicles}/>
+          
         </div>
 
         <div className="flex overflow-hidden bg-gradient-to-b from-rose-200 to-gray-100">
@@ -134,7 +125,7 @@ const Dashboard = () => {
                       <div className="shadow overflow-hidden sm:rounded-lg">
                         <div className="overflow-y-auto max-h-[500px]">
                           <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50">
+                            <thead className="bg-gray-50 sticky top-0 z-10">
                               <tr>
                                 <th className="p-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                   ID
@@ -153,6 +144,7 @@ const Dashboard = () => {
                                 </th>
                               </tr>
                             </thead>
+
                             <tbody className="bg-white">
                               {vehicles
                                 .slice() // สร้างสำเนาอาร์เรย์เพื่อป้องกันการเปลี่ยนแปลงค่าเดิม
@@ -191,10 +183,19 @@ const Dashboard = () => {
                                         {vehicle.yolo_id}
                                       </td>
                                       <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-900">
-                                        <span className="font-semibold">
-                                          {vehicle.class === "car" ? "รถยนต์" : "รถบรรทุก"}
+                                        <span
+                                          className={`font-semibold ${
+                                            vehicle.class === "car"
+                                              ? "text-[#3b8f88]"
+                                              : "text-[#b3b44b]"
+                                          }`}
+                                        >
+                                          {vehicle.class === "car"
+                                            ? "รถยนต์"
+                                            : "รถบรรทุก"}
                                         </span>
                                       </td>
+
                                       <td className="p-4 whitespace-nowrap text-sm font-normal text-gray-500">
                                         {formattedDate}
                                       </td>
@@ -202,7 +203,21 @@ const Dashboard = () => {
                                         {timeOnly}
                                       </td>
                                       <td className="p-4 whitespace-nowrap text-sm font-semibold text-gray-900">
-                                        {calculateSpeed(vehicle).speed_kmph}
+                                        <span
+                                          className={
+                                            calculateSpeed(vehicle).speed_kmph >
+                                            100
+                                              ? "text-red-500"
+                                              : ""
+                                          }
+                                        >
+                                          {calculateSpeed(vehicle).speed_kmph
+                                            ? `${
+                                                calculateSpeed(vehicle)
+                                                  .speed_kmph
+                                              } km/h`
+                                            : "ไม่สามารถคำนวณได้"}
+                                        </span>
                                       </td>
                                     </tr>
                                   );
