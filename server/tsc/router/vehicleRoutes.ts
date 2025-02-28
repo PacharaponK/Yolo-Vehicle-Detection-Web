@@ -131,11 +131,13 @@ router.put("/api/vehicle", [
 					throw new AppError("not unique yolo_id and video_id Request", 400);
 				}
 			}
-			const video = await db2.video.findUnique({
-				where: { id: Number(video_id_query) },
-			});
-			if (!video) {
-				throw new AppError("not found video", 400);
+			if (video_id) {
+				const video = await db2.video.findUnique({
+					where: { id: Number(video_id) },
+				});
+				if (!video) {
+					throw new AppError("not found video", 400);
+				}
 			}
 			
 			const vehicle = await db2.vehicle_data.update({
