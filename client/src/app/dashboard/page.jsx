@@ -49,9 +49,9 @@ const Dashboard = () => {
           <div className="mt-12 mb-3 flex flex-col w-full">
             <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
           </div>
-          <div className="flex w-full flex-wrap md:flex-nowrap space-x-10 justify-center items-end mt-3">
+       
             <ReportBytime vehicles={vehicles}/>
-          </div>
+          
         </div>
 
         <div className="flex overflow-hidden bg-gradient-to-b from-rose-200 to-gray-100">

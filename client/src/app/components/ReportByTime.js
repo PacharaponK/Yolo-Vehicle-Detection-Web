@@ -60,7 +60,7 @@ export default function ReportBytime({ vehicles }) {
   }, [vehicles]);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
       {[
         { label: "ช่วงเช้า (06:00 - 10:00 น.)", key: "morning" },
         { label: "ช่วงกลางวัน (10:00 - 14:00 น.)", key: "afternoon" },
