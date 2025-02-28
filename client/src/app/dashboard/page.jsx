@@ -38,7 +38,15 @@ const Dashboard = () => {
       return acc;
     }, {});
   };
-
+  const countTodayVehicles = (vehicles) => {
+    const today = new Date().toISOString().split("T")[0]; // ได้วันที่วันนี้ในรูปแบบ YYYY-MM-DD
+  
+    return vehicles.filter((vehicle) => {
+      const vehicleDate = new Date(vehicle.entry_time).toISOString().split("T")[0];
+      return vehicleDate === today;
+    }).length; // คืนค่าจำนวนรถที่ตรวจจับได้
+  };
+  console.log("🚀 ~ file: page.jsx ~ line 100 ~ Dashboard ~ vehicles", countTodayVehicles(vehicles))
 
   return (
     <div>
@@ -49,9 +57,8 @@ const Dashboard = () => {
           <div className="mt-12 mb-3 flex flex-col w-full">
             <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
           </div>
-       
-            <ReportBytime vehicles={vehicles}/>
-          
+
+          <ReportBytime vehicles={vehicles} />
         </div>
 
         <div className="flex overflow-hidden bg-gradient-to-b from-rose-200 to-gray-100">
@@ -67,7 +74,7 @@ const Dashboard = () => {
                     <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
                       <div className="flex-shrink-0">
                         <span className="text-2xl sm:text-3xl leading-none font-bold text-gray-900">
-                          150
+                          {countTodayVehicles(vehicles)}
                         </span>
                         <h3 className="text-base font-normal text-gray-500">
                           จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้
@@ -233,11 +240,11 @@ const Dashboard = () => {
                 {/* สรุปข้อมูลรถแยกประเภท */}
               </div>
             </main>
-            <Footer />
+            {/* <Footer /> */}
             <p className="text-center text-sm text-gray-500 my-10">
-              &copy; 2019-2021{" "}
+              &copy; 2025{" "}
               <Link href="#" className="hover:underline">
-                Themesberg
+                CarTally
               </Link>
               . All rights reserved.
             </p>

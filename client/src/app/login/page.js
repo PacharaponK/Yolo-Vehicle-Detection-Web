@@ -1,7 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ax, { axData } from "../../config/ax";
+import ax from "../../../config/ax";
+
 
 
 export default function Login() {
@@ -16,7 +17,7 @@ export default function Login() {
     setError("");
 
     try {
-      const res = await ax.get("/api/auth/login", {
+      const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
 

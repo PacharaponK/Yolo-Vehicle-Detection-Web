@@ -1,7 +1,7 @@
 const conf = {
     appName: "Yolo",
-    apiBaseUrl: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:3001",
-    environment: process.env.NODE_ENV || "development",
+    apiBaseUrl: process.env.NEXT_PUBLIC_API_URL, // ให้ตรงกับตัวแปรที่มีอยู่ใน .env,
+    environment: process.env.NODE_ENV,
     featureFlags: {
       enableExperimentalFeature: process.env.NEXT_PUBLIC_ENABLE_EXPERIMENTAL_FEATURE === "true",
     },

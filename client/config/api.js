@@ -2,7 +2,8 @@ import { io } from "socket.io-client";
 import conf from "./conf";
 
 const socket = io(conf.apiBaseUrl, {
-  autoConnect: false,
+  transports: ["websocket", "polling"],
+  withCredentials: true,
 });
 
 export const getVehicles = (callback) => {
@@ -20,4 +21,13 @@ export const getVehicles = (callback) => {
   socket.on("disconnect", () => {
     console.log("❌ Disconnected from WebSocket Server");
   });
+};
+
+export const checkAuth = async () => {
+  try {
+    const res = await ax.get("/api/user/me");
+    return res.data; // ✅ คืนค่าข้อมูล User
+  } catch (error) {
+    return null; // ❌ ถ้าไม่มี User ให้คืนค่า null
+  }
 };

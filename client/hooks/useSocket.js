@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import conf from "../config/conf";
 
 const useSocket = () => {
   const [vehicles, setVehicles] = useState([]);
 
   useEffect(() => {
-    const socket = io("http://localhost:3001", { transports: ["websocket"] });
+    const socket = io(conf.apiBaseUrl, { transports: ["websocket"] });
 
     socket.on("vehicles", (data) => {
       console.log("📡 Received vehicles data:", data);
