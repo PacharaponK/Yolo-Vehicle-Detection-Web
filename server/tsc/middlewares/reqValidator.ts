@@ -15,7 +15,7 @@ const reqValidator = (schema: ZodSchema) => (req: Request, res: Response, next: 
 			throw new ValidationError("Validation failed", formattedErrors);
 		}
 
-		req.body.data = parsed.data; // Ensures only validated data is passed to the route handler
+		//req.body.data = parsed.data; // Ensures only validated data is passed to the route handler
 		next();
 	} catch (error) {
 		next(error);
