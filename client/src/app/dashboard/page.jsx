@@ -9,6 +9,7 @@ import Footer from "../components/Footer";
 import TrafficChart from "../components/TraffigChart";
 import TrafficSummary from "../components/TrafficSummary";
 import Navbar from "../components/Navbar";
+import ReportBytime from "../components/ReportByTime";
 
 const socket = io(conf.apiBaseUrl);
 
@@ -38,6 +39,7 @@ const Dashboard = () => {
     }, {});
   };
 
+
   return (
     <div>
       <div className="bg-rose-200">
@@ -48,27 +50,7 @@ const Dashboard = () => {
             <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
           </div>
           <div className="flex w-full flex-wrap md:flex-nowrap space-x-10 justify-center items-end mt-3">
-            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
-              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
-              <p className="text-black">
-                This is the content of the card. You can add more text or
-                elements here.
-              </p>
-            </div>
-            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
-              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
-              <p className="text-black">
-                This is the content of the card. You can add more text or
-                elements here.
-              </p>
-            </div>
-            <div className="flex-1 bg-rose-200 rounded-xl p-10 shadow-lg">
-              <h2 className="text-2xl text-black font-bold mb-4">Card Title</h2>
-              <p className="text-black">
-                This is the content of the card. You can add more text or
-                elements here.
-              </p>
-            </div>
+            <ReportBytime vehicles={vehicles}/>
           </div>
         </div>
 
