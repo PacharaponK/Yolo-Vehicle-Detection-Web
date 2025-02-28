@@ -14,8 +14,8 @@ now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-# sio = socketio.Client()
-# sio.connect('http://localhost:3001')
+sio = socketio.Client()
+sio.connect('http://34.87.44.248')
 
 services = {
     "create_vehicle_url": "http://34.87.44.248/api/vehicle",
@@ -438,10 +438,10 @@ while True:
     cvzone.putTextRect(frame, f'3rd_bw_lane_exit_count = {len(third_bw_lane_exit_counter)}', [10, 360], thickness=1, scale=1.0, border=1)
 
     cv2.imshow('frame', frame)
-    # _, buffer = cv2.imencode('.jpg', frame) 
-    # jpg_as_text = base64.b64encode(buffer).decode('utf-8') 
+    _, buffer = cv2.imencode('.jpg', frame) 
+    jpg_as_text = base64.b64encode(buffer).decode('utf-8') 
 
-    # sio.emit('frame', jpg_as_text) 
+    sio.emit('frame', jpg_as_text) 
     cv2.waitKey(1)
 
 cap.release()
