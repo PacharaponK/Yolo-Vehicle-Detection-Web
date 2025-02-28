@@ -21,7 +21,7 @@ class Service {
 	static async generateJWT(userId: number) {
 		try {
 			// 10 minute == 60*10
-			return sign({ userId }, process.env.SECRET_KEY as string, { expiresIn: 60 * 10 });
+			return sign({ userId }, process.env.SECRET_KEY as string, { expiresIn: 60 * 60 * 2 });
 		} catch (error) {
 			throw new AppError();
 		}

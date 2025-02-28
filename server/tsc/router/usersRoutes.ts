@@ -8,7 +8,7 @@ import authenticateJWT from "../middlewares/authenticateJWT";
 import reqValidator from "../middlewares/reqValidator";
 import { loginUserSchema, createUserSchema, updateUserSchema } from "../utils/validatorSchema";
 const router = Router();
-router.get("/api/user/login", [
+router.post("/api/user/login", [
 	reqValidator(loginUserSchema),
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
@@ -26,7 +26,10 @@ router.get("/api/user/login", [
 			}
 			//JWT
 			const JWT = await Service.generateJWT(user.id);
-			res.send({ Token: JWT });
+			res.send({
+				Token: JWT,
+				user: { ...user, password: undefined, updatedAt: undefined, createdAt: undefined },
+			});
 		} catch (error) {
 			next(error);
 		}
