@@ -14,12 +14,12 @@ now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-sio = socketio.Client()
-sio.connect('http://localhost:3001')
+# sio = socketio.Client()
+# sio.connect('http://34.87.44.248')
 
 services = {
-    "create_vehicle_url": "http://localhost:3001/api/vehicle",
-    "update_vehicle_url": "http://localhost:3001/api/vehicle/{}",
+    "create_vehicle_url": "http://34.87.44.248/api/vehicle",
+    "update_vehicle_url": "http://34.87.44.248/api/vehicle/{}",
 }
 
 # C:\SDA\vehicle-detection\cars2.mp4
@@ -31,6 +31,7 @@ video_name = os.path.basename(video_path)
 
 post_video_response = post_video({"title": video_name})
 video_id = post_video_response["data"]["id"]
+print("------------------------------",video_id)
 
 model = YOLO('yolov8n.pt')
 
@@ -170,6 +171,7 @@ while True:
                             "video_id": video_id
                         }
                     }
+                    print(on_send_data)
                     response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     first_fw_lane_entry_counter.append(id)
@@ -188,6 +190,7 @@ while True:
                                 "exit_time": entry_datetime.isoformat()
                             }
                         }
+                        print(data, id)
                         query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
         
@@ -435,12 +438,12 @@ while True:
     cvzone.putTextRect(frame, f'3rd_bw_lane_exit_count = {len(third_bw_lane_exit_counter)}', [10, 360], thickness=1, scale=1.0, border=1)
 
     cv2.imshow('frame', frame)
-    _, buffer = cv2.imencode('.jpg', frame)  # Encode frame as JPEG
-    jpg_as_text = base64.b64encode(buffer).decode('utf-8')  # Convert to Base64
+    # _, buffer = cv2.imencode('.jpg', frame) 
+    # jpg_as_text = base64.b64encode(buffer).decode('utf-8') 
 
-    sio.emit('frame', jpg_as_text)  # Send frame to server
+    # sio.emit('frame', jpg_as_text) 
     cv2.waitKey(1)
 
 cap.release()
-sio.disconnect()
+# sio.disconnect()
 cv2.destroyAllWindows()

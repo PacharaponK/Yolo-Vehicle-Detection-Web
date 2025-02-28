@@ -43,7 +43,7 @@ router.post("/api/vehicle", [
 			});
 			if (!video) {
 				throw new AppError("not found video", 400);
-			}
+			}			
 			const vehicle = await db2.vehicle_data.create({
 				data: {
 					yolo_id: Number(yolo_id),
@@ -101,10 +101,12 @@ router.put("/api/vehicle", [
 					},
 				},
 			});
+			
 			if (!Found) {
 				throw new AppError("Not Found", 404);
 			}
-
+			console.log(Found);
+			
 			const {
 				class: vehicleClass,
 				entry_time,
@@ -115,25 +117,27 @@ router.put("/api/vehicle", [
 				video_id,
 			} = req.body.data;
 			if (yolo_id || video_id) {
-				const alreadyExists = await db2.vehicle_data.findUnique({
+				const alreadyExists = await db2.vehicle_data.findFirst({
 					where: {
-						yolo_id_video_id: {
 							yolo_id: yolo_id ? Number(yolo_id) : Found.yolo_id,
 							video_id: video_id ? Number(video_id) : Found.video_id,
-						},
+						
 						NOT: { id: Found.id },
 					},
 				});
+				console.log("-----------------------------------------alkda;sldka;ldkad");
+				
 				if (alreadyExists) {
 					throw new AppError("not unique yolo_id and video_id Request", 400);
 				}
 			}
-			const video = await db2.video.findUnique({
-				where: { id: video_id },
-			});
-			if (!video) {
-				throw new AppError("not found video", 400);
-			}
+			// const video = await db2.video.findUnique({
+			// 	where: { id: Number(video_id) },
+			// });
+			// if (!video) {
+			// 	throw new AppError("not found video", 400);
+			// }
+			
 			const vehicle = await db2.vehicle_data.update({
 				where: {
 					yolo_id_video_id: {
