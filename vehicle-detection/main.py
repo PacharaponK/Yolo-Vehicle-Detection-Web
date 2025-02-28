@@ -15,11 +15,11 @@ current_date = now.date()
 current_time = now.time()
 
 # sio = socketio.Client()
-# sio.connect('http://34.87.44.248')
+# sio.connect('http://localhost:3001')
 
 services = {
-    "create_vehicle_url": "http://34.87.44.248/api/vehicle",
-    "update_vehicle_url": "http://34.87.44.248/api/vehicle/{}",
+    "create_vehicle_url": "http://localhost:3001/api/vehicle",
+    "update_vehicle_url": "http://localhost:3001/api/vehicle/{}",
 }
 
 # C:\SDA\vehicle-detection\cars2.mp4
