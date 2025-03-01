@@ -3,6 +3,12 @@ services:
   nextjs:
     build: .
     container_name: nextjs
+    ports:
+      - "3000:3000"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      retries: 5
 
   nginx:
     image: nginx:alpine
