@@ -1,17 +1,13 @@
 "use client";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import conf from "../../../config/conf";
 import useSocket from "../../../hooks/useSocket";
-import Footer from "../components/Footer";
-import TrafficChart from "../components/TraffigChart";
-import TrafficSummary from "../components/TrafficSummary";
+
 import Navbar from "../components/Navbar";
 import ReportBytime from "../components/ReportByTime";
 import Picture from "../components/Picture";
 
-const socket = io(conf.apiBaseUrl);
 
 const Dashboard = () => {
   const { vehicles } = useSocket();
