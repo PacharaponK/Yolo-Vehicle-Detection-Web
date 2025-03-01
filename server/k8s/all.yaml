@@ -18,8 +18,8 @@ spec:
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "500m"
+              memory: "128Mi"
+              cpu: "100m"
             limits:
               memory: "1Gi"
               cpu: "1"
@@ -65,6 +65,7 @@ spec:
   selector:
     app: express-app
   type: LoadBalancer
+  loadBalancerIP: 35.222.183.244
   ports:
     - protocol: TCP
       port: 80
