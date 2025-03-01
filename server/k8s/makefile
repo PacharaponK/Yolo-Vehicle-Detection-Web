@@ -1,6 +1,7 @@
 #kubectl describe svc express-prisma-service
 #gcloud compute addresses --region=us-central1 create my-static-ip
 #gcloud compute addresses describe my-static-ip --region=us-central1 --format="get(address)"
+all: cdl delete apply
 crush:
 	gcloud container clusters create --machine-type=e2-medium --region=us-central1-a crush-on-k8s
 
