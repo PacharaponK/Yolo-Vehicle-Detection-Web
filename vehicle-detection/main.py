@@ -445,5 +445,5 @@ while True:
     cv2.waitKey(1)
 
 cap.release()
-# sio.disconnect()
+sio.disconnect()
 cv2.destroyAllWindows()
