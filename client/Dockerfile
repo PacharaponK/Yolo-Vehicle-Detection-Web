@@ -1,29 +1,16 @@
-# ใช้ Node.js เป็น base image
-FROM node:18-alpine AS builder
-
-# ตั้งค่า working directory
+FROM node:20-alpine AS builder
 WORKDIR /app
-
-# คัดลอก package.json และติดตั้ง dependencies
-COPY package.json package-lock.json ./
-RUN npm install --frozen-lockfile
-
-# คัดลอกไฟล์โปรเจคทั้งหมด
+COPY package*.json ./
+RUN npm install
 COPY . .
-
-# สร้าง build สำหรับ production
 RUN npm run build
 
-# ใช้ Node.js runtime แยกสำหรับ production
-FROM node:18-alpine
-
+FROM node:20-alpine
 WORKDIR /app
+COPY --from=builder /app/next.config.mjs ./next.config.mjs
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next ./.next
+COPY package*.json ./
+RUN npm install --omit=dev  # Install only production dependencies
 
-# คัดลอกไฟล์จาก builder stage
-COPY --from=builder /app ./
-
-# ตั้งค่าพอร์ตที่ expose
-EXPOSE 3000
-
-# รัน Next.js ในโหมด production
-CMD ["npm", "run", "start"]
+CMD ["npm", "start"]
