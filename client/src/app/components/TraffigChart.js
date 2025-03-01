@@ -102,6 +102,18 @@ const TrafficChart = ({ vehicleData }) => {
               },
             },
           },
+          plugins: {
+            title: {
+              display: true,
+              text: "จำนวนรถแยกตามประเภทรถ (12 ชั่วโมงย้อนหลัง)",
+              font: {
+                size: 16,
+              },
+            },
+            legend: {
+              position: "top",
+            },
+          },
         }}
       />
     </div>

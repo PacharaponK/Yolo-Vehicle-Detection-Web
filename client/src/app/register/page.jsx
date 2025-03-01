@@ -1,21 +1,63 @@
 "use client";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import ax from "../../../config/ax";
 
 export default function Register() {
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const router = useRouter();
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    try {
+      // ส่ง request ด้วย axios โดยส่ง formData โดยตรง
+      const res = await ax.post("/api/user", {
+        data: formData, // ส่ง object { data: { name, email, password } } โดยไม่ต้อง JSON.stringify
+      });
+
+      // axios จะ return data ใน res.data โดยอัตโนมัติ ไม่ต้องใช้ .json()
+      const data = res.data;
+
+      // ตรวจสอบ status code (axios throw error อัตโนมัติถ้า !ok แต่เราจะเช็คเพิ่ม)
+      if (res.status >= 400) {
+        throw new Error(
+          data.message || "การสมัครเข้าใช้งานเกิดข้อผิดพลบางอย่าง"
+        );
+      }
+
+      setSuccess("สมัครเข้าใช้งานสำเร็จ...");
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+    } catch (err) {
+      // จัดการ error จาก axios
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "An error occurred during registration";
+      setError(errorMessage);
+      console.error("Registration error:", err);
+    }
+  };
 
   return (
     <div className="font-sans text-gray-900 antialiased">
       <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-[#f8f4f3] relative overflow-hidden">
         <div className="z-10">
           <a href="/">
-            <div className="absolute bottom-0 left-0 transform animate-carMove z-0">
-              <img
-                src="https://img.lovepik.com/element/40153/6500.png_1200.png" // เปลี่ยนเป็น URL ของรถที่คุณต้องการ
-                alt="Car"
-                className="h-36"
-              />
-            </div>
             <h2 className="font-bold text-3xl">
               CAR{" "}
               <span className="bg-[#FF8295] text-white px-2 rounded-md">
@@ -26,19 +68,24 @@ export default function Register() {
         </div>
 
         <div className="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg animate-slideIn z-10">
-          <form method="POST" action="/register">
+          <form onSubmit={handleRegister}>
             <div className="py-8 text-center">
-              <span className="text-2xl font-semibold">Register</span>
+              <span className="text-2xl font-semibold">สมัครเข้าใช้งาน</span>
             </div>
+
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {success && <p className="text-green-500 text-sm">{success}</p>}
 
             <div>
               <label className="block font-medium text-sm text-gray-700">
-                Full Name
+                ชื่อ
               </label>
               <input
                 type="text"
                 name="name"
                 placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
                 className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
                 required
               />
@@ -46,12 +93,14 @@ export default function Register() {
 
             <div className="mt-4">
               <label className="block font-medium text-sm text-gray-700">
-                Email
+                อีเมล
               </label>
               <input
                 type="email"
                 name="email"
                 placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
                 className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
                 required
               />
@@ -59,39 +108,32 @@ export default function Register() {
 
             <div className="mt-4">
               <label className="block font-medium text-sm text-gray-700">
-                Password
+                รหัสผ่าน
               </label>
-              <div className="relative">
-                <input
-                  type={passwordVisible ? "text" : "password"}
-                  name="password"
-                  placeholder="Password"
-                  required
-                  className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setPasswordVisible(!passwordVisible)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm text-gray-500 hover:text-gray-600"
-                >
-                  {passwordVisible ? "🙈" : "👁️"}
-                </button>
-              </div>
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
+                required
+              />
             </div>
 
-            <div className="mt-6 flex justify-center">
+            <div className="flex items-center justify-end mt-4">
               <button
                 type="submit"
-                className="px-4 py-2 bg-[#FF8295] rounded-md text-white font-semibold"
+                className="ml-4 px-4 py-2 bg-[#FF8295] border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-[#FF6A7F] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150"
               >
-                Register
+                สมัครเข้าใช้งาน
               </button>
             </div>
 
             <div className="mt-6 text-center">
-              <span className="text-sm">Already have an account? </span>
-              <a className="text-[#FF8295] hover:underline" href="/">
-                Log in here
+              <span className="text-sm">มีบัญชีอยู่แล้ว? </span>
+              <a className="text-[#FF8295] hover:underline" href="/login">
+                ลงชื่อเข้าใช้ที่นี่
               </a>
             </div>
           </form>
