@@ -4,6 +4,8 @@ services:
   nextjs:
     build: .
     container_name: nextjs
+    expose:
+      - "3000"  # เปิดให้ Nginx เชื่อมต่อ
 
   nginx:
     image: nginx:alpine
@@ -24,3 +26,4 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
+    command: certonly --webroot -w /var/www/certbot -d dtect-sda-project.xyz --email ballxlenver7@gmail.com --agree-tos --no-eff-email --force-renewal
