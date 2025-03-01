@@ -58,7 +58,7 @@ const Dashboard = () => {
       <div className="bg-rose-200">
         {/* <p>Status: {isConnected ? "🟢 Connected" : "🔴 Disconnected"}</p> */}
         <Navbar />
-        <div className="py-12 px-10 md:flex-row rounded-b-3xl drop-shadow-xl">
+        <div className="py-12 px-10 md:flex-row rounded-b-3xl drop-shadow-xl bg-white">
           <div className="mt-12 mb-3 flex flex-col w-full">
             <h1 className="text-3xl text-black font-bold">ระบบตรวจจับพาหนะ</h1>
           </div>
