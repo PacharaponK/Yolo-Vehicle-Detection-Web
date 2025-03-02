@@ -196,6 +196,43 @@ router.get("/api/vehicle/all", async (req, res, next) => {
 		next(error);
 	}
 });
+router.get("/api/vehicle/today", [
+	// queryValidator(queryVehicleSchema),
+	// authenticateJWT,
+	async (req: Request, res: Response, next: NextFunction) => {
+		try {
+			const now = new Date();
+			// console.log(now.toString(), "-----------------");
+			const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
+			// console.log(today.toString(), "************");
+			today.setHours(0, 0, 0, 0);
+			const tomorrow = new Date(today);
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			const vehicle = await db2.vehicle_data.findMany({
+				where: {
+					entry_time: {
+						gte: today,
+						lt: tomorrow,
+					},
+				},
+				select: {
+					class: true,
+					entry_time: true,
+					exit_time: true,
+					lane_type: true,
+					lane_id: true,
+					yolo_id: true,
+				},
+			});
+			if (!vehicle) {
+				throw new AppError("Not Found", 404);
+			}
+			res.send({ data: vehicle });
+		} catch (error) {
+			next(error);
+		}
+	},
+]);
 router.get("/api/vehicle/:id", async (req, res, next) => {
 	try {
 		const { id } = req.params;

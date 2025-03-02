@@ -12,17 +12,36 @@ dotenv.config();
 
 const router = Router();
 router.get("/api/test", [
-	queryValidator(queryVehicleSchema),
-	authenticateJWT,
+	// queryValidator(queryVehicleSchema),
+	// authenticateJWT,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
-			// console.log("query\n", req.query);
-			// console.log("Body\n", req.body.data);
-			console.log("success");
-			res.send("success");
+			const today = new Date();
+			today.setHours(0, 0, 0, 0);
+
+			const tomorrow = new Date(today);
+			tomorrow.setDate(tomorrow.getDate() + 1);
+			const vehicleData = await db2.vehicle_data.findMany({
+				where: {
+					entry_time: {
+						gte: today,
+						lt: tomorrow,
+					},
+				},
+			});
+
+			res.json(vehicleData);
 		} catch (error) {
 			next(error);
 		}
+		// try {
+		// 	// console.log("query\n", req.query);
+		// 	// console.log("Body\n", req.body.data);
+		// 	console.log("success");
+		// 	res.send("success");
+		// } catch (error) {
+		// 	next(error);
+		// }
 	},
 ]);
 router.get("/api/error", async (req, res, next) => {
