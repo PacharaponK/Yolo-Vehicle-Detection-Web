@@ -1,0 +1,68 @@
+name: Deploy to Google Cloud VM
+
+# เมื่อไหร่ที่ workflow จะทำงาน
+on:
+  push:
+    branches:
+      - main  # Deploy เมื่อ push ไป main branch
+
+# Environment variables
+env:
+  VM_IP: ${{ secrets.VM_IP }}  # IP address ของ VM
+  SSH_USERNAME: ${{ secrets.SSH_USERNAME }}  # ชื่อผู้ใช้สำหรับ SSH
+  SSH_KEY: ${{ secrets.SSH_KEY }}  # Private SSH key
+  USER: ${{ secrets.USER }}  # ชื่อผู้ใช้บน VM
+  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"  # Directory บน VM
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout โค้ด
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2. ตั้งค่า Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # ใช้ Node.js 20 ตามที่ Next.js รองรับ
+
+      # 3. ติดตั้ง dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # 4. รัน lint เพื่อตรวจสอบโค้ด (optional)
+      - name: Run lint
+        run: npm run lint
+
+      # 5. Build โปรเจค Next.js
+      - name: Build project
+        run: npm run build
+
+      # 6. ตั้งค่า SSH key
+      - name: Setup SSH
+        run: |
+          echo "$SSH_KEY" > ssh_key.pem
+          chmod 600 ssh_key.pem
+
+      # 7. Deploy ไป Google Cloud VM
+      - name: Deploy to VM
+        run: |
+          # คัดลอกไฟล์ build ไปยัง VM
+          scp -i ssh_key.pem -r ./* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
+          
+          # รันคำสั่งบน VM ด้วย sudo su -
+          ssh -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+            sudo su - << 'INNER_EOF'
+              cd $PROJECT_DIR
+              npm install  # ติดตั้ง dependencies บน VM
+              npm run build  # Build อีกครั้ง (ถ้าจำเป็น)
+              pm2 restart dtect || pm2 start npm --name "dtect" -- run start  # ใช้ PM2 restart หรือ start
+            INNER_EOF
+          EOF
+
+      # 8. ลบ SSH key
+      - name: Cleanup
+        run: rm -f ssh_key.pem
