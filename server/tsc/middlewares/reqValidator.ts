@@ -8,10 +8,9 @@ const reqValidator = (schema: ZodSchema) => (req: Request, res: Response, next: 
 
 		if (!parsed.success) {
 			const formattedErrors = parsed.error.issues.map((issue) => ({
-				field: issue.path.join("."),
+				field: issue.path.length > 0 ? issue.path.join(".") : "payload",
 				message: issue.message,
 			}));
-			// res.status(400).json({ errors: formattedErrors });
 			throw new ValidationError("Validation failed", formattedErrors);
 		}
 

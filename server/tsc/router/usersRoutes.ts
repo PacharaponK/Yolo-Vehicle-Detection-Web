@@ -65,6 +65,24 @@ router.post("/api/user", [
 		}
 	},
 ]);
+router.get("/api/user/me", authenticateJWT, async (req, res, next) => {
+	try {
+		const { userID } = req.body;
+		const user = await db2.user.findUnique({
+			where: { id: userID },
+			select: {
+				id: true,
+				name: true,
+				email: true,
+				createdAt: true,
+				updatedAt: true,
+			},
+		});
+		res.send({ data: user });
+	} catch (error) {
+		next(error);
+	}
+});
 router.get("/api/user/all", async (req, res, next) => {
 	try {
 		const user = await db2.user.findMany({

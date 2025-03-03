@@ -14,15 +14,15 @@ spec:
     spec:
       containers:
         - name: express-app
-          image: alivefordie/express-server:v1.7
+          image: alivefordie/express-server:v2.0
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "128Mi"
-              cpu: "100m"
+              memory: "512Mi"
+              cpu: "200m"
             limits:
-              memory: "1Gi"
-              cpu: "1"
+              memory: "1.5Gi"
+              cpu: "1.5"
           ports:
             - containerPort: 3001
           env:

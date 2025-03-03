@@ -204,13 +204,11 @@ router.get("/api/vehicle/today", [
 			const { GMT } = req.query;
 			const TIMEZONE = GMT ? Number(GMT) : 0;
 			const now = new Date();
-			const UTC = new Date(now.getTime());
-			console.log("NOW :", now);
-			console.log("UTC :", UTC);
-			const today = new Date(UTC.getTime() + TIMEZONE * 60 * 60 * 1000);
-			// console.log(UTC.toString(), "-----------------");
-			console.log(today, "************");
-			today.setHours(0, 0, 0, 0);
+			// console.log("NOW :", now);
+			const today = new Date(now.getTime() + TIMEZONE * 60 * 60 * 1000);
+			// console.log(today, "-----------------");
+			today.setUTCHours(0, 0, 0, 0);
+			// console.log(today, "************");
 			const tomorrow = new Date(today);
 			tomorrow.setDate(tomorrow.getDate() + 1);
 			const vehicle = await db2.vehicle_data.findMany({
@@ -227,12 +225,19 @@ router.get("/api/vehicle/today", [
 					lane_type: true,
 					lane_id: true,
 					yolo_id: true,
+					// video_id: true,
+					video: true,
 				},
 			});
 			if (!vehicle) {
 				throw new AppError("Not Found", 404);
 			}
-			res.send({ data: vehicle });
+			const vehiclesWithVideoTitle = vehicle.map((vehicle) => ({
+				...vehicle,
+				video_title: vehicle.video.title,
+				video: undefined,
+			}));
+			res.send({ data: vehiclesWithVideoTitle });
 		} catch (error) {
 			next(error);
 		}
