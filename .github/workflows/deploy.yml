@@ -51,14 +51,45 @@ jobs:
 
       - name: Deploy to VM using rsync
         run: |
-          timeout 60s rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || echo "Rsync Timed Out"
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
-            # เข้าไปที่โฟลเดอร์โปรเจกต์
+          # ตรวจสอบการเชื่อมต่อ SSH ก่อนเริ่ม rsync
+          ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "echo 'SSH Connection Successful'" || { echo 'SSH Connection Failed'; exit 1; }
+
+          # ใช้ rsync ซิงค์ไฟล์โดยเพิ่ม verbose mode (-vvv) เพื่อ debug
+          timeout 60s rsync -avz -vvv -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || { echo "Rsync Failed"; exit 1; }
+
+          # เชื่อมต่อ SSH และทำการติดตั้งและรันโปรเจกต์
+          ssh -tt -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+            echo "Connected to VM"
+
+            # รีสตาร์ทเซิร์ฟเวอร์หากจำเป็น
+            if [ -f /var/run/reboot-required ]; then
+              echo "System requires a reboot. Restarting now..."
+              sudo reboot
+              exit 0
+            fi
+
+            # ตรวจสอบสิทธิ์ของโฟลเดอร์ปลายทาง
+            sudo chown -R $SSH_USERNAME:$SSH_USERNAME $PROJECT_DIR
             cd $PROJECT_DIR
+
+            # ติดตั้ง dependencies
             npm install
+
+            # ตรวจสอบและแก้ปัญหา package-lock.json หากมีเวอร์ชันไม่ตรง
+            if [ -f package-lock.json ]; then
+              lockfile_version=$(jq '.lockfileVersion' package-lock.json)
+              if [ "$lockfile_version" -ne 1 ]; then
+                echo "Updating npm and regenerating package-lock.json..."
+                sudo npm install -g npm@latest
+                rm -rf node_modules package-lock.json
+                npm install
+              fi
+            fi
+
+            # Build โปรเจกต์
             npm run build
-            
-            # ย้ายไฟล์ที่ build แล้วไปไว้ที่ /var/www/client
+
+            # ย้ายไฟล์ที่ build ไปยัง /var/www/client
             sudo mkdir -p /var/www/client
             sudo cp -r $PROJECT_DIR/build/* /var/www/client/
             sudo chown -R www-data:www-data /var/www/client
@@ -67,6 +98,8 @@ jobs:
             sudo su - << 'INNER_EOF'
               pm2 restart dtect || pm2 start npm --name "dtect" -- run start
             INNER_EOF
+
+            echo "Deployment Completed Successfully"
           EOF
 
 
