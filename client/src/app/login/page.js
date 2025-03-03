@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import ax ,{axData} from "../../../config/ax";
+import Link from "next/link";
 
 
 
@@ -53,14 +54,14 @@ export default function Login() {
 
         {/* Header */}
         <div className="z-10">
-          <a href="/">
+          <Link href="/">
             <h2 className="font-bold text-3xl">
               CAR{" "}
               <span className="bg-[#FF8295] text-white px-2 rounded-md">
                 TALLY
               </span>
             </h2>
-          </a>
+          </Link>
         </div>
 
         {/* Login Form */}
@@ -123,12 +124,12 @@ export default function Login() {
 
             {/* Actions */}
             <div className="flex items-center justify-between mt-4">
-              <a
+              <Link
                 className="text-sm text-gray-600 hover:text-gray-900"
                 href="/password-reset"
               >
                 ลืมรหัสผ่าน?
-              </a>
+              </Link>
               <button
                 type="submit"
                 className="ml-4 px-4 py-2 bg-[#FF8295] rounded-md text-white font-semibold"
@@ -140,9 +141,9 @@ export default function Login() {
             {/* Register Link */}
             <div className="mt-6 text-center">
               <span className="text-sm">ไม่มีบัญชีหรอ? </span>
-              <a className="text-[#FF8295] hover:underline" href="/register">
+              <Link className="text-[#FF8295] hover:underline" href="/register">
                 สมัครสมาชิกที่นี่
-              </a>
+              </Link>
             </div>
           </form>
         </div>

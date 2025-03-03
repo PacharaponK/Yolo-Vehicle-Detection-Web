@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import useSocket from "../../../hooks/useSocket";
+import Image from "next/image"; // เพิ่มการ import Image
 
 function Picture() {
   const { frame, error } = useSocket();
@@ -26,10 +27,10 @@ function Picture() {
           {/* เฟรมล่าสุด (ใหญ่) */}
           <div className="flex-1 max-w-[640px]">
             {frameHistory.length > 0 ? (
-              <img
+              <Image
                 src={frameHistory[0]}
-                width="640"
-                height="480"
+                width={640}
+                height={480}
                 alt="Latest Frame"
                 className="border rounded-lg shadow-lg w-full h-auto"
               />
@@ -45,10 +46,10 @@ function Picture() {
             {/* เฟรม -1 */}
             <div className="w-[320px] h-[240px] flex items-center justify-center bg-gray-200 border rounded-lg shadow-md">
               {frameHistory[1] ? (
-                <img
+                <Image
                   src={frameHistory[1]}
-                  width="320"
-                  height="240"
+                  width={320}
+                  height={240}
                   alt="Frame -1"
                   className="w-full h-auto"
                 />
@@ -59,10 +60,10 @@ function Picture() {
             {/* เฟรม -2 */}
             <div className="w-[320px] h-[240px] flex items-center justify-center bg-gray-200 border rounded-lg shadow-md">
               {frameHistory[2] ? (
-                <img
+                <Image
                   src={frameHistory[2]}
-                  width="320"
-                  height="240"
+                  width={320}
+                  height={240}
                   alt="Frame -2"
                   className="w-full h-auto"
                 />
