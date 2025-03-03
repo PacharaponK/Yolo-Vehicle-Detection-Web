@@ -55,7 +55,11 @@ jobs:
       - name: Deploy Next.js build to VM using rsync
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" \
+<<<<<<< HEAD
             $WORKING_DIR/.next \
+=======
+            $WORKING_DIR/ \
+>>>>>>> 5fe96d3aae338e7f6a766a8048e676bf949b1dda
             $WORKING_DIR/package.json \
             $WORKING_DIR/package-lock.json \
             $SSH_USERNAME@$VM_IP:$PROJECT_DIR/
@@ -66,7 +70,11 @@ jobs:
             set -e
             sudo mkdir -p /var/www/client
             sudo rm -rf /var/www/client/*
+<<<<<<< HEAD
             sudo mv /home/ballx/my-next-app/.next/* /var/www/client/
+=======
+            sudo mv /home/ballx/my-next-app/* /var/www/client/
+>>>>>>> 5fe96d3aae338e7f6a766a8048e676bf949b1dda
             sudo chown -R www-data:www-data /var/www/client
           EOF
 
@@ -74,6 +82,7 @@ jobs:
         run: |
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             set -e
+<<<<<<< HEAD
             cd $PROJECT_DIR
 
             # เช็คและอัปเดต Node.js ถ้าจำเป็น
@@ -92,6 +101,28 @@ jobs:
             sudo su - << 'INNER_EOF'
               pm2 restart dtech || pm2 start npm --name "dtech" -- start
             INNER_EOF
+=======
+            sudo bash -c '
+              cd /var/www/client
+
+              # ตรวจสอบเวอร์ชัน Node.js และอัปเดตถ้าจำเป็น
+              NODE_VERSION=$(node -v 2>/dev/null || echo "none")
+              if [[ "$NODE_VERSION" == "none" || "${NODE_VERSION:1:2}" -lt 16 ]]; then
+                echo "Updating Node.js..."
+                curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+                apt-get install -y nodejs
+              fi
+
+              # อัปเดต npm
+              npm install -g npm@latest --unsafe-perm
+
+              # ติดตั้ง dependencies (เฉพาะที่จำเป็น)
+              npm install --omit=dev
+
+              # Restart pm2
+              pm2 restart dtect || pm2 start npm --name "dtect" -- start
+            '
+>>>>>>> 5fe96d3aae338e7f6a766a8048e676bf949b1dda
           EOF
 
       - name: Cleanup
