@@ -14,12 +14,19 @@ now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-# sio = socketio.Client()
-# sio.connect('http://35.222.183.244')
+sio = socketio.Client()
+
+# เชื่อมต่อเซิร์ฟเวอร์
+try:
+    sio.connect('https://alivefordie.life')  # หรือ URL อื่นที่ถูกต้อง
+    print("Connected to server")
+except socketio.exceptions.ConnectionError as e:
+    print(f"Connection Error: {e}")
+    exit()
 
 services = {
-    "create_vehicle_url": "http://35.222.183.244/api/vehicle",
-    "update_vehicle_url": "http://35.222.183.244/api/vehicle/{}",
+    "create_vehicle_url": "https://alivefordie.life/api/vehicle",
+    "update_vehicle_url": "https://alivefordie.life/api/vehicle/{}",
 }
 
 # C:\SDA\vehicle-detection\cars2.mp4
@@ -438,12 +445,13 @@ while True:
     cvzone.putTextRect(frame, f'3rd_bw_lane_exit_count = {len(third_bw_lane_exit_counter)}', [10, 360], thickness=1, scale=1.0, border=1)
 
     cv2.imshow('frame', frame)
-    # _, buffer = cv2.imencode('.jpg', frame) 
-    # jpg_as_text = base64.b64encode(buffer).decode('utf-8') 
+    frame_resized = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
+    _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 70])  # คุณภาพ 70 (0-100)
+    jpg_as_text = base64.b64encode(buffer).decode('utf-8')
 
-    # sio.emit('frame', jpg_as_text) 
+    sio.emit('frame', jpg_as_text)
     cv2.waitKey(1)
 
 cap.release()
-# sio.disconnect()
+sio.disconnect()
 cv2.destroyAllWindows()
