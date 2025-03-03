@@ -49,16 +49,16 @@ jobs:
       - name: Debug SSH Connection
         run: ssh -v -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP "echo SSH connection successful"
 
-      - name: Deploy to VM using rsync
+      - name: Deploy build/ to VM using rsync
         run: |
-          timeout 60s rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || echo "Rsync Timed Out"
+          timeout 60s rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" $WORKING_DIR/build/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR/build || echo "Rsync Timed Out"
+
+      - name: Restart PM2 process
+        run: |
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             set -e
-            cd $PROJECT_DIR
-            npm install
-            npm run build
             sudo mkdir -p /var/www/client
-            sudo cp -r build/* /var/www/client/
+            sudo cp -r $PROJECT_DIR/build/* /var/www/client/
             sudo su - << 'INNER_EOF'
               pm2 restart dtect || pm2 start npm --name "dtect" -- run start
             INNER_EOF
