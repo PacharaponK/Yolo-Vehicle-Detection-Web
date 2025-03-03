@@ -2,13 +2,8 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import TrafficChart from "../components/TraffigChart";
-import { io } from "socket.io-client";
-import conf from "../../../config/conf";
 import LaneTrafficChart from "../components/LaneTrafficChart";
 import { useSocketContext } from "@/context/context";
-
-
-const socket = io(conf.apiBaseUrl);
 
 function Analye() {
   const { vehicles } = useSocketContext();

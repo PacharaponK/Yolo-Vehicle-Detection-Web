@@ -19,20 +19,32 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
-      // console.log("🚀 ~ handleLogin ~ res:", res);
+      console.log("🚀 ~ handleLogin ~ res:", res); // Debug response
 
       // ตรวจสอบว่า login สำเร็จหรือไม่
       if (res.status === 200) {
         const token = res.data.Token;
+        const userEmail = res.data.email || email; // ดึง email จาก response หรือ input
+
         // เก็บ JWT ใน sessionStorage
         sessionStorage.setItem("jwt", token);
-        // เก็บ JWT ใน cookie เพื่อให้ Middleware ตรวจสอบได้
+
+        // เก็บ JWT ใน cookie
         document.cookie = `jwt=${token}; path=/; SameSite=Strict`;
-        axData.jwt = token; // อัพเดต axData ด้วย JWT ใหม่
-        router.push("/dashboard"); // เปลี่ยนเส้นทางไปหน้าหลัก
+
+        // เก็บ email ใน cookie
+        document.cookie = `email=${encodeURIComponent(
+          userEmail
+        )}; path=/; SameSite=Strict`;
+
+        // อัพเดต axData ด้วย JWT ใหม่
+        axData.jwt = token;
+
+        // เปลี่ยนเส้นทางไปหน้าหลัก
+        router.push("/dashboard");
       }
     } catch (error) {
-      // console.log("🚀 ~ handleLogin ~ error:", error);
+      console.log("🚀 ~ handleLogin ~ error:", error);
       if (error.response && error.response.data) {
         setError(error.response.data.message); // แสดงข้อความ error จาก response
       } else {
