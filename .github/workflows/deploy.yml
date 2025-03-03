@@ -49,8 +49,8 @@ jobs:
 
       - name: Deploy to VM
         run: |
-          scp -i ssh_key.pem -r ./${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
-          ssh -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+          scp -o StrictHostKeyChecking=no -i ssh_key.pem -r ./${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             sudo su - << 'INNER_EOF'
               cd $PROJECT_DIR
               npm install
