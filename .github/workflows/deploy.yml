@@ -49,9 +49,9 @@ jobs:
       - name: Debug SSH Connection
         run: ssh -v -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP "echo SSH connection successful"
 
-      - name: Deploy to VM
+      - name: Deploy to VM using rsync
         run: |
-          scp -o StrictHostKeyChecking=no -i ssh_key.pem -r ${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
+          timeout 60s rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || echo "Rsync Timed Out"
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             cd $PROJECT_DIR
             npm install
