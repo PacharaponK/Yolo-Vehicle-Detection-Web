@@ -10,7 +10,7 @@ env:
   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
   SSH_KEY: ${{ secrets.SSH_KEY }}
   USER: ${{ secrets.USER }}
-  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}"
+  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"
   WORKING_DIR: "client"
 
 jobs:
@@ -49,8 +49,8 @@ jobs:
 
       - name: Deploy to VM
         run: |
-          scp -o StrictHostKeyChecking=no -i ssh_key.pem -r ./${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
-          ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+          scp -i ssh_key.pem -r ./${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
+          ssh -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             sudo su - << 'INNER_EOF'
               cd $PROJECT_DIR
               npm install
