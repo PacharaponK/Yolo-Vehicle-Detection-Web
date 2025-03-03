@@ -2,7 +2,6 @@
 import { useSocketContext } from "@/context/context";
 import React, { useRef, useEffect } from "react";
 
-
 function Picture() {
   const { frame, error } = useSocketContext();
   const canvasRef = useRef(null);
