@@ -20,7 +20,9 @@ const useSocket = () => {
   const reconnectTimeoutRef = useRef(null);
   const maxReconnectAttempts = 5;
   const reconnectAttemptsRef = useRef(0);
+  const isMountedRef = useRef(false); // ใช้ตรวจสอบว่า component ยัง mount อยู่
 
+  // Handler สำหรับข้อมูล vehicles
   const handleVehiclesData = useCallback((data) => {
     console.log("📡 Received vehicles data:", data);
     setVehicles((prev) => {
@@ -31,11 +33,13 @@ const useSocket = () => {
     });
   }, []);
 
+  // Handler สำหรับข้อมูล frame
   const handleFrameData = useCallback((data) => {
     console.log("📷 Received frame data");
-    setFrame((prev) => `data:image/jpeg;base64,${data}`);
+    setFrame(`data:image/jpeg;base64,${data}`);
   }, []);
 
+  // Handler เมื่อเกิด connection error
   const handleConnectError = useCallback((err) => {
     console.error("Socket connection error:", err);
     setError("Failed to connect to the server");
@@ -43,16 +47,19 @@ const useSocket = () => {
     attemptReconnect();
   }, []);
 
+  // Handler เมื่อ disconnect
   const handleDisconnect = useCallback(() => {
     console.log("🔌 Socket disconnected");
     setIsConnected(false);
     attemptReconnect();
   }, []);
 
+  // ฟังก์ชัน reconnect
   const attemptReconnect = useCallback(() => {
     if (
       reconnectAttemptsRef.current < maxReconnectAttempts &&
-      !socket.connected
+      !socket.connected &&
+      isMountedRef.current // reconnect เฉพาะเมื่อ component ยัง mount
     ) {
       const delay = Math.min(1000 * 2 ** reconnectAttemptsRef.current, 10000);
       reconnectTimeoutRef.current = setTimeout(() => {
@@ -65,13 +72,22 @@ const useSocket = () => {
     }
   }, []);
 
+  // ฟังก์ชันเชื่อมต่อ socket
   const connectSocket = useCallback(() => {
     if (!socket.connected && !socket.connecting) {
+      console.log("Attempting to connect socket...");
       socket.connect();
     }
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true; // ระบุว่า component mount แล้ว
+
+    // ถ้า socket ยังไม่เชื่อมต่อ ให้ลองเชื่อมต่อ
+    if (!socket.connected) {
+      connectSocket();
+    }
+
     // ตั้งค่า event listeners
     socket.on("connect", () => {
       setIsConnected(true);
@@ -85,20 +101,14 @@ const useSocket = () => {
     socket.on("connect_error", handleConnectError);
     socket.on("disconnect", handleDisconnect);
 
-    // เชื่อมต่อครั้งแรก
-    connectSocket();
-
-    // Cleanup
+    // Cleanup เมื่อ component unmount
     return () => {
+      isMountedRef.current = false; // ระบุว่า component unmount
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      // ลบเฉพาะ event listeners ไม่ disconnect socket
-      socket.off("connect");
-      socket.off("vehicles", handleVehiclesData);
-      socket.off("frame", handleFrameData);
-      socket.off("connect_error", handleConnectError);
-      socket.off("disconnect", handleDisconnect);
+      // ไม่ต้องลบ event listeners หรือ disconnect socket
+      // เพื่อให้ socket ทำงานต่อเนื่องแม้เปลี่ยนหน้า
     };
   }, [
     handleVehiclesData,
