@@ -55,7 +55,7 @@ jobs:
       - name: Deploy Next.js build to VM using rsync
         run: |
           rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" \
-            $WORKING_DIR/.next/ \
+            $WORKING_DIR/.next \
             $WORKING_DIR/package.json \
             $WORKING_DIR/package-lock.json \
             $SSH_USERNAME@$VM_IP:$PROJECT_DIR/
@@ -65,7 +65,7 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             set -e
             sudo mkdir -p /var/www/client
-            sudo cp -r $PROJECT_DIR/* /var/www/client/
+            sudo mv $PROJECT_DIR/.next /var/www/client/
             sudo chown -R www-data:www-data /var/www/client
           EOF
 
