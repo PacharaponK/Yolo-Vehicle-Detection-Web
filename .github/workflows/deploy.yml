@@ -89,9 +89,9 @@ jobs:
               npm install -g npm@latest --unsafe-perm
 
               # ติดตั้ง dependencies (เฉพาะที่จำเป็น)
-              npm install --omit=dev
+              npm install
               npm run build
-
+              
               # Restart pm2
               pm2 restart dtect || pm2 start npm --name "dtect" -- start
             '
