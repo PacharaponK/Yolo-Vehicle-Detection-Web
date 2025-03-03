@@ -460,10 +460,10 @@ while True:
     frame_count += 1
     if frame_count % frame_skip == 0:
         frame_resized = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
-        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 50])  # คุณภาพ 70 (0-100)
-        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+        
         if sio.connected:
-            sio.emit('frame', jpg_as_text)
+            sio.emit('frame', buffer.tobytes(), binary=True)
         else:
             print("Socket.IO client not connected")
     
