@@ -71,7 +71,7 @@ export default function Login() {
 
           <form onSubmit={handleLogin}>
             <div className="py-8 text-center">
-              <span className="text-2xl font-semibold">ลงชื่อเข้าใช้ ZZZ</span>
+              <span className="text-2xl font-semibold">ลงชื่อเข้าใช้</span>
             </div>
 
             {/* Email */}
