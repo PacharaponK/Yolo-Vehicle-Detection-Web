@@ -9,7 +9,6 @@ env:
   VM_IP: ${{ secrets.VM_IP }}
   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
   SSH_KEY: ${{ secrets.SSH_KEY }}
-  USER: ${{ secrets.USER }}
   PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"
   WORKING_DIR: "client"
 
@@ -47,10 +46,13 @@ jobs:
         env:
           SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
 
+      - name: Debug SSH Connection
+        run: ssh -v -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP "echo SSH connection successful"
+
       - name: Deploy to VM
         run: |
-          scp -i ssh_key.pem -r ${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
-          ssh -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+          scp -o StrictHostKeyChecking=no -i ssh_key.pem -r ${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             cd $PROJECT_DIR
             npm install
             npm run build
