@@ -51,40 +51,27 @@ jobs:
 
       - name: Deploy to VM using rsync
         run: |
-          # ตรวจสอบการเชื่อมต่อ SSH ก่อนเริ่ม rsync
+          echo "Checking SSH Connection..."
           ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "echo 'SSH Connection Successful'" || { echo 'SSH Connection Failed'; exit 1; }
 
-          # ใช้ rsync ซิงค์ไฟล์โดยเพิ่ม verbose mode (-vvv) เพื่อ debug
-          timeout 60s rsync -avz -vvv -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || { echo "Rsync Failed"; exit 1; }
+          echo "Restarting VM if required..."
+          ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "if [ -f /var/run/reboot-required ]; then sudo reboot; exit 0; fi"
 
-          # เชื่อมต่อ SSH และทำการติดตั้งและรันโปรเจกต์
+          echo "Starting Rsync..."
+          timeout 600s rsync -avz -vvv --progress --exclude=node_modules -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || { echo "Rsync Failed"; exit 1; }
+
+          echo "Running Deployment on VM..."
           ssh -tt -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             echo "Connected to VM"
 
-            # รีสตาร์ทเซิร์ฟเวอร์หากจำเป็น
-            if [ -f /var/run/reboot-required ]; then
-              echo "System requires a reboot. Restarting now..."
-              sudo reboot
-              exit 0
-            fi
-
-            # ตรวจสอบสิทธิ์ของโฟลเดอร์ปลายทาง
+            # ตั้งค่า permission ให้ถูกต้อง
             sudo chown -R $SSH_USERNAME:$SSH_USERNAME $PROJECT_DIR
             cd $PROJECT_DIR
 
-            # ติดตั้ง dependencies
+            # อัปเดต npm และจัดการ package-lock.json
+            sudo npm install -g npm@latest
+            rm -rf node_modules package-lock.json
             npm install
-
-            # ตรวจสอบและแก้ปัญหา package-lock.json หากมีเวอร์ชันไม่ตรง
-            if [ -f package-lock.json ]; then
-              lockfile_version=$(jq '.lockfileVersion' package-lock.json)
-              if [ "$lockfile_version" -ne 1 ]; then
-                echo "Updating npm and regenerating package-lock.json..."
-                sudo npm install -g npm@latest
-                rm -rf node_modules package-lock.json
-                npm install
-              fi
-            fi
 
             # Build โปรเจกต์
             npm run build
