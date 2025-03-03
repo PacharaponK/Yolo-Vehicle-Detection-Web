@@ -1,18 +1,17 @@
 name: Deploy to Google Cloud VM
 
-# เมื่อไหร่ที่ workflow จะทำงาน
 on:
   push:
     branches:
       - main  # Deploy เมื่อ push ไป main branch
 
-# Environment variables
 env:
-  VM_IP: ${{ secrets.VM_IP }}  # IP address ของ VM
-  SSH_USERNAME: ${{ secrets.SSH_USERNAME }}  # ชื่อผู้ใช้สำหรับ SSH
-  SSH_KEY: ${{ secrets.SSH_KEY }}  # Private SSH key
-  USER: ${{ secrets.USER }}  # ชื่อผู้ใช้บน VM
-  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"  # Directory บน VM
+  VM_IP: ${{ secrets.VM_IP }}
+  SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
+  SSH_KEY: ${{ secrets.SSH_KEY }}
+  USER: ${{ secrets.USER }}
+  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"
+  WORKING_DIR: "client"  # เพิ่มตัวแปรสำหรับ subfolder ที่มี package.json
 
 jobs:
   deploy:
@@ -27,19 +26,22 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '20'  # ใช้ Node.js 20 ตามที่ Next.js รองรับ
+          node-version: '20'
 
-      # 3. ติดตั้ง dependencies
+      # 3. ติดตั้ง dependencies (ใน subfolder)
       - name: Install dependencies
         run: npm install
+        working-directory: ${{ env.WORKING_DIR }}  # ระบุ subfolder
 
-      # 4. รัน lint เพื่อตรวจสอบโค้ด (optional)
+      # 4. รัน lint เพื่อตรวจสอบโค้ด
       - name: Run lint
         run: npm run lint
+        working-directory: ${{ env.WORKING_DIR }}
 
       # 5. Build โปรเจค Next.js
       - name: Build project
         run: npm run build
+        working-directory: ${{ env.WORKING_DIR }}
 
       # 6. ตั้งค่า SSH key
       - name: Setup SSH
@@ -50,16 +52,16 @@ jobs:
       # 7. Deploy ไป Google Cloud VM
       - name: Deploy to VM
         run: |
-          # คัดลอกไฟล์ build ไปยัง VM
-          scp -i ssh_key.pem -r ./* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
+          # คัดลอกไฟล์จาก subfolder ไปยัง VM
+          scp -i ssh_key.pem -r ./${{ env.WORKING_DIR }}/* $SSH_USERNAME@$VM_IP:$PROJECT_DIR
           
           # รันคำสั่งบน VM ด้วย sudo su -
           ssh -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             sudo su - << 'INNER_EOF'
               cd $PROJECT_DIR
-              npm install  # ติดตั้ง dependencies บน VM
-              npm run build  # Build อีกครั้ง (ถ้าจำเป็น)
-              pm2 restart dtect || pm2 start npm --name "dtect" -- run start  # ใช้ PM2 restart หรือ start
+              npm install
+              npm run build
+              pm2 restart dtect || pm2 start npm --name "dtect" -- run start
             INNER_EOF
           EOF
 
