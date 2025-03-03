@@ -1,14 +1,15 @@
+// src/hooks/useSocket.js
 import { useEffect, useState, useCallback, useRef } from "react";
 import { io } from "socket.io-client";
 import conf from "../config/conf";
 
-// สร้าง socket instance นอก component และเก็บเป็น singleton
+// สร้าง socket instance แค่ครั้งเดียว
 const socket = io(conf.apiBaseUrl, {
-  transports: ["websocket"],
-  reconnection: false, // ปิด reconnection อัตโนมัติของ socket.io
+  transports: ["websocket"], // ใช้ WebSocket เท่านั้น
+  reconnection: false, // ปิด reconnection อัตโนมัติ
   timeout: 10000,
   forceNew: false,
-  autoConnect: false, // ปิด autoConnect เพื่อควบคุมเอง
+  autoConnect: false,
 });
 
 const useSocket = () => {
@@ -20,11 +21,10 @@ const useSocket = () => {
   const reconnectTimeoutRef = useRef(null);
   const maxReconnectAttempts = 5;
   const reconnectAttemptsRef = useRef(0);
-  const isMountedRef = useRef(false); // ใช้ตรวจสอบว่า component ยัง mount อยู่
+  const isMountedRef = useRef(false);
 
-  // Handler สำหรับข้อมูล vehicles
   const handleVehiclesData = useCallback((data) => {
-    console.log("📡 Received vehicles data:", data);
+    //("📡 Received vehicles data:", data);
     setVehicles((prev) => {
       if (JSON.stringify(prev) !== JSON.stringify(data)) {
         return data;
@@ -33,13 +33,18 @@ const useSocket = () => {
     });
   }, []);
 
-  // Handler สำหรับข้อมูล frame
   const handleFrameData = useCallback((data) => {
-    console.log("📷 Received frame data");
-    setFrame(`data:image/jpeg;base64,${data}`);
+    //("📷 Received frame data, length:", data.length);
+    // แปลง binary data เป็น base64 string
+    const base64String = btoa(
+      new Uint8Array(data).reduce(
+        (acc, byte) => acc + String.fromCharCode(byte),
+        ""
+      )
+    );
+    setFrame(`data:image/jpeg;base64,${base64String}`);
   }, []);
 
-  // Handler เมื่อเกิด connection error
   const handleConnectError = useCallback((err) => {
     console.error("Socket connection error:", err);
     setError("Failed to connect to the server");
@@ -47,53 +52,48 @@ const useSocket = () => {
     attemptReconnect();
   }, []);
 
-  // Handler เมื่อ disconnect
   const handleDisconnect = useCallback(() => {
-    console.log("🔌 Socket disconnected");
+    //("🔌 Socket disconnected");
     setIsConnected(false);
     attemptReconnect();
   }, []);
 
-  // ฟังก์ชัน reconnect
   const attemptReconnect = useCallback(() => {
     if (
       reconnectAttemptsRef.current < maxReconnectAttempts &&
       !socket.connected &&
-      isMountedRef.current // reconnect เฉพาะเมื่อ component ยัง mount
+      isMountedRef.current
     ) {
       const delay = Math.min(1000 * 2 ** reconnectAttemptsRef.current, 10000);
       reconnectTimeoutRef.current = setTimeout(() => {
         reconnectAttemptsRef.current += 1;
-        console.log(`Reconnection attempt ${reconnectAttemptsRef.current}`);
+        //(`Reconnection attempt ${reconnectAttemptsRef.current}`);
         socket.connect();
       }, delay);
     } else if (reconnectAttemptsRef.current >= maxReconnectAttempts) {
       setError("Max reconnection attempts reached");
+      //("Max reconnection attempts reached, stopping...");
     }
   }, []);
 
-  // ฟังก์ชันเชื่อมต่อ socket
   const connectSocket = useCallback(() => {
     if (!socket.connected && !socket.connecting) {
-      console.log("Attempting to connect socket...");
+      //("Attempting to connect socket...");
       socket.connect();
+    } else if (socket.connected) {
+      //("Socket already connected, skipping...");
     }
   }, []);
 
   useEffect(() => {
-    isMountedRef.current = true; // ระบุว่า component mount แล้ว
+    isMountedRef.current = true;
+    connectSocket(); // เชื่อมต่อครั้งแรก
 
-    // ถ้า socket ยังไม่เชื่อมต่อ ให้ลองเชื่อมต่อ
-    if (!socket.connected) {
-      connectSocket();
-    }
-
-    // ตั้งค่า event listeners
     socket.on("connect", () => {
       setIsConnected(true);
       setError(null);
       reconnectAttemptsRef.current = 0;
-      console.log("✅ Socket connected");
+      //("✅ Socket connected, SID:", socket.id);
     });
 
     socket.on("vehicles", handleVehiclesData);
@@ -101,14 +101,12 @@ const useSocket = () => {
     socket.on("connect_error", handleConnectError);
     socket.on("disconnect", handleDisconnect);
 
-    // Cleanup เมื่อ component unmount
     return () => {
-      isMountedRef.current = false; // ระบุว่า component unmount
+      isMountedRef.current = false;
       if (reconnectTimeoutRef.current) {
         clearTimeout(reconnectTimeoutRef.current);
       }
-      // ไม่ต้องลบ event listeners หรือ disconnect socket
-      // เพื่อให้ socket ทำงานต่อเนื่องแม้เปลี่ยนหน้า
+      // ไม่ disconnect socket เพื่อให้ใช้งานต่อเนื่อง
     };
   }, [
     handleVehiclesData,
@@ -118,7 +116,7 @@ const useSocket = () => {
     connectSocket,
   ]);
 
-  return {
+  const socketData = {
     vehicles,
     frame,
     error,
@@ -128,6 +126,8 @@ const useSocket = () => {
       attemptReconnect();
     },
   };
+  //("useSocket returning:", socketData);
+  return socketData;
 };
 
 export default useSocket;

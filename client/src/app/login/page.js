@@ -19,7 +19,7 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
-      console.log("🚀 ~ handleLogin ~ res:", res);
+      // console.log("🚀 ~ handleLogin ~ res:", res);
 
       // ตรวจสอบว่า login สำเร็จหรือไม่
       if (res.status === 200) {
@@ -32,7 +32,7 @@ export default function Login() {
         router.push("/dashboard"); // เปลี่ยนเส้นทางไปหน้าหลัก
       }
     } catch (error) {
-      console.log("🚀 ~ handleLogin ~ error:", error);
+      // console.log("🚀 ~ handleLogin ~ error:", error);
       if (error.response && error.response.data) {
         setError(error.response.data.message); // แสดงข้อความ error จาก response
       } else {
