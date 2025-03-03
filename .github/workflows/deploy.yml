@@ -62,7 +62,7 @@ jobs:
             ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "sudo reboot" || true
 
             echo "Waiting for VM to restart..."
-            sleep 30  # รอให้ VM ปิดและเริ่มใหม่
+            sleep 30
 
             echo "Checking VM status..."
             until ssh -i ssh_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=5 $SSH_USERNAME@$VM_IP "echo 'VM is back online'"; do
@@ -87,18 +87,16 @@ jobs:
 
             npm run build
 
-            sudo mkdir -p /var/www/client
             sudo cp -r $PROJECT_DIR/build/* /var/www/client/
             sudo chown -R www-data:www-data /var/www/client
 
             sudo su - << 'INNER_EOF'
-              pm2 restart dtect || pm2 start npm --name "dtect" -- run start
+              pm2 restart dtect &>/dev/null &
             INNER_EOF
 
             echo "Deployment Completed Successfully"
+            exit 0
           EOF
-
-
 
       - name: Cleanup
         run: rm -f ssh_key.pem
