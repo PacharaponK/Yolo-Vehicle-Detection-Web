@@ -9,7 +9,7 @@ env:
   VM_IP: ${{ secrets.VM_IP }}
   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
   SSH_KEY: ${{ secrets.SSH_KEY }}
-  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"
+  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/client_from_github"
   WORKING_DIR: "client"
 
 jobs:
@@ -53,11 +53,22 @@ jobs:
         run: |
           timeout 60s rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || echo "Rsync Timed Out"
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+            # เข้าไปที่โฟลเดอร์โปรเจกต์
             cd $PROJECT_DIR
             npm install
             npm run build
-            pm2 restart dtect || pm2 start npm --name "dtect" -- run start
+            
+            # ย้ายไฟล์ที่ build แล้วไปไว้ที่ /var/www/client
+            sudo mkdir -p /var/www/client
+            sudo cp -r $PROJECT_DIR/build/* /var/www/client/
+            sudo chown -R www-data:www-data /var/www/client
+
+            # ใช้ sudo su - เพื่อรัน pm2 ด้วยสิทธิ์ root
+            sudo su - << 'INNER_EOF'
+              pm2 restart dtect || pm2 start npm --name "dtect" -- run start
+            INNER_EOF
           EOF
+
 
       - name: Cleanup
         run: rm -f ssh_key.pem
