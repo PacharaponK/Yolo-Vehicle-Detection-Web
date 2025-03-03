@@ -65,7 +65,8 @@ jobs:
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             set -e
             sudo mkdir -p /var/www/client
-            sudo mv $PROJECT_DIR/.next/* /var/www/client/
+            sudo rm -rf /var/www/client/*
+            sudo mv /home/ballx/my-next-app/.next/* /var/www/client/
             sudo chown -R www-data:www-data /var/www/client
           EOF
 
