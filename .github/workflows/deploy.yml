@@ -54,40 +54,50 @@ jobs:
           echo "Checking SSH Connection..."
           ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "echo 'SSH Connection Successful'" || { echo 'SSH Connection Failed'; exit 1; }
 
-          echo "Restarting VM if required..."
-          ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "if [ -f /var/run/reboot-required ]; then sudo reboot; exit 0; fi"
+          echo "Checking if reboot is required..."
+          REBOOT_NEEDED=$(ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "[ -f /var/run/reboot-required ] && echo 'yes' || echo 'no'")
+
+          if [ "$REBOOT_NEEDED" = "yes" ]; then
+            echo "Rebooting VM..."
+            ssh -i ssh_key.pem -o StrictHostKeyChecking=no $SSH_USERNAME@$VM_IP "sudo reboot" || true
+
+            echo "Waiting for VM to restart..."
+            sleep 30  # รอให้ VM ปิดและเริ่มใหม่
+
+            echo "Checking VM status..."
+            until ssh -i ssh_key.pem -o StrictHostKeyChecking=no -o ConnectTimeout=5 $SSH_USERNAME@$VM_IP "echo 'VM is back online'"; do
+              echo "Waiting for VM..."
+              sleep 10
+            done
+          fi
 
           echo "Starting Rsync..."
-          timeout 600s rsync -avz -vvv --progress --exclude=node_modules -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || { echo "Rsync Failed"; exit 1; }
+          timeout 60s rsync -avz --progress --exclude=node_modules -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" client/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR || { echo "Rsync Failed"; exit 1; }
 
           echo "Running Deployment on VM..."
           ssh -tt -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             echo "Connected to VM"
 
-            # ตั้งค่า permission ให้ถูกต้อง
             sudo chown -R $SSH_USERNAME:$SSH_USERNAME $PROJECT_DIR
             cd $PROJECT_DIR
 
-            # อัปเดต npm และจัดการ package-lock.json
             sudo npm install -g npm@latest
             rm -rf node_modules package-lock.json
             npm install
 
-            # Build โปรเจกต์
             npm run build
 
-            # ย้ายไฟล์ที่ build ไปยัง /var/www/client
             sudo mkdir -p /var/www/client
             sudo cp -r $PROJECT_DIR/build/* /var/www/client/
             sudo chown -R www-data:www-data /var/www/client
 
-            # ใช้ sudo su - เพื่อรัน pm2 ด้วยสิทธิ์ root
             sudo su - << 'INNER_EOF'
               pm2 restart dtect || pm2 start npm --name "dtect" -- run start
             INNER_EOF
 
             echo "Deployment Completed Successfully"
           EOF
+
 
 
       - name: Cleanup
