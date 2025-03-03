@@ -19,7 +19,7 @@ now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-frame_skip = 2
+frame_skip = 1
 frame_count = 0
 
 sio = socketio.Client()
@@ -51,7 +51,7 @@ post_video_response = post_video({"title": video_name})
 video_id = post_video_response["data"]["id"]
 print("------------------------------",video_id)
 
-model = YOLO('yolov8m.pt')
+model = YOLO('yolov8n.pt')
 
 classnames = []
 with open('classes.txt', 'r') as f:
@@ -460,10 +460,10 @@ while True:
     frame_count += 1
     if frame_count % frame_skip == 0:
         frame_resized = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
-        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
-        
+        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
+
         if sio.connected:
-            sio.emit('frame', buffer.tobytes(), binary=True)
+            sio.emit('frame', buffer.tobytes())
         else:
             print("Socket.IO client not connected")
     
