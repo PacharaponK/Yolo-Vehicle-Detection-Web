@@ -11,32 +11,63 @@ export default function ReportBytime({ vehicles }) {
   useEffect(() => {
     if (vehicles && vehicles.length > 0) {
       const timeRanges = {
-        morning: [6, 10],
-        afternoon: [10, 14],
-        evening: [14, 18],
-        night: [18, 6],
+        morning: [6, 10], // 06:00 - 10:00
+        afternoon: [10, 14], // 10:00 - 14:00
+        evening: [14, 18], // 14:00 - 18:00
+        night: [18, 6], // 18:00 - 06:00
+      };
+
+      const calculateSpeed = (vehicle) => {
+        // แยกวันที่และเวลาจาก entry_time และ exit_time โดยไม่ปรับไทม์โซน
+        const startTimeStr = vehicle.entry_time.split("T")[1].split(".")[0];
+        const endTimeStr = vehicle.exit_time.split("T")[1].split(".")[0];
+
+        const startTimeParts = startTimeStr.split(":");
+        const endTimeParts = endTimeStr.split(":");
+
+        const startSeconds =
+          parseInt(startTimeParts[0]) * 3600 +
+          parseInt(startTimeParts[1]) * 60 +
+          parseInt(startTimeParts[2]);
+        const endSeconds =
+          parseInt(endTimeParts[0]) * 3600 +
+          parseInt(endTimeParts[1]) * 60 +
+          parseInt(endTimeParts[2]);
+
+        const distance = 200; // ระยะทาง 200 เมตร
+        let timeDiff = endSeconds - startSeconds; // คำนวณเป็นวินาที
+
+        // กรณีข้ามวัน (เช่น 23:59 ไป 00:01)
+        if (timeDiff < 0) {
+          timeDiff += 24 * 3600; // บวก 24 ชั่วโมง
+        }
+
+        if (timeDiff <= 0) return null; // ถ้าเวลาผิดพลาด คืนค่า null
+
+        const speed_mps = distance / timeDiff;
+        const speed_kmph = speed_mps * 3.6; // แปลงเป็น km/h
+        return speed_kmph;
       };
 
       const filterAndCalculate = (start, end) => {
         const filtered = vehicles
           .map((vehicle) => {
             if (!vehicle.entry_time || !vehicle.exit_time) return null;
-            const startTime = new Date(vehicle.entry_time);
-            const endTime = new Date(vehicle.exit_time);
-            const hour = startTime.getHours();
-            const distance = 200;
-            const timeDiff = (endTime - startTime) / 1000;
 
-            if (timeDiff <= 0) return null;
-            const speed = (distance / timeDiff) * 3.6;
+            // ดึงชั่วโมงจาก entry_time โดยตรง ไม่ปรับไทม์โซน
+            const timeStr = vehicle.entry_time.split("T")[1].split(".")[0];
+            const hour = parseInt(timeStr.split(":")[0], 10);
+            const speed = calculateSpeed(vehicle);
 
-            return start < end
-              ? hour >= start && hour < end
-                ? { ...vehicle, speed }
-                : null
-              : hour >= start || hour < end
-              ? { ...vehicle, speed }
-              : null;
+            if (speed === null) return null;
+
+            // ตรวจสอบช่วงเวลาแบบดิบๆ
+            const isInRange =
+              start < end
+                ? hour >= start && hour < end
+                : hour >= start || hour < end;
+
+            return isInRange ? { ...vehicle, speed } : null;
           })
           .filter((v) => v !== null);
 
@@ -90,7 +121,7 @@ export default function ReportBytime({ vehicles }) {
             width="100%"
             height="100"
             viewBox="0 0 64 64"
-            className="max-w-[120px]" // Reduced max-width for side-by-side layout
+            className="max-w-[120px]"
           >
             <rect
               x="0"
@@ -260,10 +291,10 @@ export default function ReportBytime({ vehicles }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
       {[
-        { label: "ช่วงเช้า(06:00-10:00น.)", key: "morning" },
-        { label: "ช่วงกลางวัน(10:00-14:00น.)", key: "afternoon" },
-        { label: "ช่วงเย็น(14:00-18:00น.)", key: "evening" },
-        { label: "ช่วงกลางคืน(18:00-06:00น.)", key: "night" },
+        { label: "ช่วงเช้า (06:00-10:00น.)", key: "morning" },
+        { label: "ช่วงกลางวัน (10:00-14:00น.)", key: "afternoon" },
+        { label: "ช่วงเย็น (14:00-18:00น.)", key: "evening" },
+        { label: "ช่วงกลางคืน (18:00-06:00น.)", key: "night" },
       ].map(({ label, key }) => (
         <div
           key={key}
