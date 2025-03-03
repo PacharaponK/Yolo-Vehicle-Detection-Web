@@ -26,37 +26,64 @@ const TrafficChart = ({ vehicleData }) => {
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
 
   useEffect(() => {
-    if (!vehicleData || vehicleData.length === 0) return; // ถ้าไม่มีข้อมูล ไม่ต้องอัปเดต
+    if (!vehicleData || vehicleData.length === 0) {
+      console.log("No vehicle data provided");
+      return;
+    }
 
-    const now = new Date(); // เวลาปัจจุบัน
-    const startTime = new Date(now.getTime() - 12 * 60 * 60 * 1000); // 12 ชม. ก่อนหน้า
+    console.log("Total vehicles:", vehicleData.length);
+    console.log("Sample vehicle data:", vehicleData.slice(0, 5));
 
-    const numIntervals = 24; // 12 ชั่วโมง (ทุกๆ 30 นาที)
+    // กำหนดเวลาปัจจุบัน (UTC) และบวก 7 ชั่วโมง
+    const now = new Date(); // เวลาปัจจุบันใน UTC
+    const startTime = new Date(now.getTime() + 4 * 60 * 60 * 1000); // บวก 7 ชั่วโมง
+    const endTime = new Date(startTime.getTime()); // บวก 3 ชั่วโมงจาก startTime
+
+    const intervalMs = 5 * 60 * 1000; // 5 นาที
+    const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 3 ชั่วโมง หาร 5 นาที = 36 ช่วง
+
+    console.log("Current time (UTC):", now.toISOString());
+    console.log("Start time (UTC):", startTime.toISOString());
+    console.log("End time (UTC):", endTime.toISOString());
+    console.log("Number of intervals:", numIntervals);
+
     const halfHourlyTraffic = {};
-
     vehicleTypes.forEach((type) => {
       halfHourlyTraffic[type] = Array(numIntervals).fill(0);
     });
 
     vehicleData.forEach(({ class: type, entry_time }) => {
+      if (!type || !entry_time) {
+        console.log("Skipping invalid vehicle:", { type, entry_time });
+        return;
+      }
+
       const entryDate = new Date(entry_time);
-
-      if (entryDate >= startTime && entryDate <= now) {
+      if (entryDate >= startTime && entryDate <= endTime) {
         const timeDiff = entryDate - startTime;
-        const index = Math.floor(timeDiff / (30 * 60 * 1000)); // คำนวณ index เป็นช่วงครึ่งชั่วโมง
+        const index = Math.floor(timeDiff / intervalMs);
 
-        if (halfHourlyTraffic[type] && index < numIntervals) {
+        if (halfHourlyTraffic[type] && index >= 0 && index < numIntervals) {
           halfHourlyTraffic[type][index] += 1;
+        } else {
+          console.log(
+            "Index out of bounds:",
+            index,
+            "for entry_time:",
+            entry_time
+          );
         }
       }
     });
 
+    console.log("Half hourly traffic:", halfHourlyTraffic);
+
+    // สร้าง labels โดยใช้ UTC ดิบๆ ในรูปแบบ HH:mm
     const labels = Array.from({ length: numIntervals }, (_, i) => {
-      const time = new Date(startTime.getTime() + i * 30 * 60 * 1000);
-      return time.toLocaleTimeString("th-TH", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      const time = new Date(startTime.getTime() + i * intervalMs);
+      const hours = time.getUTCHours().toString().padStart(2, "0");
+      const minutes = time.getUTCMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
     });
 
     const colors = {
@@ -78,7 +105,7 @@ const TrafficChart = ({ vehicleData }) => {
     }));
 
     setChartData({ labels, datasets });
-  }, [vehicleData]); // อัปเดตทุกครั้งที่ vehicleData เปลี่ยน
+  }, [vehicleData]);
 
   return (
     <div className="w-full h-[30vh] max-h-[400px] md:max-h-[500px]">
@@ -96,7 +123,8 @@ const TrafficChart = ({ vehicleData }) => {
             },
             x: {
               ticks: {
-                autoSkip: false,
+                autoSkip: true,
+                maxTicksLimit: 12, // จำกัดจำนวน ticks ให้เหมาะกับ 3 ชั่วโมง
                 maxRotation: 45,
                 minRotation: 45,
               },
@@ -105,7 +133,7 @@ const TrafficChart = ({ vehicleData }) => {
           plugins: {
             title: {
               display: true,
-              text: "จำนวนรถแยกตามประเภทรถ (12 ชั่วโมงย้อนหลัง)",
+              text: "จำนวนรถแยกตามประเภทรถ (3 ชั่วโมงจากเวลาปัจจุบัน +7 ชม., ทุก 5 นาที)",
               font: {
                 size: 16,
               },
