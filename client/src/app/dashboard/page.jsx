@@ -8,7 +8,6 @@ import Navbar from "../components/Navbar";
 import ReportBytime from "../components/ReportByTime";
 import Picture from "../components/Picture";
 
-
 const Dashboard = () => {
   const { vehicles } = useSocket();
 
@@ -56,11 +55,10 @@ const Dashboard = () => {
           <div className="bg-white shadow-lg rounded-lg p-4 sm:p-6 xl:p-8 mb-6 w-full">
             <div className="flex flex-col sm:flex-row items-center justify-between mb-4">
               <div className="flex-shrink-0 text-center">
-                <span className="text-2xl sm:text-3xl font-bold text-gray-900">
-                  {countTodayVehicles(vehicles)}
-                </span>
+                <span className="text-2xl sm:text-3xl font-bold text-gray-900"></span>
                 <h3 className="text-base font-normal text-gray-500">
-                  จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้
+                  จำนวนรถที่ตรวจจับได้ทั้งหมดในวันนี้{" "}
+                  {countTodayVehicles(vehicles)} คัน
                 </h3>
               </div>
             </div>
