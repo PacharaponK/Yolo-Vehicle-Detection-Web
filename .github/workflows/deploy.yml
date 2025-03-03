@@ -10,7 +10,7 @@ env:
   SSH_USERNAME: ${{ secrets.SSH_USERNAME }}
   SSH_KEY: ${{ secrets.SSH_KEY }}
   USER: ${{ secrets.USER }}
-  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}/my-next-app"
+  PROJECT_DIR: "/home/${{ secrets.SSH_USERNAME }}"
   WORKING_DIR: "client"
 
 jobs:
