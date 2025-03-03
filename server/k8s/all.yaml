@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: express-app
-          image: alivefordie/express-server:v1.4
+          image: alivefordie/express-server:v1.7
           imagePullPolicy: Always
           resources:
             requests:
@@ -64,8 +64,8 @@ metadata:
 spec:
   selector:
     app: express-app
-  type: LoadBalancer
-  loadBalancerIP: 35.222.183.244
+  # type: LoadBalancer
+  # loadBalancerIP: xxx.xxx.xxx.xxx
   ports:
     - protocol: TCP
       port: 80

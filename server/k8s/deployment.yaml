@@ -14,14 +14,15 @@ spec:
     spec:
       containers:
         - name: express-app
-          image: alivefordie/express-server:v1.2
+          image: alivefordie/express-server:v1.4
+          imagePullPolicy: Always
           resources:
             requests:
-              memory: "512Mi"  # Minimum memory allocated at startup
-              cpu: "500m"      # Minimum CPU (0.5 cores)
+              memory: "128Mi"       #     memory: "512Mi"  Minimum memory allocated at startup
+              cpu: "100m"           #     cpu: "500m"      Minimum CPU (0.5 cores)
             limits:
-              memory: "1Gi"    # Max memory
-              cpu: "1"         # Max CPU (1 core)
+              memory: "1Gi"         #     memory: "1Gi"    Max memory   
+              cpu: "1"              #     cpu: "1"         Max CPU (1 core)
           ports:
             - containerPort: 3001
           env:
