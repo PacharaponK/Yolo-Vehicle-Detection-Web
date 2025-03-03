@@ -60,11 +60,33 @@ jobs:
             $WORKING_DIR/package-lock.json \
             $SSH_USERNAME@$VM_IP:$PROJECT_DIR/
 
+      - name: Move Next.js build to /var/www/client
+        run: |
+          ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
+            set -e
+            sudo mkdir -p /var/www/client
+            sudo cp -r $PROJECT_DIR/.next/* /var/www/client/
+            sudo chown -R www-data:www-data /var/www/client
+          EOF
+
       - name: Restart Next.js app on VM
         run: |
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             set -e
             cd $PROJECT_DIR
+
+            # เช็คและอัปเดต Node.js ถ้าจำเป็น
+            NODE_VERSION=$(node -v || echo "none")
+            if [[ "$NODE_VERSION" == "none" || "$NODE_VERSION" < "v16" ]]; then
+              echo "Updating Node.js..."
+              curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
+              sudo apt-get install -y nodejs
+            fi
+
+            # อัปเดต npm ถ้าจำเป็น
+            sudo npm install -g npm@latest
+
+            # ติดตั้ง dependencies และ restart pm2
             npm install --omit=dev
             sudo su - << 'INNER_EOF'
               pm2 restart dtech || pm2 start npm --name "dtech" -- start
