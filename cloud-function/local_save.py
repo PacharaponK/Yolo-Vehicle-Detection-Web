@@ -3,7 +3,7 @@ import json
 import pandas as pd
 
 def fetch_data():
-    url = "http://alivefordie.life/api/vehicle/today"  
+    url = "https://alivefordie.life/api/vehicle/today"  
     response = requests.get(url)
     
     if response.status_code == 200:
@@ -17,22 +17,32 @@ def export_to_excel(forward_lane_list, backward_lane_list, filename="vehicle_dat
     df_backward = pd.DataFrame(backward_lane_list)
     
     # เปลี่ยนชื่อคอลัมน์เป็นภาษาไทย
-    df_forward.rename(columns={'class': 'ชนิดรถ', 'yolo_id': "รหัสรถ", 'lane_type': "ชนิดเลน", 'lane_id': "ลำดับเลน", 'entry_time': "เวลาที่ตรวจจับ"}, inplace=True)
-    df_backward.rename(columns={'class': 'ชนิดรถ', 'yolo_id': "รหัสรถ", 'lane_type': "ชนิดเลน", 'lane_id': "ลำดับเลน", 'entry_time': "เวลาที่ตรวจจับ"}, inplace=True)
+    df_forward.rename(columns={'yolo_id': "รหัสรถ", 'class': 'ชนิดรถ', 'lane_id': "ลำดับเลน", 'entry_time': "เวลาที่ตรวจจับ"}, inplace=True)
+    df_backward.rename(columns={'yolo_id': "รหัสรถ", 'class': 'ชนิดรถ', 'lane_id': "ลำดับเลน", 'entry_time': "เวลาที่ตรวจจับ"}, inplace=True)
 
     # แปลงและแยกวันที่ - เวลา
     for df in [df_forward, df_backward]:
         if "เวลาที่ตรวจจับ" in df.columns:
             df["เวลาที่ตรวจจับ"] = pd.to_datetime(df["เวลาที่ตรวจจับ"])
-            df["วันที่ตรวจจับ"] = df["เวลาที่ตรวจจับ"].dt.date.astype(str)  # แปลงเป็น string เพื่อความสวยงาม
-            df["เวลาที่ตรวจจับ"] = df["เวลาที่ตรวจจับ"].dt.time.astype(str)  # แปลงเป็น string เพื่อความสวยงาม
+            df["วันที่ตรวจจับ"] = df["เวลาที่ตรวจจับ"].dt.date.astype(str)
+            df["เวลาที่ตรวจจับ"] = df["เวลาที่ตรวจจับ"].dt.time.astype(str)
 
     # ลบคอลัมน์ที่ไม่ต้องการ
-    columns_to_remove = ["id", "exit_time"]  
+    columns_to_remove = ["id", "exit_time", "lane_type"]  
     df_forward.drop(columns=[col for col in columns_to_remove if col in df_forward.columns], inplace=True)
     df_backward.drop(columns=[col for col in columns_to_remove if col in df_backward.columns], inplace=True)
 
+    # Sort ข้อมูลตามลำดับเลน (จากน้อยไปมาก)
+    df_forward = df_forward.sort_values(by="รหัสรถ")
+    df_backward = df_backward.sort_values(by="รหัสรถ")
+
+    # จัดเรียงลำดับคอลัมน์ตามที่ต้องการ
+    desired_columns = ["รหัสรถ", "ลำดับเลน", "ชนิดรถ", "เวลาที่ตรวจจับ", "วันที่ตรวจจับ"]
+    df_forward = df_forward[desired_columns]
+    df_backward = df_backward[desired_columns]
+
     print(df_forward.head())
+    print(df_backward.head())
 
     # บันทึกข้อมูลเป็นไฟล์ Excel โดยใช้หลายชีต
     with pd.ExcelWriter(filename) as writer:

@@ -9,17 +9,34 @@ from services import update_and_forget, fire_and_forget, post_video
 import os
 import base64
 import socketio
+import random
+import string
+
+def random_video_name(length=8):
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
 now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-# sio = socketio.Client()
-# sio.connect('http://35.222.183.244')
+frame_skip = 2
+frame_count = 0
+
+sio = socketio.Client()
+
+# เชื่อมต่อเซิร์ฟเวอร์
+try:
+    sio.connect('https://alivefordie.life')  # หรือ URL อื่นที่ถูกต้อง
+    print("Connected to server")
+except socketio.exceptions.ConnectionError as e:
+    print(f"Connection Error: {e}")
+    while e :
+        sio.connect('https://alivefordie.life')
+        print("Connected to server")
 
 services = {
-    "create_vehicle_url": "http://35.222.183.244/api/vehicle",
-    "update_vehicle_url": "http://35.222.183.244/api/vehicle/{}",
+    "create_vehicle_url": "https://alivefordie.life/api/vehicle",
+    "update_vehicle_url": "https://alivefordie.life/api/vehicle/{}",
 }
 
 # C:\SDA\vehicle-detection\cars2.mp4
@@ -27,13 +44,14 @@ services = {
 
 video_path = r"C:\SDA\vehicle-detection\data\cars.mp4"
 cap = cv2.VideoCapture(video_path)
-video_name = os.path.basename(video_path)
+# video_name = os.path.basename(video_path)
+video_name = random_video_name()
 
 post_video_response = post_video({"title": video_name})
 video_id = post_video_response["data"]["id"]
 print("------------------------------",video_id)
 
-model = YOLO('yolov8n.pt')
+model = YOLO('yolov8m.pt')
 
 classnames = []
 with open('classes.txt', 'r') as f:
@@ -424,26 +442,33 @@ while True:
                         query = f'?yolo_id={id}&video_id={video_id}'
                         response = update_and_forget(data, query)
 
-    cvzone.putTextRect(frame, f'1st_fw_lane_entry_count = {len(first_fw_lane_entry_counter)}', [10, 30], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'1st_fw_lane_exit_count = {len(first_fw_lane_exit_counter)}', [10, 60], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'2nd_fw_lane_entry_count = {len(second_fw_lane_entry_counter)}', [10, 90], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'2nd_fw_lane_exit_count = {len(second_fw_lane_exit_counter)}', [10, 120], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'3rd_fw_lane_entry_count = {len(third_fw_lane_entry_counter)}', [10, 150], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'3rd_fw_lane_exit_count = {len(third_fw_lane_exit_counter)}', [10, 180], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'1st_bw_lane_entry_count = {len(first_bw_lane_entry_counter)}', [10, 210], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'1st_bw_lane_exit_count = {len(first_bw_lane_exit_counter)}', [10, 240], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'2nd_bw_lane_entry_count = {len(second_bw_lane_entry_counter)}', [10, 270], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'2nd_bw_lane_exit_count = {len(second_bw_lane_exit_counter)}', [10, 300], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'3rd_bw_lane_entry_count = {len(third_bw_lane_entry_counter)}', [10, 330], thickness=1, scale=1.0, border=1)
-    cvzone.putTextRect(frame, f'3rd_bw_lane_exit_count = {len(third_bw_lane_exit_counter)}', [10, 360], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'1st_fw_lane_entry_count = {len(first_fw_lane_entry_counter)}', [10, 30], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'1st_fw_lane_exit_count = {len(first_fw_lane_exit_counter)}', [10, 60], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'2nd_fw_lane_entry_count = {len(second_fw_lane_entry_counter)}', [10, 90], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'2nd_fw_lane_exit_count = {len(second_fw_lane_exit_counter)}', [10, 120], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'3rd_fw_lane_entry_count = {len(third_fw_lane_entry_counter)}', [10, 150], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'3rd_fw_lane_exit_count = {len(third_fw_lane_exit_counter)}', [10, 180], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'1st_bw_lane_entry_count = {len(first_bw_lane_entry_counter)}', [10, 210], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'1st_bw_lane_exit_count = {len(first_bw_lane_exit_counter)}', [10, 240], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'2nd_bw_lane_entry_count = {len(second_bw_lane_entry_counter)}', [10, 270], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'2nd_bw_lane_exit_count = {len(second_bw_lane_exit_counter)}', [10, 300], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'3rd_bw_lane_entry_count = {len(third_bw_lane_entry_counter)}', [10, 330], thickness=1, scale=1.0, border=1)
+    # cvzone.putTextRect(frame, f'3rd_bw_lane_exit_count = {len(third_bw_lane_exit_counter)}', [10, 360], thickness=1, scale=1.0, border=1)
 
     cv2.imshow('frame', frame)
-    # _, buffer = cv2.imencode('.jpg', frame) 
-    # jpg_as_text = base64.b64encode(buffer).decode('utf-8') 
 
-    # sio.emit('frame', jpg_as_text) 
+    frame_count += 1
+    if frame_count % frame_skip == 0:
+        frame_resized = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
+        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 50])  # คุณภาพ 70 (0-100)
+        jpg_as_text = base64.b64encode(buffer).decode('utf-8')
+        if sio.connected:
+            sio.emit('frame', jpg_as_text)
+        else:
+            print("Socket.IO client not connected")
+    
     cv2.waitKey(1)
 
 cap.release()
-# sio.disconnect()
+sio.disconnect()
 cv2.destroyAllWindows()

@@ -17,60 +17,28 @@ function Picture() {
   }, [frame]);
 
   return (
-    <div className="flex flex-col w-full container mx-auto p-4 items-center">
+    <div className="flex flex-col w-full min-h-[70vh] container mx-auto p-4 items-center justify-center">
       {error ? (
-        <div className="w-[640px] h-[480px] flex items-center justify-center bg-red-100 border border-red-400 rounded-lg">
+        <div className="w-full h-full flex items-center justify-center bg-red-100 border border-red-400 rounded-lg">
           <p className="text-red-700">{error}</p>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-4 justify-center items-center">
+        <div className="flex flex-col md:flex-row gap-4 justify-center items-center w-full h-full">
           {/* เฟรมล่าสุด (ใหญ่) */}
-          <div className="flex-1 max-w-[640px]">
+          <div className="flex-1 w-full h-full max-w-[960px]">
             {frameHistory.length > 0 ? (
               <Image
                 src={frameHistory[0]}
-                width={640}
-                height={480}
+                width={960}
+                height={540}
                 alt="Latest Frame"
-                className="border rounded-lg shadow-lg w-full h-auto"
+                className="border rounded-lg shadow-lg w-full h-auto object-cover"
               />
             ) : (
-              <div className="w-[640px] h-[480px] flex items-center justify-center bg-gray-200 border rounded-lg shadow-lg">
+              <div className="w-full h-full flex items-center justify-center bg-gray-200 border rounded-lg shadow-lg">
                 <p className="text-gray-700">Loading stream...</p>
               </div>
             )}
-          </div>
-
-          {/* เฟรมก่อนหน้า (เล็ก) */}
-          <div className="flex flex-col gap-4">
-            {/* เฟรม -1 */}
-            <div className="w-[320px] h-[240px] flex items-center justify-center bg-gray-200 border rounded-lg shadow-md">
-              {frameHistory[1] ? (
-                <Image
-                  src={frameHistory[1]}
-                  width={320}
-                  height={240}
-                  alt="Frame -1"
-                  className="w-full h-auto"
-                />
-              ) : (
-                <p className="text-gray-700">Loading...</p>
-              )}
-            </div>
-            {/* เฟรม -2 */}
-            <div className="w-[320px] h-[240px] flex items-center justify-center bg-gray-200 border rounded-lg shadow-md">
-              {frameHistory[2] ? (
-                <Image
-                  src={frameHistory[2]}
-                  width={320}
-                  height={240}
-                  alt="Frame -2"
-                  className="w-full h-auto"
-                />
-              ) : (
-                <p className="text-gray-700">Loading...</p>
-              )}
-            </div>
           </div>
         </div>
       )}

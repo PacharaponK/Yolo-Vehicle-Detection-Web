@@ -1,10 +1,8 @@
 "use client";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import ax ,{axData} from "../../../config/ax";
+import ax, { axData } from "../../../config/ax";
 import Link from "next/link";
-
-
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -21,17 +19,20 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
-      console.log("🚀 ~ handleLogin ~ res:", res)
+      console.log("🚀 ~ handleLogin ~ res:", res);
 
       // ตรวจสอบว่า login สำเร็จหรือไม่
       if (res.status === 200) {
-        // เก็บ JWT ใน sessionStorage เมื่อ login สำเร็จ
-        sessionStorage.setItem("jwt", res.data.Token);
-        axData.jwt = res.data.Token; // อัพเดต axData ด้วย JWT ใหม่
+        const token = res.data.Token;
+        // เก็บ JWT ใน sessionStorage
+        sessionStorage.setItem("jwt", token);
+        // เก็บ JWT ใน cookie เพื่อให้ Middleware ตรวจสอบได้
+        document.cookie = `jwt=${token}; path=/; SameSite=Strict`;
+        axData.jwt = token; // อัพเดต axData ด้วย JWT ใหม่
         router.push("/dashboard"); // เปลี่ยนเส้นทางไปหน้าหลัก
       }
     } catch (error) {
-      console.log("🚀 ~ handleLogin ~ error:", error)
+      console.log("🚀 ~ handleLogin ~ error:", error);
       if (error.response && error.response.data) {
         setError(error.response.data.message); // แสดงข้อความ error จาก response
       } else {
@@ -81,7 +82,7 @@ export default function Login() {
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
+                placeholder="อีเมล"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
@@ -98,7 +99,7 @@ export default function Login() {
                 <input
                   type={passwordVisible ? "text" : "password"}
                   name="password"
-                  placeholder="Password"
+                  placeholder="รหัสผ่าน"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required

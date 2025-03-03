@@ -9,7 +9,7 @@ from datetime import datetime
 
 def fetch_data():
     """ดึงข้อมูลจาก API พร้อมการ retry กรณีเจอ 500 Internal Server Error"""
-    url = "http://alivefordie.life/api/vehicle/today"
+    url = "https://alivefordie.life/api/vehicle/today"
     retries = 3  # จำนวนครั้งที่ retry
     for i in range(retries):
         try:

@@ -2,9 +2,9 @@ import requests
 import threading
 
 services = {
-    "create_vehicle_url": "http://35.222.183.244/api/vehicle",
-    "update_vehicle_url": "http://35.222.183.244/api/vehicle{}",
-    "create_video_url": "http://35.222.183.244/api/video"
+    "create_vehicle_url": "https://alivefordie.life/api/vehicle",
+    "update_vehicle_url": "https://alivefordie.life/api/vehicle{}",
+    "create_video_url": "https://alivefordie.life/api/video"
 }
 
 def post_video(data): 
