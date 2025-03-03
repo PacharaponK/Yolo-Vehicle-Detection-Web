@@ -201,10 +201,15 @@ router.get("/api/vehicle/today", [
 	// authenticateJWT,
 	async (req: Request, res: Response, next: NextFunction) => {
 		try {
+			const { GMT } = req.query;
+			const TIMEZONE = GMT ? Number(GMT) : 0;
 			const now = new Date();
-			// console.log(now.toString(), "-----------------");
-			const today = new Date(now.getTime() + 7 * 60 * 60 * 1000);
-			// console.log(today.toString(), "************");
+			const UTC = new Date(now.getTime());
+			console.log("NOW :", now);
+			console.log("UTC :", UTC);
+			const today = new Date(UTC.getTime() + TIMEZONE * 60 * 60 * 1000);
+			// console.log(UTC.toString(), "-----------------");
+			console.log(today, "************");
 			today.setHours(0, 0, 0, 0);
 			const tomorrow = new Date(today);
 			tomorrow.setDate(tomorrow.getDate() + 1);
