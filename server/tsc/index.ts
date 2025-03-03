@@ -21,6 +21,9 @@ export const io = setupSocket(server);
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+	res.send("Welcome to the server");
+});
 app.use(testRoutes);
 app.use(vehicleRoutes);
 app.use(videoRoutes);

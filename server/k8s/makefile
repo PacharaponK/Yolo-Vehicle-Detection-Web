@@ -16,3 +16,19 @@ delete:
 
 logs:
 	kubectl logs -f -l app=express-app -c express-app
+
+https: ingress cert
+
+delete-https: delete-ingress delete-cert
+
+cert:
+	kubectl apply -f cert.yaml
+
+delete-cert:
+	kubectl delete -f cert.yaml
+
+delete-ingress:
+	kubectl delete -f ingress.yaml
+
+ingress:
+	kubectl apply -f ingress.yaml
