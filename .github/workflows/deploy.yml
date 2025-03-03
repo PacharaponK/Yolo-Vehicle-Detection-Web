@@ -1,4 +1,4 @@
-name: Deploy to Google Cloud VM
+name: Deploy Next.js to Google Cloud VM
 
 on:
   push:
@@ -33,9 +33,12 @@ jobs:
         run: npm run lint
         working-directory: ${{ env.WORKING_DIR }}
 
-      - name: Build project
+      - name: Build Next.js app
         run: npm run build
         working-directory: ${{ env.WORKING_DIR }}
+
+      - name: Verify Next.js build output
+        run: ls -l ${{ env.WORKING_DIR }}/.next
 
       - name: Setup SSH
         run: |
@@ -49,18 +52,22 @@ jobs:
       - name: Debug SSH Connection
         run: ssh -v -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP "echo SSH connection successful"
 
-      - name: Deploy build/ to VM using rsync
+      - name: Deploy Next.js build to VM using rsync
         run: |
-          timeout 60s rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" $WORKING_DIR/build/ $SSH_USERNAME@$VM_IP:$PROJECT_DIR/build || echo "Rsync Timed Out"
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" \
+            $WORKING_DIR/.next/ \
+            $WORKING_DIR/package.json \
+            $WORKING_DIR/package-lock.json \
+            $SSH_USERNAME@$VM_IP:$PROJECT_DIR/
 
-      - name: Restart PM2 process
+      - name: Restart Next.js app on VM
         run: |
           ssh -o StrictHostKeyChecking=no -i ssh_key.pem $SSH_USERNAME@$VM_IP << 'EOF'
             set -e
-            sudo mkdir -p /var/www/client
-            sudo cp -r $PROJECT_DIR/build/* /var/www/client/
+            cd $PROJECT_DIR
+            npm install --omit=dev
             sudo su - << 'INNER_EOF'
-              pm2 restart dtect || pm2 start npm --name "dtect" -- run start
+              pm2 restart dtech || pm2 start npm --name "dtech" -- start
             INNER_EOF
           EOF
 
