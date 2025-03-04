@@ -54,7 +54,7 @@ jobs:
 
       - name: Deploy Next.js build to VM using rsync
         run: |
-          rsync -avz -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" \
+          rsync -avz --exclude='.next' -e "ssh -o StrictHostKeyChecking=no -i ssh_key.pem" \
             $WORKING_DIR/ \
             $WORKING_DIR/package.json \
             $WORKING_DIR/package-lock.json \

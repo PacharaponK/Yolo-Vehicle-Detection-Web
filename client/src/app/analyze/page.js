@@ -2,15 +2,12 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 import TrafficChart from "../components/TraffigChart";
-import { io } from "socket.io-client";
-import useSocket from "../../../hooks/useSocket";
-import conf from "../../../config/conf";
 import LaneTrafficChart from "../components/LaneTrafficChart";
-
-const socket = io(conf.apiBaseUrl);
+import { useSocketContext } from "@/context/context";
 
 function Analye() {
-  const { vehicles } = useSocket();
+  const { vehicles } = useSocketContext();
+  console.log("🚀 ~ Analye ~ vehicles:", vehicles);
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-rose-200 to-gray-100">
       <Navbar />

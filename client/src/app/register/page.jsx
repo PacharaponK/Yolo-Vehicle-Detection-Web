@@ -83,7 +83,7 @@ export default function Register() {
               <input
                 type="text"
                 name="name"
-                placeholder="Full Name"
+                placeholder="ชื่อ"
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
@@ -98,7 +98,7 @@ export default function Register() {
               <input
                 type="email"
                 name="email"
-                placeholder="Email"
+                placeholder="อีเมล"
                 value={formData.email}
                 onChange={handleChange}
                 className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"
@@ -113,7 +113,7 @@ export default function Register() {
               <input
                 type="password"
                 name="password"
-                placeholder="Password"
+                placeholder="รหัสผ่าน"
                 value={formData.password}
                 onChange={handleChange}
                 className="w-full rounded-md py-2.5 px-4 border text-sm outline-[#FF8295]"

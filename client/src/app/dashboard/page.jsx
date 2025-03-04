@@ -1,15 +1,12 @@
 "use client";
 import Link from "next/link";
-import { io } from "socket.io-client";
-import conf from "../../../config/conf";
-import useSocket from "../../../hooks/useSocket";
-
 import Navbar from "../components/Navbar";
 import ReportBytime from "../components/ReportByTime";
 import Picture from "../components/Picture";
+import { useSocketContext } from "@/context/context";
 
 const Dashboard = () => {
-  const { vehicles } = useSocket();
+  const { vehicles } = useSocketContext();
 
   const calculateSpeed = (vehicle) => {
     const startTime = new Date(vehicle.entry_time);
@@ -28,13 +25,32 @@ const Dashboard = () => {
   };
 
   const countTodayVehicles = (vehicles) => {
+    // ใช้ UTC ดิบๆ สำหรับวันที่ปัจจุบัน
     const today = new Date().toISOString().split("T")[0];
-    return vehicles.filter((vehicle) => {
-      const vehicleDate = new Date(vehicle.entry_time)
-        .toISOString()
-        .split("T")[0];
-      return vehicleDate === today;
+    //("Today (UTC):", today);
+
+    // ตรวจสอบว่า vehicles มีข้อมูลหรือไม่
+    if (!Array.isArray(vehicles) || vehicles.length === 0) {
+      //("Vehicles is empty or not an array:", vehicles);
+      return 0;
+    }
+
+    // ใช้วันที่จากข้อมูลแรกเป็น基準 (ถ้าต้องการนับข้อมูลที่มี)
+    const referenceDate = vehicles[0]?.entry_time?.split("T")[0] || today;
+    //("Reference date (from data or today):", referenceDate);
+
+    const count = vehicles.filter((vehicle) => {
+      if (!vehicle || !vehicle.entry_time) {
+        //("Invalid vehicle entry:", vehicle);
+        return false;
+      }
+      const vehicleDate = vehicle.entry_time.split("T")[0];
+      //("Vehicle date:", vehicleDate);
+      return vehicleDate === referenceDate; // เปลี่ยนจาก today เป็น referenceDate
     }).length;
+
+    //("Counted vehicles for reference date:", count);
+    return count;
   };
 
   return (
@@ -190,9 +206,6 @@ const Dashboard = () => {
           . All rights reserved.
         </p>
       </div>
-
-      <script async defer src="https://buttons.github.io/buttons.js"></script>
-      <script src="https://demo.themesberg.com/windster/app.bundle.js"></script>
     </div>
   );
 };

@@ -1,4 +1,3 @@
-// components/LaneTrafficChart.jsx
 import { useState, useEffect } from "react";
 import { Line } from "react-chartjs-2";
 import {
@@ -26,11 +25,26 @@ const LaneTrafficChart = ({ vehicleData }) => {
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
 
   useEffect(() => {
-    if (!vehicleData || vehicleData.length === 0) return;
+    if (!vehicleData || vehicleData.length === 0) {
+      console.log("No vehicle data provided");
+      return;
+    }
 
-    const now = new Date();
-    const startTime = new Date(now.getTime() - 12 * 60 * 60 * 1000); // 12 ชม. ก่อนหน้า
-    const numIntervals = 24; // ทุก 30 นาที รวม 12 ชั่วโมง
+    console.log("Total vehicles:", vehicleData.length);
+    console.log("Sample vehicle data:", vehicleData.slice(0, 5));
+
+    // กำหนดเวลาปัจจุบัน (UTC) และบวก 7 ชั่วโมง
+    const now = new Date(); // เวลาปัจจุบันใน UTC
+    const startTime = new Date(now.getTime() + 7 * 60 * 60 * 1000); // บวก 7 ชั่วโมง
+    const endTime = new Date(startTime.getTime() + 3 * 60 * 60 * 1000); // บวก 3 ชั่วโมงจาก startTime
+
+    const intervalMs = 5 * 60 * 1000; // 5 นาที
+    const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 3 ชั่วโมง หาร 5 นาที = 36 ช่วง
+
+    console.log("Current time (UTC):", now.toISOString());
+    console.log("Start time (UTC):", startTime.toISOString());
+    console.log("End time (UTC):", endTime.toISOString());
+    console.log("Number of intervals:", numIntervals);
 
     // หาเลนทั้งหมดที่มีในข้อมูล
     const lanes = [...new Set(vehicleData.map((v) => v.lane_id))]; // เช่น [1, 2, 3]
@@ -43,25 +57,37 @@ const LaneTrafficChart = ({ vehicleData }) => {
 
     // นับจำนวนรถในแต่ละเลนตามช่วงเวลา
     vehicleData.forEach(({ lane_id, entry_time }) => {
+      if (!lane_id || !entry_time) {
+        console.log("Skipping invalid vehicle:", { lane_id, entry_time });
+        return;
+      }
+
       const entryDate = new Date(entry_time);
-
-      if (entryDate >= startTime && entryDate <= now) {
+      if (entryDate >= startTime && entryDate <= endTime) {
         const timeDiff = entryDate - startTime;
-        const index = Math.floor(timeDiff / (30 * 60 * 1000)); // ดัชนีช่วงครึ่งชั่วโมง
+        const index = Math.floor(timeDiff / intervalMs);
 
-        if (laneTraffic[lane_id] && index < numIntervals) {
+        if (laneTraffic[lane_id] && index >= 0 && index < numIntervals) {
           laneTraffic[lane_id][index] += 1;
+        } else {
+          console.log(
+            "Index out of bounds:",
+            index,
+            "for entry_time:",
+            entry_time
+          );
         }
       }
     });
 
-    // สร้าง labels (เวลา)
+    console.log("Lane traffic:", laneTraffic);
+
+    // สร้าง labels โดยใช้ UTC ดิบๆ ในรูปแบบ HH:mm
     const labels = Array.from({ length: numIntervals }, (_, i) => {
-      const time = new Date(startTime.getTime() + i * 30 * 60 * 1000);
-      return time.toLocaleTimeString("th-TH", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      const time = new Date(startTime.getTime() + i * intervalMs);
+      const hours = time.getUTCHours().toString().padStart(2, "0");
+      const minutes = time.getUTCMinutes().toString().padStart(2, "0");
+      return `${hours}:${minutes}`;
     });
 
     // กำหนดสีสำหรับแต่ละเลน
@@ -110,7 +136,8 @@ const LaneTrafficChart = ({ vehicleData }) => {
                 text: "เวลา",
               },
               ticks: {
-                autoSkip: false,
+                autoSkip: true,
+                maxTicksLimit: 12, // จำกัดจำนวน ticks ให้เหมาะกับ 3 ชั่วโมง
                 maxRotation: 45,
                 minRotation: 45,
               },
@@ -119,7 +146,7 @@ const LaneTrafficChart = ({ vehicleData }) => {
           plugins: {
             title: {
               display: true,
-              text: "จำนวนรถแยกตามเลน (12 ชั่วโมงย้อนหลัง)",
+              text: "จำนวนรถแยกตามเลน (3 ชั่วโมงจากเวลาปัจจุบัน +7 ชม., ทุก 5 นาที)",
               font: {
                 size: 16,
               },
