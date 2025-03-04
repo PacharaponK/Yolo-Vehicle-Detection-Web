@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ax, { axData } from "../../../config/ax";
 import Link from "next/link";
@@ -8,8 +8,20 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false); // เพิ่ม state สำหรับ "จดจำฉัน"
   const [error, setError] = useState("");
   const router = useRouter();
+
+  // โหลดข้อมูลจาก localStorage ถ้ามีการจดจำ
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("rememberedEmail");
+    const savedPassword = localStorage.getItem("rememberedPassword");
+    if (savedEmail && savedPassword) {
+      setEmail(savedEmail);
+      setPassword(savedPassword);
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -19,25 +31,32 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
-      console.log("🚀 ~ handleLogin ~ res:", res); // Debug response
+      console.log("🚀 ~ handleLogin ~ res:", res);
 
-      // ตรวจสอบว่า login สำเร็จหรือไม่
       if (res.status === 200) {
         const token = res.data.Token;
-        const userEmail = res.data.email || email; // ดึง email จาก response หรือ input
+        const userEmail = res.data.email || email;
 
         // เก็บ JWT ใน sessionStorage
         sessionStorage.setItem("jwt", token);
 
-        // เก็บ JWT ใน cookie
+        // เก็บ JWT และ email ใน cookie
         document.cookie = `jwt=${token}; path=/; SameSite=Strict`;
-
-        // เก็บ email ใน cookie
         document.cookie = `email=${encodeURIComponent(
           userEmail
         )}; path=/; SameSite=Strict`;
 
-        // อัพเดต axData ด้วย JWT ใหม่
+        // ถ้ากด "จดจำฉัน" เก็บข้อมูลใน localStorage
+        if (rememberMe) {
+          localStorage.setItem("rememberedEmail", userEmail);
+          localStorage.setItem("rememberedPassword", password);
+        } else {
+          // ลบข้อมูลจาก localStorage ถ้าไม่จดจำ
+          localStorage.removeItem("rememberedEmail");
+          localStorage.removeItem("rememberedPassword");
+        }
+
+        // อัพเดต axData ด้วย JWT
         axData.jwt = token;
 
         // เปลี่ยนเส้นทางไปหน้าหลัก
@@ -46,9 +65,19 @@ export default function Login() {
     } catch (error) {
       console.log("🚀 ~ handleLogin ~ error:", error);
       if (error.response && error.response.data) {
-        setError(error.response.data.message); // แสดงข้อความ error จาก response
+        // แสดงข้อความ error เฉพาะเจาะจงจาก API
+        const errorMessage = error.response.data.message;
+        if (error.response.status === 401) {
+          setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+        } else if (error.response.status === 400) {
+          setError("กรุณากรอกข้อมูลให้ครบถ้วน");
+        } else {
+          setError(errorMessage || "เกิดข้อผิดพลาดในการล็อกอิน");
+        }
+      } else if (error.request) {
+        setError("ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาลองใหม่");
       } else {
-        setError("An unexpected error occurred.");
+        setError("เกิดข้อผิดพลาดที่ไม่คาดคิด: " + error.message);
       }
     }
   };
@@ -79,7 +108,9 @@ export default function Login() {
 
         {/* Login Form */}
         <div className="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg animate-slideIn z-10">
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+          {error && (
+            <p className="text-red-500 text-sm text-center mb-4">{error}</p>
+          )}
 
           <form onSubmit={handleLogin}>
             <div className="py-8 text-center">
@@ -130,7 +161,12 @@ export default function Login() {
             {/* Remember Me */}
             <div className="block mt-4">
               <label className="flex items-center">
-                <input type="checkbox" className="rounded border-gray-300" />
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                  className="rounded border-gray-300"
+                />
                 <span className="ml-2 text-sm text-gray-600">จดจำฉันไว้</span>
               </label>
             </div>
