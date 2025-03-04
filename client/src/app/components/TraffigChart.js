@@ -34,13 +34,13 @@ const TrafficChart = ({ vehicleData }) => {
     console.log("Total vehicles:", vehicleData.length);
     console.log("Sample vehicle data:", vehicleData.slice(0, 5));
 
-    // กำหนดเวลาปัจจุบัน (UTC) และบวก 7 ชั่วโมง
-    const now = new Date(); // เวลาปัจจุบันใน UTC
-    const startTime = new Date(now.getTime() + 4 * 60 * 60 * 1000); // บวก 7 ชั่วโมง
-    const endTime = new Date(startTime.getTime()); // บวก 3 ชั่วโมงจาก startTime
+    // กำหนดเวลาปัจจุบัน (UTC)
+    const now = new Date();
+    const startTime = new Date(now.getTime() + 4 * 60 * 60 * 1000); // บวก 4 ชั่วโมง
+    const endTime = new Date(startTime.getTime() + 3 * 60 * 60 * 1000); // บวก 3 ชั่วโมงจาก startTime
 
     const intervalMs = 5 * 60 * 1000; // 5 นาที
-    const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 3 ชั่วโมง หาร 5 นาที = 36 ช่วง
+    const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 36 ช่วง
 
     console.log("Current time (UTC):", now.toISOString());
     console.log("Start time (UTC):", startTime.toISOString());
@@ -52,13 +52,15 @@ const TrafficChart = ({ vehicleData }) => {
       halfHourlyTraffic[type] = Array(numIntervals).fill(0);
     });
 
-    vehicleData.forEach(({ class: type, entry_time }) => {
-      if (!type || !entry_time) {
-        console.log("Skipping invalid vehicle:", { type, entry_time });
+    vehicleData.forEach(({ class: vehicleClass, entry_time }) => {
+      if (!vehicleClass || !entry_time) {
+        console.log("Skipping invalid vehicle:", { vehicleClass, entry_time });
         return;
       }
 
+      const type = vehicleClass.toLowerCase();
       const entryDate = new Date(entry_time);
+
       if (entryDate >= startTime && entryDate <= endTime) {
         const timeDiff = entryDate - startTime;
         const index = Math.floor(timeDiff / intervalMs);
@@ -73,12 +75,13 @@ const TrafficChart = ({ vehicleData }) => {
             entry_time
           );
         }
+      } else {
+        console.log("Entry time out of range:", entry_time);
       }
     });
 
     console.log("Half hourly traffic:", halfHourlyTraffic);
 
-    // สร้าง labels โดยใช้ UTC ดิบๆ ในรูปแบบ HH:mm
     const labels = Array.from({ length: numIntervals }, (_, i) => {
       const time = new Date(startTime.getTime() + i * intervalMs);
       const hours = time.getUTCHours().toString().padStart(2, "0");
@@ -124,7 +127,7 @@ const TrafficChart = ({ vehicleData }) => {
             x: {
               ticks: {
                 autoSkip: true,
-                maxTicksLimit: 12, // จำกัดจำนวน ticks ให้เหมาะกับ 3 ชั่วโมง
+                maxTicksLimit: 12,
                 maxRotation: 45,
                 minRotation: 45,
               },
@@ -133,7 +136,7 @@ const TrafficChart = ({ vehicleData }) => {
           plugins: {
             title: {
               display: true,
-              text: "จำนวนรถแยกตามประเภทรถ (3 ชั่วโมงจากเวลาปัจจุบัน +7 ชม., ทุก 5 นาที)",
+              text: "จำนวนรถแยกตามประเภทรถ (3 ชั่วโมงจากเวลาปัจจุบัน)",
               font: {
                 size: 16,
               },

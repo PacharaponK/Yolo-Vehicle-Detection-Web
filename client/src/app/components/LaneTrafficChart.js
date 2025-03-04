@@ -33,13 +33,13 @@ const LaneTrafficChart = ({ vehicleData }) => {
     console.log("Total vehicles:", vehicleData.length);
     console.log("Sample vehicle data:", vehicleData.slice(0, 5));
 
-    // กำหนดเวลาปัจจุบัน (UTC) และบวก 7 ชั่วโมง
-    const now = new Date(); // เวลาปัจจุบันใน UTC
-    const startTime = new Date(now.getTime() + 7 * 60 * 60 * 1000); // บวก 7 ชั่วโมง
+    // กำหนดเวลาปัจจุบัน (UTC)
+    const now = new Date();
+    const startTime = new Date(now.getTime() + 4 * 60 * 60 * 1000); // บวก 4 ชั่วโมง
     const endTime = new Date(startTime.getTime() + 3 * 60 * 60 * 1000); // บวก 3 ชั่วโมงจาก startTime
 
     const intervalMs = 5 * 60 * 1000; // 5 นาที
-    const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 3 ชั่วโมง หาร 5 นาที = 36 ช่วง
+    const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 36 ช่วง
 
     console.log("Current time (UTC):", now.toISOString());
     console.log("Start time (UTC):", startTime.toISOString());
@@ -47,10 +47,8 @@ const LaneTrafficChart = ({ vehicleData }) => {
     console.log("Number of intervals:", numIntervals);
 
     // หาเลนทั้งหมดที่มีในข้อมูล
-    const lanes = [...new Set(vehicleData.map((v) => v.lane_id))]; // เช่น [1, 2, 3]
+    const lanes = [...new Set(vehicleData.map((v) => v.lane_id))];
     const laneTraffic = {};
-
-    // เตรียม array สำหรับแต่ละเลน
     lanes.forEach((lane) => {
       laneTraffic[lane] = Array(numIntervals).fill(0);
     });
@@ -77,6 +75,8 @@ const LaneTrafficChart = ({ vehicleData }) => {
             entry_time
           );
         }
+      } else {
+        console.log("Entry time out of range:", entry_time);
       }
     });
 
@@ -95,6 +95,7 @@ const LaneTrafficChart = ({ vehicleData }) => {
       1: "rgba(54, 162, 235, 1)", // น้ำเงิน
       2: "rgba(255, 99, 132, 1)", // แดง
       3: "rgba(75, 192, 192, 1)", // เขียวอมฟ้า
+      4: "rgba(255, 206, 86, 1)", // เหลือง
     };
 
     // สร้าง datasets สำหรับแต่ละเลน
@@ -125,19 +126,11 @@ const LaneTrafficChart = ({ vehicleData }) => {
           scales: {
             y: {
               beginAtZero: true,
-              title: {
-                display: true,
-                text: "จำนวนรถ",
-              },
             },
             x: {
-              title: {
-                display: true,
-                text: "เวลา",
-              },
               ticks: {
                 autoSkip: true,
-                maxTicksLimit: 12, // จำกัดจำนวน ticks ให้เหมาะกับ 3 ชั่วโมง
+                maxTicksLimit: 12,
                 maxRotation: 45,
                 minRotation: 45,
               },
@@ -146,7 +139,7 @@ const LaneTrafficChart = ({ vehicleData }) => {
           plugins: {
             title: {
               display: true,
-              text: "จำนวนรถแยกตามเลน (3 ชั่วโมงจากเวลาปัจจุบัน +7 ชม., ทุก 5 นาที)",
+              text: "จำนวนรถแยกตามเลน (3 ชั่วโมงจากเวลาปัจจุบัน)",
               font: {
                 size: 16,
               },
