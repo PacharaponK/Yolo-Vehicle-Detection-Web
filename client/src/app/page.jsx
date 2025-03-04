@@ -5,7 +5,7 @@ import Navbar from "./components/Navbar";
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-rose-200  flex flex-col">
+    <div className="min-h-screen bg-gradient-to-b from-white to-rose-200  flex flex-col pt-10">
       {/* Navbar */}
       <Navbar />
 
