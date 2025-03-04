@@ -7,6 +7,7 @@ import { useSocketContext } from "@/context/context";
 
 const Dashboard = () => {
   const { vehicles } = useSocketContext();
+  console.log("🚀 ~ Dashboard ~ vehicles:", vehicles);
 
   const calculateSpeed = (vehicle) => {
     const startTime = new Date(vehicle.entry_time);
@@ -25,31 +26,34 @@ const Dashboard = () => {
   };
 
   const countTodayVehicles = (vehicles) => {
-    // ใช้ UTC ดิบๆ สำหรับวันที่ปัจจุบัน
-    const today = new Date().toISOString().split("T")[0];
-    //("Today (UTC):", today);
-
-    // ตรวจสอบว่า vehicles มีข้อมูลหรือไม่
     if (!Array.isArray(vehicles) || vehicles.length === 0) {
-      //("Vehicles is empty or not an array:", vehicles);
       return 0;
     }
 
-    // ใช้วันที่จากข้อมูลแรกเป็น基準 (ถ้าต้องการนับข้อมูลที่มี)
-    const referenceDate = vehicles[0]?.entry_time?.split("T")[0] || today;
-    //("Reference date (from data or today):", referenceDate);
+    // หาวันที่สูงสุดจาก entry_time
+    const maxEntryTime = vehicles
+      .filter((v) => v && v.entry_time)
+      .reduce(
+        (max, v) =>
+          new Date(v.entry_time) > max ? new Date(v.entry_time) : max,
+        new Date(vehicles[0].entry_time)
+      );
+
+    // ลบ 1 วันและบวก 7 ชั่วโมง
+    const targetDate = new Date(maxEntryTime);
+    targetDate.setUTCDate(targetDate.getUTCDate() - 1);
+    targetDate.setUTCHours(targetDate.getUTCHours() + 7);
+    const targetDateTime = targetDate.toISOString();
+    console.log("Target date and time:", targetDateTime);
 
     const count = vehicles.filter((vehicle) => {
       if (!vehicle || !vehicle.entry_time) {
-        //("Invalid vehicle entry:", vehicle);
         return false;
       }
-      const vehicleDate = vehicle.entry_time.split("T")[0];
-      //("Vehicle date:", vehicleDate);
-      return vehicleDate === referenceDate; // เปลี่ยนจาก today เป็น referenceDate
+      // เปรียบเทียบ entry_time กับ targetDateTime โดยตรง (ไม่แยกวันที่)
+      return new Date(vehicle.entry_time) > new Date(targetDateTime);
     }).length;
 
-    //("Counted vehicles for reference date:", count);
     return count;
   };
 

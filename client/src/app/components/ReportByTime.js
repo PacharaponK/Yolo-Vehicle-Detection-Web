@@ -9,85 +9,89 @@ export default function ReportBytime({ vehicles }) {
   });
 
   useEffect(() => {
-    if (vehicles && vehicles.length > 0) {
-      const timeRanges = {
-        morning: [6, 10], // 06:00 - 10:00
-        afternoon: [10, 14], // 10:00 - 14:00
-        evening: [14, 18], // 14:00 - 18:00
-        night: [18, 6], // 18:00 - 06:00
-      };
-
-      const calculateSpeed = (vehicle) => {
-        // แยกวันที่และเวลาจาก entry_time และ exit_time โดยไม่ปรับไทม์โซน
-        const startTimeStr = vehicle.entry_time.split("T")[1].split(".")[0];
-        const endTimeStr = vehicle.exit_time.split("T")[1].split(".")[0];
-
-        const startTimeParts = startTimeStr.split(":");
-        const endTimeParts = endTimeStr.split(":");
-
-        const startSeconds =
-          parseInt(startTimeParts[0]) * 3600 +
-          parseInt(startTimeParts[1]) * 60 +
-          parseInt(startTimeParts[2]);
-        const endSeconds =
-          parseInt(endTimeParts[0]) * 3600 +
-          parseInt(endTimeParts[1]) * 60 +
-          parseInt(endTimeParts[2]);
-
-        const distance = 200; // ระยะทาง 200 เมตร
-        let timeDiff = endSeconds - startSeconds; // คำนวณเป็นวินาที
-
-        // กรณีข้ามวัน (เช่น 23:59 ไป 00:01)
-        if (timeDiff < 0) {
-          timeDiff += 24 * 3600; // บวก 24 ชั่วโมง
-        }
-
-        if (timeDiff <= 0) return null; // ถ้าเวลาผิดพลาด คืนค่า null
-
-        const speed_mps = distance / timeDiff;
-        const speed_kmph = speed_mps * 3.6; // แปลงเป็น km/h
-        return speed_kmph;
-      };
-
-      const filterAndCalculate = (start, end) => {
-        const filtered = vehicles
-          .map((vehicle) => {
-            if (!vehicle.entry_time || !vehicle.exit_time) return null;
-
-            // ดึงชั่วโมงจาก entry_time โดยตรง ไม่ปรับไทม์โซน
-            const timeStr = vehicle.entry_time.split("T")[1].split(".")[0];
-            const hour = parseInt(timeStr.split(":")[0], 10);
-            const speed = calculateSpeed(vehicle);
-
-            if (speed === null) return null;
-
-            // ตรวจสอบช่วงเวลาแบบดิบๆ
-            const isInRange =
-              start < end
-                ? hour >= start && hour < end
-                : hour >= start || hour < end;
-
-            return isInRange ? { ...vehicle, speed } : null;
-          })
-          .filter((v) => v !== null);
-
-        const avgSpeed =
-          filtered.length > 0
-            ? (
-                filtered.reduce((sum, v) => sum + v.speed, 0) / filtered.length
-              ).toFixed(2)
-            : 0;
-
-        return { count: filtered.length, avgSpeed };
-      };
-
-      setTimeData({
-        morning: filterAndCalculate(...timeRanges.morning),
-        afternoon: filterAndCalculate(...timeRanges.afternoon),
-        evening: filterAndCalculate(...timeRanges.evening),
-        night: filterAndCalculate(...timeRanges.night),
-      });
+    if (!vehicles || vehicles.length === 0) {
+      console.log("No vehicle data provided");
+      return;
     }
+
+    const currentYear = new Date().getFullYear(); // เช่น 2025
+
+    const timeRanges = {
+      morning: [6, 10], // 06:00 - 10:00
+      afternoon: [10, 14], // 10:00 - 14:00
+      evening: [14, 18], // 14:00 - 18:00
+      night: [18, 6], // 18:00 - 06:00
+    };
+
+    const calculateSpeed = (vehicle) => {
+      const startTimeStr = vehicle.entry_time.split("T")[1].split(".")[0];
+      const endTimeStr = vehicle.exit_time.split("T")[1].split(".")[0];
+
+      const startTimeParts = startTimeStr.split(":");
+      const endTimeParts = endTimeStr.split(":");
+
+      const startSeconds =
+        parseInt(startTimeParts[0]) * 3600 +
+        parseInt(startTimeParts[1]) * 60 +
+        parseInt(startTimeParts[2]);
+      const endSeconds =
+        parseInt(endTimeParts[0]) * 3600 +
+        parseInt(endTimeParts[1]) * 60 +
+        parseInt(endTimeParts[2]);
+
+      const distance = 100; // ระยะทาง 100 เมตร
+      let timeDiff = endSeconds - startSeconds;
+
+      if (timeDiff < 0) {
+        timeDiff += 24 * 3600; // บวก 24 ชั่วโมงถ้าข้ามวัน
+      }
+
+      if (timeDiff <= 0) return null; // ถ้าเวลาผิดพลาด คืนค่า null
+
+      const speed_mps = distance / timeDiff;
+      const speed_kmph = speed_mps * 3.6; // แปลงเป็น km/h
+      return speed_kmph;
+    };
+
+    const filterAndCalculate = (start, end) => {
+      const filtered = vehicles
+        .map((vehicle) => {
+          if (!vehicle.entry_time || !vehicle.exit_time) return null;
+
+          // ดึงปีและชั่วโมงจาก entry_time
+          const entryDate = new Date(vehicle.entry_time);
+          const year = entryDate.getUTCFullYear();
+          const hour = entryDate.getUTCHours();
+          const speed = calculateSpeed(vehicle);
+
+          if (speed === null || year !== currentYear) return null;
+
+          // ตรวจสอบช่วงเวลา
+          const isInRange =
+            start < end
+              ? hour >= start && hour < end
+              : hour >= start || hour < end;
+
+          return isInRange ? { ...vehicle, speed } : null;
+        })
+        .filter((v) => v !== null);
+
+      const avgSpeed =
+        filtered.length > 0
+          ? (
+              filtered.reduce((sum, v) => sum + v.speed, 0) / filtered.length
+            ).toFixed(2)
+          : 0;
+
+      return { count: filtered.length, avgSpeed };
+    };
+
+    setTimeData({
+      morning: filterAndCalculate(...timeRanges.morning),
+      afternoon: filterAndCalculate(...timeRanges.afternoon),
+      evening: filterAndCalculate(...timeRanges.evening),
+      night: filterAndCalculate(...timeRanges.night),
+    });
   }, [vehicles]);
 
   const timeStyles = {
