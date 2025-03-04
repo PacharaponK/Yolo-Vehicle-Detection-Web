@@ -17,7 +17,11 @@ export const setupSocket = (server: http.Server) => {
 	});
 	// WebSocket: ส่งข้อมูล vehicles
 	io.on("connection", async (socket) => {
-		console.log("✅ Connected to WebSocket Server", socket.id);
+		console.log(
+			"✅ Connected to WebSocket Server\n",
+			socket.handshake.headers["user-agent"],
+			"\n✅ end of details\n"
+		);
 
 		VehiclesSocket(io, socket); // ดึงข้อมูลเมื่อ Client เชื่อมต่อ
 		socket.on("frame", (data) => {
