@@ -1,4 +1,5 @@
 "use client";
+
 import { useSocketContext } from "@/context/context";
 import React, { useRef, useEffect } from "react";
 
@@ -15,15 +16,30 @@ function Picture() {
       const img = new window.Image();
       img.src = frame;
 
-      // วาดภาพเมื่อโหลดเสร็จ
       img.onload = () => {
-        // ปรับขนาด canvas ให้ตรงกับภาพ (หรือกำหนดขนาดตายตัว)
-        canvas.width = img.width; // หรือกำหนด 960
-        canvas.height = img.height; // หรือกำหนด 540
-        context.drawImage(img, 0, 0, canvas.width, canvas.height);
+        // กำหนดขนาดสูงสุด
+        const maxWidth = 960;
+        const maxHeight = 540;
+        let width = img.width;
+        let height = img.height;
+
+        // คำนวณสัดส่วนเพื่อรักษา aspect ratio
+        const aspectRatio = width / height;
+        if (width > maxWidth) {
+          width = maxWidth;
+          height = width / aspectRatio;
+        }
+        if (height > maxHeight) {
+          height = maxHeight;
+          width = height * aspectRatio;
+        }
+
+        // ปรับขนาด canvas
+        canvas.width = width;
+        canvas.height = height;
+        context.drawImage(img, 0, 0, width, height);
       };
 
-      // จัดการ error ถ้าภาพโหลดไม่สำเร็จ
       img.onerror = () => {
         console.error("Failed to load image from frame data");
       };
@@ -31,23 +47,23 @@ function Picture() {
   }, [frame]);
 
   return (
-    <div className="flex flex-col w-full min-h-[70vh] container mx-auto p-4 items-center justify-center">
+    <div className="flex flex-col w-full container mx-auto p-4 items-center justify-center">
       {error ? (
-        <div className="w-full h-full flex items-center justify-center bg-red-100 border border-red-400 rounded-lg">
-          <p className="text-red-700">{error}</p>
+        <div className="w-full max-w-4xl flex items-center justify-center bg-red-100 border border-red-400 rounded-lg p-4">
+          <p className="text-red-700 text-center">{error}</p>
         </div>
       ) : (
-        <div className="flex flex-col md:flex-row gap-4 justify-center items-center w-full h-full">
+        <div className="w-full max-w-4xl">
           {/* เฟรมปัจจุบัน (ใช้ Canvas) */}
-          <div className="flex-1 w-full h-full max-w-[960px]">
+          <div className="w-full">
             {frame ? (
               <canvas
                 ref={canvasRef}
-                className="border rounded-lg shadow-lg w-full h-auto object-cover"
+                className="border rounded-lg shadow-lg w-full h-auto object-cover max-w-full"
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200 border rounded-lg shadow-lg">
-                <p className="text-gray-700">Loading stream...</p>
+              <div className="w-full aspect-[16/9] flex items-center justify-center bg-gray-200 border rounded-lg shadow-lg">
+                <p className="text-gray-700 text-center">Loading stream...</p>
               </div>
             )}
           </div>
