@@ -1,4 +1,4 @@
-// src/middleware.js
+// src/middleware.js (หรือ middleware.js ที่ root)
 import { NextResponse } from "next/server";
 
 export function middleware(req) {
@@ -32,16 +32,13 @@ export function middleware(req) {
   // ตรวจสอบการเข้าถึง
   if (isProtected) {
     if (isPrivileged) {
-      // ผู้ใช้ privileged สามารถเข้าถึงทุกหน้า
       console.log("Privileged user access granted for:", pathname);
       return NextResponse.next();
     } else {
-      // ผู้ใช้ทั่วไป (ไม่ใช่ privileged)
       if (pathname.startsWith("/vehiclehistory")) {
         console.log("General user access granted for /vehiclehistory");
         return NextResponse.next();
       } else {
-        // ถ้าไม่ใช่ /vehiclehistory (เช่น /dashboard หรือ /analyze)
         console.log(
           "General user denied access to:",
           pathname,
@@ -58,5 +55,10 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/vehiclehistory/:path*", "/analyze/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/vehiclehistory/:path*",
+    "/analyze/:path*",
+    // เพิ่ม "/" เพื่อให้ครอบคลุมทุก path (ถ้าต้องการทดสอบทุกหน้า)
+  ],
 };

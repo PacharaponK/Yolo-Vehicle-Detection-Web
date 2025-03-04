@@ -16,11 +16,22 @@ const Navbar = () => {
   }, []);
 
   const handleLogout = () => {
+    // ลบ JWT ออกจาก sessionStorage
     sessionStorage.removeItem("jwt");
+
+    // ลบ JWT และ email ออกจาก cookie
     document.cookie =
       "jwt=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict; Secure";
+    document.cookie =
+      "email=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; SameSite=Strict; Secure";
+
+    // ล้าง header Authorization ใน axios instance
     delete ax.defaults.headers.common["Authorization"];
+
+    // อัปเดต state
     setJwt(null);
+
+    // เปลี่ยนเส้นทางไปหน้า Login
     router.push("/");
     setIsMenuOpen(false); // ปิดเมนูเมื่อ logout
   };
@@ -113,7 +124,7 @@ const Navbar = () => {
             <Link
               href="/vehiclehistory"
               className="text-lg font-medium text-gray-900 hover:bg-gray-100 w-full px-2 py-1 rounded-lg"
-              onClick={() => setIsMenuOpen(false)} // ปิดเมนูเมื่อคลิกลิงก์
+              onClick={() => setIsMenuOpen(false)}
             >
               วิดีโอย้อนหลัง
             </Link>
