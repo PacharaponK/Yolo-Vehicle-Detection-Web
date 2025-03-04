@@ -1,6 +1,8 @@
 #kubectl describe svc express-prisma-service
 #gcloud compute addresses --region=us-central1 create my-static-ip
 #gcloud compute addresses describe my-static-ip --region=us-central1 --format="get(address)"
+#kubectl describe managedcertificate express-cert
+#kubectl describe ingress express-ingress
 all: cdl delete apply
 crush:
 	gcloud container clusters create --machine-type=e2-medium --region=asia-southeast1-a crush-on-k8s

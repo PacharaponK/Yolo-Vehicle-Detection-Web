@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: express-app
-          image: alivefordie/express-server:v2.0
+          image: alivefordie/express-server:2.1
           imagePullPolicy: Always
           resources:
             requests:
@@ -89,3 +89,36 @@ type: Opaque
 data:
    DATABASE_URL: bXlzcWw6Ly9mb3J0aHJlZTpmb3J0cmVlQDM0LjQ0LjgwLjEzMDozMzA2L3Rlc3Q=
    SECRET_KEY: UExqUzFxcUlpUXNETGpZZFdBWURFRFhRTzFQUzZsMVFJNWFwUExUUWZQNlhxV2JLRUwwU2hlV2FLOTdobjRZNTBXOWVLU0ZFekNGcE9SZHJtM0VTb0E=
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: express-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: gb-express-server
+    networking.gke.io/managed-certificates: express-cert
+spec:
+  # tls:
+  # - hosts:
+  #   - alivefordie.life
+    # Uncomment the next line if you’re using a self-managed TLS certificate secret
+    # secretName: tls-secret
+  rules:
+  - host: alivefordie.life
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: express-prisma-service
+            port:
+              number: 80
+---
+apiVersion: networking.gke.io/v1
+kind: ManagedCertificate
+metadata:
+  name: express-cert
+spec:
+  domains:
+    - alivefordie.life
