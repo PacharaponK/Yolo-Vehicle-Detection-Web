@@ -11,6 +11,7 @@ all: build push
 
 # Build the Docker image
 build:
+	npm run build
 	docker build -t $(IMAGE_NAME) -f $(DOCKERFILE_PATH) .
 
 # Push the Docker image

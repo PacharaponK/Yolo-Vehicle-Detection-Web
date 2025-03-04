@@ -59,6 +59,10 @@ export const updateUserSchema = z
 	});
 
 export const loginUserSchema = z.object({
-	email: z.string().email({ message: "Invalid email format" }), // Validate email format
-	password: z.string().min(6, { message: "Password must be at least 6 characters" }), // Validate password length
+	email: z
+		.string({ required_error: "Email is required" })
+		.email({ message: "Invalid email format" }), // Validate email format
+	password: z
+		.string({ required_error: "Password is required" })
+		.min(6, { message: "Password must be at least 6 characters" }), // Validate password length
 });
