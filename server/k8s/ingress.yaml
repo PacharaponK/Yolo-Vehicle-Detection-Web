@@ -3,14 +3,10 @@ kind: Ingress
 metadata:
   name: express-ingress
   annotations:
+    kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: gb-express-server
     networking.gke.io/managed-certificates: express-cert
 spec:
-  # tls:
-  # - hosts:
-  #   - alivefordie.life
-    # Uncomment the next line if you’re using a self-managed TLS certificate secret
-    # secretName: tls-secret
   rules:
   - host: alivefordie.life
     http:
