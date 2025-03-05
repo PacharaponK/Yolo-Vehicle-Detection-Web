@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,13 +9,22 @@ const Navbar = () => {
   const [jwt, setJwt] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // ฟังก์ชันดึง JWT จาก cookie
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
   useEffect(() => {
-    const token = sessionStorage.getItem("jwt");
+    // ตรวจสอบ JWT จาก cookie
+    const token = getCookie("jwt");
     setJwt(token);
   }, []);
 
   const handleLogout = () => {
-    // ลบ JWT ออกจาก sessionStorage
+    // ลบ JWT ออกจาก sessionStorage (ถ้ามี)
     sessionStorage.removeItem("jwt");
 
     // ลบ JWT และ email ออกจาก cookie
