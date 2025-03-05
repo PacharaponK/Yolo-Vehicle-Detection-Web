@@ -26,12 +26,12 @@ const LaneTrafficChart = ({ vehicleData }) => {
 
   useEffect(() => {
     if (!vehicleData || vehicleData.length === 0) {
-      console.log("No vehicle data provided");
+      //("No vehicle data provided");
       return;
     }
 
-    console.log("Total vehicles:", vehicleData.length);
-    console.log("Sample vehicle data:", vehicleData.slice(0, 5));
+    //("Total vehicles:", vehicleData.length);
+    //("Sample vehicle data:", vehicleData.slice(0, 5));
 
     // กำหนดเวลาปัจจุบัน (UTC)
     const now = new Date();
@@ -41,10 +41,10 @@ const LaneTrafficChart = ({ vehicleData }) => {
     const intervalMs = 5 * 60 * 1000; // 5 นาที
     const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 36 ช่วง
 
-    console.log("Current time (UTC):", now.toISOString());
-    console.log("Start time (UTC):", startTime.toISOString());
-    console.log("End time (UTC):", endTime.toISOString());
-    console.log("Number of intervals:", numIntervals);
+    //("Current time (UTC):", now.toISOString());
+    //("Start time (UTC):", startTime.toISOString());
+    //("End time (UTC):", endTime.toISOString());
+    //("Number of intervals:", numIntervals);
 
     // หาเลนทั้งหมดที่มีในข้อมูล
     const lanes = [...new Set(vehicleData.map((v) => v.lane_id))];
@@ -56,7 +56,7 @@ const LaneTrafficChart = ({ vehicleData }) => {
     // นับจำนวนรถในแต่ละเลนตามช่วงเวลา
     vehicleData.forEach(({ lane_id, entry_time }) => {
       if (!lane_id || !entry_time) {
-        console.log("Skipping invalid vehicle:", { lane_id, entry_time });
+        //("Skipping invalid vehicle:", { lane_id, entry_time });
         return;
       }
 
@@ -68,19 +68,19 @@ const LaneTrafficChart = ({ vehicleData }) => {
         if (laneTraffic[lane_id] && index >= 0 && index < numIntervals) {
           laneTraffic[lane_id][index] += 1;
         } else {
-          console.log(
-            "Index out of bounds:",
-            index,
-            "for entry_time:",
-            entry_time
-          );
+          // //(
+          //   "Index out of bounds:",
+          //   index,
+          //   "for entry_time:",
+          //   entry_time
+          // );
         }
       } else {
-        console.log("Entry time out of range:", entry_time);
+        //("Entry time out of range:", entry_time);
       }
     });
 
-    console.log("Lane traffic:", laneTraffic);
+    //("Lane traffic:", laneTraffic);
 
     // สร้าง labels โดยใช้ UTC ดิบๆ ในรูปแบบ HH:mm
     const labels = Array.from({ length: numIntervals }, (_, i) => {

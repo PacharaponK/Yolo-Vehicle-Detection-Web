@@ -27,12 +27,12 @@ const TrafficChart = ({ vehicleData }) => {
 
   useEffect(() => {
     if (!vehicleData || vehicleData.length === 0) {
-      console.log("No vehicle data provided");
+      //("No vehicle data provided");
       return;
     }
 
-    console.log("Total vehicles:", vehicleData.length);
-    console.log("Sample vehicle data:", vehicleData.slice(0, 5));
+    //("Total vehicles:", vehicleData.length);
+    //("Sample vehicle data:", vehicleData.slice(0, 5));
 
     // กำหนดเวลาปัจจุบัน (UTC)
     const now = new Date();
@@ -42,10 +42,10 @@ const TrafficChart = ({ vehicleData }) => {
     const intervalMs = 5 * 60 * 1000; // 5 นาที
     const numIntervals = Math.ceil((3 * 60 * 60 * 1000) / intervalMs); // 36 ช่วง
 
-    console.log("Current time (UTC):", now.toISOString());
-    console.log("Start time (UTC):", startTime.toISOString());
-    console.log("End time (UTC):", endTime.toISOString());
-    console.log("Number of intervals:", numIntervals);
+    //("Current time (UTC):", now.toISOString());
+    //("Start time (UTC):", startTime.toISOString());
+    //("End time (UTC):", endTime.toISOString());
+    //("Number of intervals:", numIntervals);
 
     const halfHourlyTraffic = {};
     vehicleTypes.forEach((type) => {
@@ -54,7 +54,7 @@ const TrafficChart = ({ vehicleData }) => {
 
     vehicleData.forEach(({ class: vehicleClass, entry_time }) => {
       if (!vehicleClass || !entry_time) {
-        console.log("Skipping invalid vehicle:", { vehicleClass, entry_time });
+        //("Skipping invalid vehicle:", { vehicleClass, entry_time });
         return;
       }
 
@@ -68,19 +68,19 @@ const TrafficChart = ({ vehicleData }) => {
         if (halfHourlyTraffic[type] && index >= 0 && index < numIntervals) {
           halfHourlyTraffic[type][index] += 1;
         } else {
-          console.log(
-            "Index out of bounds:",
-            index,
-            "for entry_time:",
-            entry_time
-          );
+          // //(
+          //   "Index out of bounds:",
+          //   index,
+          //   "for entry_time:",
+          //   entry_time
+          // );
         }
       } else {
-        console.log("Entry time out of range:", entry_time);
+        //("Entry time out of range:", entry_time);
       }
     });
 
-    console.log("Half hourly traffic:", halfHourlyTraffic);
+    //("Half hourly traffic:", halfHourlyTraffic);
 
     const labels = Array.from({ length: numIntervals }, (_, i) => {
       const time = new Date(startTime.getTime() + i * intervalMs);

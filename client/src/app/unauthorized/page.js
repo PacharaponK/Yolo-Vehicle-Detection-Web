@@ -11,10 +11,10 @@ const Unauthorized = () => {
           คุณไม่มีสิทธิ์เข้าถึงหน้านี้ เฉพาะผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงได้
         </p>
         <Link
-          href="/vehiclehistory"
+          href="/dashboard"
           className="inline-block px-6 py-3 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition duration-200"
         >
-          กลับไปที่หน้า Vehicle History
+          กลับไปที่หน้า Dashboard
         </Link>
       </div>
     </div>

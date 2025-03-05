@@ -7,7 +7,7 @@ import { useSocketContext } from "@/context/context";
 
 const Dashboard = () => {
   const { vehicles } = useSocketContext();
-  console.log("🚀 ~ Dashboard ~ vehicles:", vehicles);
+  //("🚀 ~ Dashboard ~ vehicles:", vehicles);
 
   const calculateSpeed = (vehicle) => {
     const startTime = new Date(vehicle.entry_time);
@@ -44,7 +44,7 @@ const Dashboard = () => {
     targetDate.setUTCDate(targetDate.getUTCDate() - 1);
     targetDate.setUTCHours(targetDate.getUTCHours() + 7);
     const targetDateTime = targetDate.toISOString();
-    console.log("Target date and time:", targetDateTime);
+    //("Target date and time:", targetDateTime);
 
     const count = vehicles.filter((vehicle) => {
       if (!vehicle || !vehicle.entry_time) {

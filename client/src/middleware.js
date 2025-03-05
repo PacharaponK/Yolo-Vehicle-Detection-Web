@@ -1,4 +1,4 @@
-// src/middleware.js
+// src/middleware.js (หรือ middleware.js ที่ root)
 import { NextResponse } from "next/server";
 
 export function middleware(req) {
@@ -12,6 +12,14 @@ export function middleware(req) {
 
   console.log("JWT in cookie:", jwt);
   console.log("Email in cookie:", email);
+
+  // ถ้ามี JWT และอยู่ในหน้า /login ให้ redirect ไป /dashboard
+  if (jwt && pathname === "/login") {
+    console.log(
+      "User already logged in, redirecting from /login to /dashboard"
+    );
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
 
   // กำหนด protected paths
   const protectedPaths = ["/dashboard", "/vehiclehistory", "/analyze"];
@@ -32,20 +40,21 @@ export function middleware(req) {
   // ตรวจสอบการเข้าถึง
   if (isProtected) {
     if (isPrivileged) {
-      // ผู้ใช้ privileged สามารถเข้าถึงทุกหน้า
+      // ผู้ใช้ privileged เข้าถึงทุกหน้าได้
       console.log("Privileged user access granted for:", pathname);
       return NextResponse.next();
     } else {
-      // ผู้ใช้ทั่วไป (ไม่ใช่ privileged)
-      if (pathname.startsWith("/vehiclehistory")) {
-        console.log("General user access granted for /vehiclehistory");
+      // ผู้ใช้ทั่วไป
+      if (pathname.startsWith("/dashboard")) {
+        // อนุญาตให้เข้าถึง /dashboard และ subpaths
+        console.log("General user access granted for /dashboard");
         return NextResponse.next();
       } else {
-        // ถ้าไม่ใช่ /vehiclehistory (เช่น /dashboard หรือ /analyze)
+        // ถ้าไม่ใช่ /dashboard (เช่น /vehiclehistory หรือ /analyze)
         console.log(
           "General user denied access to:",
           pathname,
-          "redirecting to /unauthorized"
+          "redirecting to /dashboard"
         );
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
@@ -58,5 +67,10 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/vehiclehistory/:path*", "/analyze/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/vehiclehistory/:path*",
+    "/analyze/:path*",
+    "/login",
+  ],
 };

@@ -111,7 +111,7 @@ while True:
     
     detections = np.empty((0, 6))
     result = model(frame, stream=True, classes=[0, 2, 7])
-
+    
     
     for info in result:
         boxes = info.boxes
