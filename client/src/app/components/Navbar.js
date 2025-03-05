@@ -21,7 +21,17 @@ const Navbar = () => {
     // ตรวจสอบ JWT จาก cookie
     const token = getCookie("jwt");
     setJwt(token);
-  }, []);
+
+    // อัปเดต jwt เมื่อ cookie เปลี่ยน (เช่น หลัง login/logout)
+    const checkCookie = () => {
+      const newToken = getCookie("jwt");
+      if (newToken !== jwt) {
+        setJwt(newToken);
+      }
+    };
+    const interval = setInterval(checkCookie, 1000); // ตรวจทุก 1 วินาที
+    return () => clearInterval(interval);
+  }, [jwt]);
 
   const handleLogout = () => {
     // ลบ JWT ออกจาก sessionStorage (ถ้ามี)
@@ -39,9 +49,9 @@ const Navbar = () => {
     // อัปเดต state
     setJwt(null);
 
-    // เปลี่ยนเส้นทางไปหน้า Login
-    router.push("/");
-    setIsMenuOpen(false); // ปิดเมนูเมื่อ logout
+    // เปลี่ยนเส้นทางไปหน้า Login โดย force reload เพื่อให้ middleware ทำงาน
+    window.location.href = "/"; // ใช้ window.location เพื่อบังคับ reload
+    setIsMenuOpen(false);
   };
 
   const toggleMenu = () => {
