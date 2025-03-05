@@ -1,30 +1,30 @@
 "use client";
-
-import { useSocketContext } from "@/context/context";
 import React, { useRef, useEffect } from "react";
+import { useSocketContext } from "@/context/context";
 
 function Picture() {
-  const { frame, error } = useSocketContext();
+  const { frame, error, isConnected } = useSocketContext();
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (frame && canvasRef.current) {
-      const canvas = canvasRef.current;
-      const context = canvas.getContext("2d");
+    if (!frame || !canvasRef.current || !isConnected) return;
 
-      // สร้าง Image object จาก base64 string
-      const img = new window.Image();
-      img.src = frame;
+    const canvas = canvasRef.current;
+    const context = canvas.getContext("2d");
 
-      img.onload = () => {
-        // กำหนดขนาดสูงสุด
+    // แปลง byte เป็นภาพโดยตรง
+    const renderFrame = async () => {
+      try {
+        const blob = new Blob([frame], { type: "image/jpeg" });
+        const bitmap = await createImageBitmap(blob);
+
         const maxWidth = 960;
         const maxHeight = 540;
-        let width = img.width;
-        let height = img.height;
+        let width = bitmap.width;
+        let height = bitmap.height;
+        const aspectRatio = width / height;
 
         // คำนวณสัดส่วนเพื่อรักษา aspect ratio
-        const aspectRatio = width / height;
         if (width > maxWidth) {
           width = maxWidth;
           height = width / aspectRatio;
@@ -34,27 +34,35 @@ function Picture() {
           width = height * aspectRatio;
         }
 
-        // ปรับขนาด canvas
         canvas.width = width;
         canvas.height = height;
-        context.drawImage(img, 0, 0, width, height);
-      };
+        context.drawImage(bitmap, 0, 0, width, height);
+        console.log(
+          "Frame rendered at:",
+          new Date().toISOString(),
+          "size:",
+          `${width}x${height}`
+        );
 
-      img.onerror = () => {
-        console.error("Failed to load image from frame data");
-      };
-    }
-  }, [frame]);
+        bitmap.close(); // ล้างทรัพยากร
+      } catch (err) {
+        console.error("Failed to render frame from byte data:", err);
+      }
+    };
+
+    renderFrame();
+  }, [frame, isConnected]);
 
   return (
     <div className="flex flex-col w-full container mx-auto p-4 items-center justify-center">
-      {error ? (
+      {error || !isConnected ? (
         <div className="w-full max-w-4xl flex items-center justify-center bg-red-100 border border-red-400 rounded-lg p-4">
-          <p className="text-red-700 text-center">{error}</p>
+          <p className="text-red-700 text-center">
+            {error || "Stream disconnected"}
+          </p>
         </div>
       ) : (
         <div className="w-full max-w-4xl">
-          {/* เฟรมปัจจุบัน (ใช้ Canvas) */}
           <div className="w-full">
             {frame ? (
               <canvas

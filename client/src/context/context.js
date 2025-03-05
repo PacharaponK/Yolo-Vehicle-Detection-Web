@@ -37,7 +37,7 @@ export const SocketProvider = ({ children }) => {
     };
 
     const handleFrameData = (data) => {
-      setFrame(`data:image/jpeg;base64,${data}`);
+      setFrame(data);
     };
 
     const handleConnectError = (err) => {
