@@ -11,15 +11,25 @@ import base64
 import socketio
 import random
 import string
+import threading
 
 def random_video_name(length=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
+
+def send_frame(buffer):
+    # frame_base64 = base64.b64encode(buffer).decode('utf-8')
+    frame_byte = buffer.tobytes()
+
+    if sio.connected:
+        sio.emit('frame', frame_byte)
+    else:
+        print("Socket.IO client not connected")
 
 now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-frame_skip = 1
+frame_skip = 10
 frame_count = 0
 
 sio = socketio.Client()
@@ -460,14 +470,11 @@ while True:
     frame_count += 1
     if frame_count % frame_skip == 0:
         frame_resized = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
-        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
-
-        frame_base64 = base64.b64encode(buffer).decode('utf-8')
-
-        if sio.connected:
-            sio.emit('frame', frame_base64)
-        else:
-            print("Socket.IO client not connected")
+        _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 50])
+        send_frame(buffer)
+        # frame_base64 = base64.b64encode(buffer).decode('utf-8')
+        # thread = threading.Thread(target=send_frame, args=(buffer,))
+        # thread.start()
     
     cv2.waitKey(1)
 

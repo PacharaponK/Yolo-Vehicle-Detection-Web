@@ -30,7 +30,7 @@ resource "google_compute_firewall" "allow_lb_instance" {
     target_service_accounts = [google_service_account.default.email]
 }
 
-resource "google_compute_instance" "dtect-web" {
+resource "google_compute_instance" "frontend-yolo-detection" {
     name             = "frontend-yolo-detection"
     zone             = "asia-southeast1-a"
     machine_type     = "n2d-standard-2"
