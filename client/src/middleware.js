@@ -26,19 +26,20 @@ export function middleware(req) {
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
   console.log("Is this a protected path?", isProtected);
 
-  // ถ้าเป็น protected path และไม่มี JWT หรือ email
+  // ถ้าเป็น protected path และไม่มี JWT หรือ email ให้ redirect ไป /login
   if (isProtected && (!jwt || !email)) {
-    console.log("No JWT or email found, redirecting to /login");
+    console.log("No JWT or email found, redirecting to /login from:", pathname);
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
-  // กำหนด email ที่มีสิทธิ์เข้าถึงทุกหน้า
-  const privilegedEmails = ["admin@email.com", "chotmanat@email.com"];
-  const isPrivileged = privilegedEmails.includes(email);
-  console.log("Is user privileged?", isPrivileged);
+  // ถ้ามี JWT และ email ใน protected path
+  if (isProtected && jwt && email) {
+    // กำหนด email ที่มีสิทธิ์เข้าถึงทุกหน้า
+    const privilegedEmails = ["admin@email.com", "chotmanat@email.com"];
+    const isPrivileged = privilegedEmails.includes(email);
+    console.log("Is user privileged?", isPrivileged);
 
-  // ตรวจสอบการเข้าถึง
-  if (isProtected) {
+    // ตรวจสอบการเข้าถึง
     if (isPrivileged) {
       // ผู้ใช้ privileged เข้าถึงทุกหน้าได้
       console.log("Privileged user access granted for:", pathname);
@@ -54,7 +55,7 @@ export function middleware(req) {
         console.log(
           "General user denied access to:",
           pathname,
-          "redirecting to /dashboard"
+          "redirecting to /unauthorized"
         );
         return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
