@@ -7,12 +7,12 @@ import { useSocketContext } from "@/context/context";
 
 const Dashboard = () => {
   const { vehicles, vehicleCount, vehicleTime } = useSocketContext();
-  console.log(
-    "🚀 ~ Dashboard ~ vehicleCount:",
-    vehicleCount,
-    "vehicleTime:",
-    vehicleTime
-  );
+  // console.log(
+  //   "🚀 ~ Dashboard ~ vehicleCount:",
+  //   vehicleCount,
+  //   "vehicleTime:",
+  //   vehicleTime
+  // );
 
   const calculateSpeed = (vehicle) => {
     if (!vehicle?.entry_time || !vehicle?.exit_time) {
@@ -161,7 +161,8 @@ const Dashboard = () => {
                                     : "text-gray-900"
                                 }
                               >
-                                {calculateSpeed(vehicle).speed_kmph === "N/A"
+                                {calculateSpeed(vehicle).speed_kmph ===
+                                "ตรวจจับไม่ได้"
                                   ? "N/A"
                                   : `${
                                       calculateSpeed(vehicle).speed_kmph
@@ -178,7 +179,7 @@ const Dashboard = () => {
                               >
                                 {vehicle.lane_type === "forward"
                                   ? "ขาเข้า"
-                                  : vehicle.lane_type === "outward"
+                                  : vehicle.lane_type === "backward"
                                   ? "ขาออก"
                                   : "N/A"}
                               </span>
