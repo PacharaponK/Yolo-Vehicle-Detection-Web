@@ -32,19 +32,23 @@ export function middleware(req) {
   // ตรวจสอบการเข้าถึง
   if (isProtected) {
     if (isPrivileged) {
+      // ผู้ใช้ privileged เข้าถึงทุกหน้าได้
       console.log("Privileged user access granted for:", pathname);
       return NextResponse.next();
     } else {
-      if (pathname.startsWith("/vehiclehistory")) {
-        console.log("General user access granted for /vehiclehistory");
+      // ผู้ใช้ทั่วไป
+      if (pathname.startsWith("/dashboard")) {
+        // อนุญาตให้เข้าถึง /dashboard และ subpaths
+        console.log("General user access granted for /dashboard");
         return NextResponse.next();
       } else {
+        // ถ้าไม่ใช่ /dashboard (เช่น /vehiclehistory หรือ /analyze)
         console.log(
           "General user denied access to:",
           pathname,
-          "redirecting to /unauthorized"
+          "redirecting to /dashboard"
         );
-        return NextResponse.redirect(new URL("/unauthorized", req.url));
+        return NextResponse.redirect(new URL("/dashboard", req.url));
       }
     }
   }
@@ -55,10 +59,5 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: [
-    "/dashboard/:path*",
-    "/vehiclehistory/:path*",
-    "/analyze/:path*",
-    // เพิ่ม "/" เพื่อให้ครอบคลุมทุก path (ถ้าต้องการทดสอบทุกหน้า)
-  ],
+  matcher: ["/dashboard/:path*", "/vehiclehistory/:path*", "/analyze/:path*"],
 };
