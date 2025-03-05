@@ -48,7 +48,7 @@ export function middleware(req) {
           pathname,
           "redirecting to /dashboard"
         );
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
     }
   }
