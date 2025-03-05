@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 
 export default function ReportBytime({ vehicleTime }) {
-  console.log("🚀 ~ ReportBytime ~ vehicleTime:", vehicleTime);
+  // console.log("🚀 ~ ReportBytime ~ vehicleTime:", vehicleTime);
   const [timeData, setTimeData] = useState({
     morning: { count: 0, avg: 0 },
     midday: { count: 0, avg: 0 },
