@@ -1,98 +1,42 @@
+"use client";
 import { useState, useEffect } from "react";
 
-export default function ReportBytime({ vehicles }) {
+export default function ReportBytime({ vehicleTime }) {
+  console.log("🚀 ~ ReportBytime ~ vehicleTime:", vehicleTime);
   const [timeData, setTimeData] = useState({
-    morning: { count: 0, avgSpeed: 0 },
-    afternoon: { count: 0, avgSpeed: 0 },
-    evening: { count: 0, avgSpeed: 0 },
-    night: { count: 0, avgSpeed: 0 },
+    morning: { count: 0, avg: 0 },
+    midday: { count: 0, avg: 0 },
+    evening: { count: 0, avg: 0 },
+    night: { count: 0, avg: 0 },
   });
 
   useEffect(() => {
-    if (!vehicles || vehicles.length === 0) {
-      //("No vehicle data provided");
+    // ตรวจสอบว่า vehicleTime มีค่าหรือไม่
+    if (!vehicleTime) {
+      console.log("No vehicle data provided");
       return;
     }
 
-    const currentYear = new Date().getFullYear(); // เช่น 2025
-
-    const timeRanges = {
-      morning: [6, 10], // 06:00 - 10:00
-      afternoon: [10, 14], // 10:00 - 14:00
-      evening: [14, 18], // 14:00 - 18:00
-      night: [18, 6], // 18:00 - 06:00
-    };
-
-    const calculateSpeed = (vehicle) => {
-      const startTimeStr = vehicle.entry_time.split("T")[1].split(".")[0];
-      const endTimeStr = vehicle.exit_time.split("T")[1].split(".")[0];
-
-      const startTimeParts = startTimeStr.split(":");
-      const endTimeParts = endTimeStr.split(":");
-
-      const startSeconds =
-        parseInt(startTimeParts[0]) * 3600 +
-        parseInt(startTimeParts[1]) * 60 +
-        parseInt(startTimeParts[2]);
-      const endSeconds =
-        parseInt(endTimeParts[0]) * 3600 +
-        parseInt(endTimeParts[1]) * 60 +
-        parseInt(endTimeParts[2]);
-
-      const distance = 200; // ระยะทาง 100 เมตร
-      let timeDiff = endSeconds - startSeconds;
-
-      if (timeDiff < 0) {
-        timeDiff += 24 * 3600; // บวก 24 ชั่วโมงถ้าข้ามวัน
-      }
-
-      if (timeDiff <= 0) return null; // ถ้าเวลาผิดพลาด คืนค่า null
-
-      const speed_mps = distance / timeDiff;
-      const speed_kmph = speed_mps * 3.6; // แปลงเป็น km/h
-      return speed_kmph;
-    };
-
-    const filterAndCalculate = (start, end) => {
-      const filtered = vehicles
-        .map((vehicle) => {
-          if (!vehicle.entry_time || !vehicle.exit_time) return null;
-
-          // ดึงปีและชั่วโมงจาก entry_time
-          const entryDate = new Date(vehicle.entry_time);
-          const year = entryDate.getUTCFullYear();
-          const hour = entryDate.getUTCHours();
-          const speed = calculateSpeed(vehicle);
-
-          if (speed === null || year !== currentYear) return null;
-
-          // ตรวจสอบช่วงเวลา
-          const isInRange =
-            start < end
-              ? hour >= start && hour < end
-              : hour >= start || hour < end;
-
-          return isInRange ? { ...vehicle, speed } : null;
-        })
-        .filter((v) => v !== null);
-
-      const avgSpeed =
-        filtered.length > 0
-          ? (
-              filtered.reduce((sum, v) => sum + v.speed, 0) / filtered.length
-            ).toFixed(2)
-          : 0;
-
-      return { count: filtered.length, avgSpeed };
-    };
-
+    // อัปเดต timeData โดยตัดทศนิยมของ avg
     setTimeData({
-      morning: filterAndCalculate(...timeRanges.morning),
-      afternoon: filterAndCalculate(...timeRanges.afternoon),
-      evening: filterAndCalculate(...timeRanges.evening),
-      night: filterAndCalculate(...timeRanges.night),
+      morning: {
+        count: vehicleTime.morning?.count || 0,
+        avg: Math.round(vehicleTime.morning?.avg || 0),
+      },
+      midday: {
+        count: vehicleTime.midday?.count || 0,
+        avg: Math.round(vehicleTime.midday?.avg || 0),
+      },
+      evening: {
+        count: vehicleTime.evening?.count || 0,
+        avg: Math.round(vehicleTime.evening?.avg || 0),
+      },
+      night: {
+        count: vehicleTime.night?.count || 0,
+        avg: Math.round(vehicleTime.night?.avg || 0),
+      },
     });
-  }, [vehicles]);
+  }, [vehicleTime]);
 
   const timeStyles = {
     morning: {
@@ -100,7 +44,7 @@ export default function ReportBytime({ vehicles }) {
       sunColor: "#FFB74D",
       skyColor: "#87CEEB",
     },
-    afternoon: {
+    midday: {
       bgGradient: "bg-gradient-to-br from-blue-100 to-yellow-200",
       sunColor: "#FFD700",
       skyColor: "#87CEFA",
@@ -158,7 +102,7 @@ export default function ReportBytime({ vehicles }) {
             </g>
           </svg>
         );
-      case "afternoon":
+      case "midday":
         return (
           <svg
             width="100%"
@@ -296,7 +240,7 @@ export default function ReportBytime({ vehicles }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
       {[
         { label: "ช่วงเช้า (06:00-10:00น.)", key: "morning" },
-        { label: "ช่วงกลางวัน (10:00-14:00น.)", key: "afternoon" },
+        { label: "ช่วงกลางวัน (10:00-14:00น.)", key: "midday" },
         { label: "ช่วงเย็น (14:00-18:00น.)", key: "evening" },
         { label: "ช่วงกลางคืน (18:00-06:00น.)", key: "night" },
       ].map(({ label, key }) => (
@@ -324,9 +268,7 @@ export default function ReportBytime({ vehicles }) {
               </p>
               <p>
                 ความเร็วเฉลี่ย:{" "}
-                <span className="font-medium">
-                  {timeData[key].avgSpeed} km/h
-                </span>
+                <span className="font-medium">{timeData[key].avg} km/h</span>
               </p>
             </div>
           </div>
