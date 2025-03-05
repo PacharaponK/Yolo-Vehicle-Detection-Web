@@ -46,6 +46,43 @@ function Picture() {
     }
   }, [frame]);
 
+  // const renderFrame = async () => {
+  //   try {
+  //     const blob = new Blob([frame], { type: "image/jpeg" });
+  //     const bitmap = await createImageBitmap(blob);
+
+  //     const maxWidth = 960;
+  //     const maxHeight = 540;
+  //     let width = bitmap.width;
+  //     let height = bitmap.height;
+  //     const aspectRatio = width / height;
+
+  //     // คำนวณสัดส่วนเพื่อรักษา aspect ratio
+  //     if (width > maxWidth) {
+  //       width = maxWidth;
+  //       height = width / aspectRatio;
+  //     }
+  //     if (height > maxHeight) {
+  //       height = maxHeight;
+  //       width = height * aspectRatio;
+  //     }
+
+  //     canvas.width = width;
+  //     canvas.height = height;
+  //     context.drawImage(bitmap, 0, 0, width, height);
+  //     console.log(
+  //       "Frame rendered at:",
+  //       new Date().toISOString(),
+  //       "size:",
+  //       `${width}x${height}`
+  //     );
+
+  //     bitmap.close(); // ล้างทรัพยากร
+  //   } catch (err) {
+  //     console.error("Failed to render frame from byte data:", err);
+  //   }
+  // };
+
   return (
     <div className="flex flex-col w-full container mx-auto p-4 items-center justify-center">
       {error ? (
