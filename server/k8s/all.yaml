@@ -14,12 +14,12 @@ spec:
     spec:
       containers:
         - name: express-app
-          image: alivefordie/express-server:2.1
+          image: alivefordie/express-server:v2.3
           imagePullPolicy: Always
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "200m"
+              memory: "500Mi"
+              cpu: "300m"
             limits:
               memory: "1.5Gi"
               cpu: "1.5"
@@ -61,15 +61,16 @@ apiVersion: v1
 kind: Service
 metadata:
   name: express-prisma-service
+  # annotations:
+  #   cloud.google.com/backend-config: '{"default": "express-backend-config"}'
 spec:
   selector:
     app: express-app
-  # type: LoadBalancer
-  # loadBalancerIP: xxx.xxx.xxx.xxx
   ports:
     - protocol: TCP
       port: 80
       targetPort: 3001
+  sessionAffinity: ClientIP
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -95,14 +96,10 @@ kind: Ingress
 metadata:
   name: express-ingress
   annotations:
+    kubernetes.io/ingress.class: "gce"
     kubernetes.io/ingress.global-static-ip-name: gb-express-server
     networking.gke.io/managed-certificates: express-cert
 spec:
-  # tls:
-  # - hosts:
-  #   - alivefordie.life
-    # Uncomment the next line if you’re using a self-managed TLS certificate secret
-    # secretName: tls-secret
   rules:
   - host: alivefordie.life
     http:

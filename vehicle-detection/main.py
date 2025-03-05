@@ -42,7 +42,7 @@ services = {
 # C:\SDA\vehicle-detection\cars2.mp4
 # C:\Users\ballx\Downloads\road_training.mp4
 
-video_path = r"C:\SDA\vehicle-detection\data\cars.mp4"
+video_path = r".\data\cars.mp4"
 cap = cv2.VideoCapture(video_path)
 # video_name = os.path.basename(video_path)
 video_name = random_video_name()
@@ -462,8 +462,10 @@ while True:
         frame_resized = cv2.resize(frame, (640, 360), interpolation=cv2.INTER_AREA)
         _, buffer = cv2.imencode('.jpg', frame_resized, [int(cv2.IMWRITE_JPEG_QUALITY), 60])
 
+        frame_base64 = base64.b64encode(buffer).decode('utf-8')
+
         if sio.connected:
-            sio.emit('frame', buffer.tobytes())
+            sio.emit('frame', frame_base64)
         else:
             print("Socket.IO client not connected")
     
