@@ -13,6 +13,14 @@ export function middleware(req) {
   console.log("JWT in cookie:", jwt);
   console.log("Email in cookie:", email);
 
+  // ถ้ามี JWT และอยู่ในหน้า /login ให้ redirect ไป /dashboard
+  if (jwt && pathname === "/login") {
+    console.log(
+      "User already logged in, redirecting from /login to /dashboard"
+    );
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
+
   // กำหนด protected paths
   const protectedPaths = ["/dashboard", "/vehiclehistory", "/analyze"];
   const isProtected = protectedPaths.some((path) => pathname.startsWith(path));
@@ -48,7 +56,7 @@ export function middleware(req) {
           pathname,
           "redirecting to /dashboard"
         );
-        return NextResponse.redirect(new URL("/dashboard", req.url));
+        return NextResponse.redirect(new URL("/unauthorized", req.url));
       }
     }
   }
@@ -59,5 +67,10 @@ export function middleware(req) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*", "/vehiclehistory/:path*", "/analyze/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/vehiclehistory/:path*",
+    "/analyze/:path*",
+    "/login",
+  ],
 };

@@ -10,7 +10,7 @@ export default function ReportBytime({ vehicles }) {
 
   useEffect(() => {
     if (!vehicles || vehicles.length === 0) {
-      console.log("No vehicle data provided");
+      //("No vehicle data provided");
       return;
     }
 
@@ -39,7 +39,7 @@ export default function ReportBytime({ vehicles }) {
         parseInt(endTimeParts[1]) * 60 +
         parseInt(endTimeParts[2]);
 
-      const distance = 100; // ระยะทาง 100 เมตร
+      const distance = 200; // ระยะทาง 100 เมตร
       let timeDiff = endSeconds - startSeconds;
 
       if (timeDiff < 0) {
