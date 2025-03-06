@@ -239,10 +239,10 @@ export default function ReportBytime({ vehicleTime }) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 p-6">
       {[
-        { label: "ช่วงเช้า (06:00-10:00น.)", key: "morning" },
-        { label: "ช่วงกลางวัน (10:00-14:00น.)", key: "midday" },
-        { label: "ช่วงเย็น (14:00-18:00น.)", key: "evening" },
-        { label: "ช่วงกลางคืน (18:00-06:00น.)", key: "night" },
+        { label: "ช่วงเช้า (00:00-06:00น.)", key: "morning" },
+        { label: "ช่วงกลางวัน (06:00-12:00น.)", key: "midday" },
+        { label: "ช่วงเย็น (12:00-18:00น.)", key: "evening" },
+        { label: "ช่วงกลางคืน (18:00-00:00น.)", key: "night" },
       ].map(({ label, key }) => (
         <div
           key={key}

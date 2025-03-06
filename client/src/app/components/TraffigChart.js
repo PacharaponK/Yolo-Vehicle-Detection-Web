@@ -22,6 +22,7 @@ ChartJS.register(
 );
 
 const TrafficChart = ({ vehicleData }) => {
+  console.log("🚀 ~ TrafficChart ~ vehicleData:", vehicleData)
   const vehicleTypes = ["car", "truck", "bus", "motorcycle"];
   const [chartData, setChartData] = useState({ labels: [], datasets: [] });
 

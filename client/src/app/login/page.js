@@ -31,7 +31,7 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
-      console.log("🚀 ~ handleLogin ~ res:", res);
+      // console.log("🚀 ~ handleLogin ~ res:", res);
 
       if (res.status === 200) {
         const token = res.data.Token;
@@ -63,7 +63,7 @@ export default function Login() {
         router.push("/dashboard");
       }
     } catch (error) {
-      console.log("🚀 ~ handleLogin ~ error:", error);
+      // console.log("🚀 ~ handleLogin ~ error:", error);
       if (error.response && error.response.data) {
         // แสดงข้อความ error เฉพาะเจาะจงจาก API
         const errorMessage = error.response.data.message;

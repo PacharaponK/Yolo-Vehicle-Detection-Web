@@ -1,13 +1,27 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Navbar from "../components/Navbar";
 import TrafficChart from "../components/TraffigChart";
 import LaneTrafficChart from "../components/LaneTrafficChart";
-import { useSocketContext } from "@/context/context";
+import ax from "../../../config/ax";
 
 function Analye() {
-  const { vehicles } = useSocketContext();
-  console.log("🚀 ~ Analye ~ vehicles:", vehicles);
+  const [vehicles, setVehicles] = useState([]);
+  const fetchData = async () => {
+    try {
+      const res = await ax.get("/api/vehicle/all");
+      // เรียงข้อมูลจากล่าสุดไปเก่าสุดตาม createdAt
+      setVehicles(res.data.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      setVehicles([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+  // console.log("🚀 ~ Analye ~ vehicles:", vehicles);
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-rose-200 to-gray-100">
       <Navbar />
