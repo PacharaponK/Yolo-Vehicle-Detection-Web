@@ -9,6 +9,8 @@ const SocketContext = createContext();
 export const SocketProvider = ({ children }) => {
   const [socket, setSocket] = useState(null);
   const [vehicles, setVehicles] = useState([]);
+  const [vehicleTime, setVehicleTime] = useState([]);
+  const [vehicleCount, setVehicleCount] = useState([]);
   const [frame, setFrame] = useState(null);
   const [error, setError] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -34,6 +36,13 @@ export const SocketProvider = ({ children }) => {
       setVehicles((prev) =>
         JSON.stringify(prev) !== JSON.stringify(data) ? data : prev
       );
+    };
+
+    const handleVehicleCountData = (data) => {
+      setVehicleCount(data);
+    };
+    const handleVehicleTimeData = (data) => {
+      setVehicleTime(data);
     };
 
     const handleFrameData = (data) => {
@@ -66,6 +75,8 @@ export const SocketProvider = ({ children }) => {
       setError(null);
     });
     socket.on("vehicles", handleVehiclesData);
+    socket.on("vehicleCount", handleVehicleCountData);
+    socket.on("vehicleTime", handleVehicleTimeData);
     socket.on("frame", handleFrameData);
     socket.on("connect_error", handleConnectError);
     socket.on("disconnect", handleDisconnect);
@@ -74,6 +85,8 @@ export const SocketProvider = ({ children }) => {
 
     return () => {
       socket.off("vehicles", handleVehiclesData);
+      socket.off("vehicleCount", handleVehicleCountData);
+      socket.off("vehicleTime", handleVehicleTimeData);
       socket.off("frame", handleFrameData);
       socket.off("connect_error", handleConnectError);
       socket.off("disconnect", handleDisconnect);
@@ -84,7 +97,15 @@ export const SocketProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider
-      value={{ socket, vehicles, frame, error, isConnected }}
+      value={{
+        socket,
+        vehicles,
+        vehicleCount,
+        vehicleTime,
+        frame,
+        error,
+        isConnected,
+      }}
     >
       {children}
     </SocketContext.Provider>

@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -10,13 +9,32 @@ const Navbar = () => {
   const [jwt, setJwt] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // ฟังก์ชันดึง JWT จาก cookie
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
   useEffect(() => {
-    const token = sessionStorage.getItem("jwt");
+    // ตรวจสอบ JWT จาก cookie
+    const token = getCookie("jwt");
     setJwt(token);
-  }, []);
+
+    // อัปเดต jwt เมื่อ cookie เปลี่ยน (เช่น หลัง login/logout)
+    const checkCookie = () => {
+      const newToken = getCookie("jwt");
+      if (newToken !== jwt) {
+        setJwt(newToken);
+      }
+    };
+    const interval = setInterval(checkCookie, 1000); // ตรวจทุก 1 วินาที
+    return () => clearInterval(interval);
+  }, [jwt]);
 
   const handleLogout = () => {
-    // ลบ JWT ออกจาก sessionStorage
+    // ลบ JWT ออกจาก sessionStorage (ถ้ามี)
     sessionStorage.removeItem("jwt");
 
     // ลบ JWT และ email ออกจาก cookie
@@ -31,9 +49,9 @@ const Navbar = () => {
     // อัปเดต state
     setJwt(null);
 
-    // เปลี่ยนเส้นทางไปหน้า Login
-    router.push("/");
-    setIsMenuOpen(false); // ปิดเมนูเมื่อ logout
+    // เปลี่ยนเส้นทางไปหน้า Login โดย force reload เพื่อให้ middleware ทำงาน
+    window.location.href = "/"; // ใช้ window.location เพื่อบังคับ reload
+    setIsMenuOpen(false);
   };
 
   const toggleMenu = () => {

@@ -8,11 +8,19 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false); // เพิ่ม state สำหรับ "จดจำฉัน"
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
 
-  // โหลดข้อมูลจาก localStorage ถ้ามีการจดจำ
+  // ฟังก์ชันดึง JWT จาก cookie
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(";").shift();
+    return null;
+  };
+
+  // โหลดข้อมูลจาก localStorage และตรวจสอบ JWT
   useEffect(() => {
     const savedEmail = localStorage.getItem("rememberedEmail");
     const savedPassword = localStorage.getItem("rememberedPassword");
@@ -21,7 +29,13 @@ export default function Login() {
       setPassword(savedPassword);
       setRememberMe(true);
     }
-  }, []);
+
+    const jwt = getCookie("jwt");
+    if (jwt) {
+      router.push("/dashboard");
+      router.refresh(); // อัปเดตสถานะเพื่อให้ middleware ทำงาน
+    }
+  }, [router]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -31,7 +45,6 @@ export default function Login() {
       const res = await ax.post("/api/user/login", {
         data: { email, password },
       });
-      console.log("🚀 ~ handleLogin ~ res:", res);
 
       if (res.status === 200) {
         const token = res.data.Token;
@@ -41,31 +54,29 @@ export default function Login() {
         sessionStorage.setItem("jwt", token);
 
         // เก็บ JWT และ email ใน cookie
-        document.cookie = `jwt=${token}; path=/; SameSite=Strict`;
+        document.cookie = `jwt=${token}; path=/; SameSite=Strict; Secure`;
         document.cookie = `email=${encodeURIComponent(
           userEmail
-        )}; path=/; SameSite=Strict`;
+        )}; path=/; SameSite=Strict; Secure`;
 
         // ถ้ากด "จดจำฉัน" เก็บข้อมูลใน localStorage
         if (rememberMe) {
           localStorage.setItem("rememberedEmail", userEmail);
           localStorage.setItem("rememberedPassword", password);
         } else {
-          // ลบข้อมูลจาก localStorage ถ้าไม่จดจำ
           localStorage.removeItem("rememberedEmail");
           localStorage.removeItem("rememberedPassword");
         }
 
-        // อัพเดต axData ด้วย JWT
+        // อัปเดต axData ด้วย JWT
         axData.jwt = token;
 
-        // เปลี่ยนเส้นทางไปหน้าหลัก
+        // เปลี่ยนเส้นทางไปหน้า dashboard และ refresh
         router.push("/dashboard");
+        router.refresh(); // บังคับให้ Next.js อัปเดตสถานะและ trigger middleware
       }
     } catch (error) {
-      console.log("🚀 ~ handleLogin ~ error:", error);
       if (error.response && error.response.data) {
-        // แสดงข้อความ error เฉพาะเจาะจงจาก API
         const errorMessage = error.response.data.message;
         if (error.response.status === 401) {
           setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
