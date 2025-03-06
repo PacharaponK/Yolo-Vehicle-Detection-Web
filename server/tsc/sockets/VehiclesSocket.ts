@@ -35,7 +35,7 @@ const getVehicleTime = async (): Promise<Record<string, any>> => {
 			},
 		});
 
-		console.log("🚀 Fetched vehicles count:", vehicleData.length);
+		// console.log("🚀 Fetched vehicles count:", vehicleData.length);
 
 		// Categorize data in-memory
 		for (const vehicle of vehicleData) {

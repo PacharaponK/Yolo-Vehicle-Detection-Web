@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: express-app
-          image: alivefordie/express-server:v2.3
+          image: alivefordie/express-server:v2.8
           imagePullPolicy: Always
           resources:
             requests:
@@ -26,6 +26,16 @@ spec:
           ports:
             - containerPort: 3001
           env:
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: express-config
+                  key: REDIS_HOST # ชื่อของ service ที่สร้างไว้สำหรับ Redis
+            - name: REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: express-config
+                  key: REDIS_PORT
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -81,6 +91,8 @@ data:
   URL: ""
   FRONT_URL: ""
   FRONT_PORT: ""
+  REDIS_PORT: "6379"
+  REDIS_HOST: "redis-service"
 ---
 apiVersion: v1
 kind: Secret
