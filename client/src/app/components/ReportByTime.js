@@ -20,20 +20,20 @@ export default function ReportBytime({ vehicleTime }) {
     // อัปเดต timeData โดยตัดทศนิยมของ avg
     setTimeData({
       morning: {
+        count: vehicleTime.night?.count || 0,
+        avg: Math.round(vehicleTime.night?.avg || 0),
+      },
+      midday: {
         count: vehicleTime.morning?.count || 0,
         avg: Math.round(vehicleTime.morning?.avg || 0),
       },
-      midday: {
+      evening: {
         count: vehicleTime.midday?.count || 0,
         avg: Math.round(vehicleTime.midday?.avg || 0),
       },
-      evening: {
+      night: {
         count: vehicleTime.evening?.count || 0,
         avg: Math.round(vehicleTime.evening?.avg || 0),
-      },
-      night: {
-        count: vehicleTime.night?.count || 0,
-        avg: Math.round(vehicleTime.night?.avg || 0),
       },
     });
   }, [vehicleTime]);
