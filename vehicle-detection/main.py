@@ -16,12 +16,28 @@ import threading
 def random_video_name(length=8):
     return ''.join(random.choices(string.ascii_letters + string.digits, k=length))
 
+def encode_base64_image(original_frame, x1, y1, x2, y2, margin=20):
+    """ ตัดภาพจากเฟรมต้นฉบับก่อนวาดกราฟิก """
+    h, w, _ = original_frame.shape  # ขนาดของเฟรม
+
+    # ขยาย bounding box โดยเพิ่ม margin
+    x1 = max(x1 - margin, 0)
+    y1 = max(y1 - margin, 0)
+    x2 = min(x2 + margin, w)
+    y2 = min(y2 + margin, h)
+
+    cropped_img = original_frame[y1:y2, x1:x2]  # ตัดภาพจากเฟรมดั้งเดิม
+    _, buffer = cv2.imencode('.jpg', cropped_img)  # เข้ารหัสเป็น JPEG
+    base64_str = base64.b64encode(buffer).decode('utf-8')  # แปลงเป็น Base64
+    return base64_str
+
+
 def send_frame(buffer):
-    # frame_base64 = base64.b64encode(buffer).decode('utf-8')
-    frame_byte = buffer.tobytes()
+    frame_base64 = base64.b64encode(buffer).decode('utf-8')
+    # frame_byte = buffer.tobytes()
 
     if sio.connected:
-        sio.emit('frame', frame_byte)
+        sio.emit('frame', frame_base64)
     else:
         print("Socket.IO client not connected")
 
@@ -29,7 +45,7 @@ now = datetime.datetime.now()
 current_date = now.date()
 current_time = now.time()
 
-frame_skip = 10
+frame_skip = 1
 frame_count = 0
 
 sio = socketio.Client()
@@ -133,10 +149,12 @@ while True:
             classindex = int(classindex)
             objectdetect = classnames[classindex]
 
-            if objectdetect in ['car', 'truck'] and conf > 40:
+            if objectdetect in ['car', 'truck'] and conf > 50:
                 x1, y1, x2, y2 = int(x1), int(y1), int(x2), int(y2)
                 new_detections = np.array([x1, y1, x2, y2, conf, classindex])
                 detections = np.vstack((detections, new_detections))
+                
+    original_frame = frame.copy()
 
     track_result = tracker.update(detections)
     cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 255), 4)
@@ -155,6 +173,7 @@ while True:
     cv2.line(frame, (second_exit_bw_lane[0], second_exit_bw_lane[1]), (second_exit_bw_lane[2], second_exit_bw_lane[3]), (0, 255, 0), 4)
     cv2.line(frame, (third_exit_bw_lane[0], third_exit_bw_lane[1]), (third_exit_bw_lane[2], third_exit_bw_lane[3]), (255, 0, 0), 4)
 
+    
 
     for results in track_result:
         x1, y1, x2, y2, id, classindex = results
@@ -178,6 +197,7 @@ while True:
         # ตรวจจับถนนขาเข้าเฟรมรถเข้าเลนแรก
         if first_entry_fw_lane[0] < cx < first_entry_fw_lane[2] and first_entry_fw_lane[1] - 10 < cy < first_entry_fw_lane[1] + 10:
             cv2.line(frame, (first_entry_fw_lane[0], first_entry_fw_lane[1]), (first_entry_fw_lane[2], first_entry_fw_lane[3]), (0, 0, 0), 8)
+            base64_img = encode_base64_image(original_frame, x1, y1, x2, y2)
             if id not in first_fw_lane_entry_counter:
                 if id not in detected_objects:
                     entry_datetime = datetime.datetime.combine(datetime.datetime.now().date(), datetime.datetime.now().time())
@@ -185,7 +205,8 @@ while True:
                         "id": id,
                         "class": classnames[classindex],
                         "lane_type": "forward",
-                        "lane_id": 1
+                        "lane_id": 1,
+                        "image": base64_img
                     }
 
                     on_send_data = {
@@ -199,7 +220,7 @@ while True:
                             "video_id": video_id
                         }
                     }
-                    print(on_send_data)
+                    print("------------------------------------------------------", detected)
                     response = fire_and_forget(on_send_data)
                     detected_objects.append([detected])
                     first_fw_lane_entry_counter.append(id)
